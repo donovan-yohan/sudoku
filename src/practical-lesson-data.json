@@ -12805,7 +12805,7 @@
     "generalTechnique": "x-wing",
     "title": "X-Wing",
     "tier": "advanced",
-    "rule": "Focus on one digit. If its only two positions in each of two rows form the corners of a rectangle, it must occupy one of the two diagonal pairs. Either way, remove that digit from the two columns outside the rectangle. The same reasoning works with rows and columns swapped.",
+    "rule": "Focus on one digit. If its only two positions in each of two rows form the corners of a rectangle, it must occupy one of the two diagonal pairs. Either way, remove that digit from the other cells of those two columns. The same reasoning works with rows and columns swapped.",
     "scenarios": [
       {
         "id": "x-wing-1",
@@ -13430,7 +13430,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 5 remains at r6c5 after excluding its row, column, box and proven eliminations.",
+            "explanation": "Either diagonal pair puts 6 inside the rectangle in each of rows 3 and 6. The X-Wing therefore removes 6 from r6c5.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5.",
             "board": [
               9,
               0,
@@ -13713,7 +13713,7 @@
         "target": 49,
         "digit": 5,
         "prompt": "Use the X-Wing to fill r6c5.",
-        "proof": "Focus on 6. In column 3, the only two positions for 6 are r3c3 and r6c3. In column 9, the only two positions for 6 are r3c9 and r6c9. These four cells form a rectangle.\n\nIf r3c3 is 6, then r6c9 must be 6, because r3c3 blocks 6 at r3c9 in their shared row 3. That leaves r6c9 as the only position for 6 in column 9. This uses one diagonal pair.\n\nIf r6c3 is 6, then r3c9 must be 6, because r6c3 blocks 6 at r6c9 in their shared row 6. That leaves r3c9 as the only position for 6 in column 9. This uses the other diagonal pair.\n\nEither way, each of rows 3 and 6 gets its 6 in the rectangle. Remove 6 from r3c4, r3c8, r6c5: these cells are elsewhere in those rows.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5. Only 5 remains at r6c5 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 6. In column 3, the only two positions for 6 are r3c3 and r6c3. In column 9, the only two positions for 6 are r3c9 and r6c9. These four cells form a rectangle.\n\nIf r3c3 is 6, then r6c9 must be 6, because r3c3 blocks 6 at r3c9 in their shared row 3. That leaves r6c9 as the only position for 6 in column 9. This uses one diagonal pair.\n\nIf r6c3 is 6, then r3c9 must be 6, because r6c3 blocks 6 at r6c9 in their shared row 6. That leaves r3c9 as the only position for 6 in column 9. This uses the other diagonal pair.\n\nEither way, each of rows 3 and 6 gets its 6 in the rectangle. Remove 6 from r3c4, r3c8, r6c5: these cells are elsewhere in those rows.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5. Either diagonal pair puts 6 inside the rectangle in each of rows 3 and 6. The X-Wing therefore removes 6 from r6c5.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5.",
         "provenance": {
           "source": "catalog",
           "puzzleId": "catalog:advanced:0",
@@ -15045,7 +15045,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 3 remains at r4c4 after excluding its row, column, box and proven eliminations.",
+            "explanation": "Either diagonal pair puts 5 inside the rectangle in each of rows 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
             "board": [
               0,
               0,
@@ -15401,7 +15401,7 @@
         "target": 30,
         "digit": 3,
         "prompt": "Use the X-Wing to fill r4c4.",
-        "proof": "Focus on 5. In column 3, the only two positions for 5 are r4c3 and r7c3. In column 8, the only two positions for 5 are r4c8 and r7c8. These four cells form a rectangle.\n\nIf r4c3 is 5, then r7c8 must be 5, because r4c3 blocks 5 at r4c8 in their shared row 4. That leaves r7c8 as the only position for 5 in column 8. This uses one diagonal pair.\n\nIf r7c3 is 5, then r4c8 must be 5, because r7c3 blocks 5 at r7c8 in their shared row 7. That leaves r4c8 as the only position for 5 in column 8. This uses the other diagonal pair.\n\nEither way, each of rows 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r4c7, r7c1, r7c2: these cells are elsewhere in those rows.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4. Only 3 remains at r4c4 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 5. In column 3, the only two positions for 5 are r4c3 and r7c3. In column 8, the only two positions for 5 are r4c8 and r7c8. These four cells form a rectangle.\n\nIf r4c3 is 5, then r7c8 must be 5, because r4c3 blocks 5 at r4c8 in their shared row 4. That leaves r7c8 as the only position for 5 in column 8. This uses one diagonal pair.\n\nIf r7c3 is 5, then r4c8 must be 5, because r7c3 blocks 5 at r7c8 in their shared row 7. That leaves r4c8 as the only position for 5 in column 8. This uses the other diagonal pair.\n\nEither way, each of rows 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r4c7, r7c1, r7c2: these cells are elsewhere in those rows.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4. Either diagonal pair puts 5 inside the rectangle in each of rows 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
         "provenance": {
           "source": "catalog",
           "puzzleId": "catalog:advanced:1",
@@ -16375,7 +16375,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 5 remains at r5c6 after excluding its row, column, box and proven eliminations.",
+            "explanation": "Either diagonal pair puts 6 inside the rectangle in each of columns 3 and 6. The X-Wing therefore removes 6 from r5c6.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6.",
             "board": [
               9,
               7,
@@ -16658,7 +16658,7 @@
         "target": 41,
         "digit": 5,
         "prompt": "Use the X-Wing to fill r5c6.",
-        "proof": "Focus on 6. In row 3, the only two positions for 6 are r3c3 and r3c6. In row 9, the only two positions for 6 are r9c3 and r9c6. These four cells form a rectangle.\n\nIf r3c3 is 6, then r9c6 must be 6, because r3c3 blocks 6 at r9c3 in their shared column 3. That leaves r9c6 as the only position for 6 in row 9. This uses one diagonal pair.\n\nIf r3c6 is 6, then r9c3 must be 6, because r3c6 blocks 6 at r9c6 in their shared column 6. That leaves r9c3 as the only position for 6 in row 9. This uses the other diagonal pair.\n\nEither way, each of columns 3 and 6 gets its 6 in the rectangle. Remove 6 from r4c3, r8c3, r5c6: these cells are elsewhere in those columns.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6. Only 5 remains at r5c6 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 6. In row 3, the only two positions for 6 are r3c3 and r3c6. In row 9, the only two positions for 6 are r9c3 and r9c6. These four cells form a rectangle.\n\nIf r3c3 is 6, then r9c6 must be 6, because r3c3 blocks 6 at r9c3 in their shared column 3. That leaves r9c6 as the only position for 6 in row 9. This uses one diagonal pair.\n\nIf r3c6 is 6, then r9c3 must be 6, because r3c6 blocks 6 at r9c6 in their shared column 6. That leaves r9c3 as the only position for 6 in row 9. This uses the other diagonal pair.\n\nEither way, each of columns 3 and 6 gets its 6 in the rectangle. Remove 6 from r4c3, r8c3, r5c6: these cells are elsewhere in those columns.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6. Either diagonal pair puts 6 inside the rectangle in each of columns 3 and 6. The X-Wing therefore removes 6 from r5c6.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6.",
         "provenance": {
           "source": "generated-transform",
           "puzzleId": "catalog:advanced:0:transpose:digit-shift-0",
@@ -18077,7 +18077,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 3 remains at r4c4 after excluding its row, column, box and proven eliminations.",
+            "explanation": "Either diagonal pair puts 5 inside the rectangle in each of columns 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
             "board": [
               0,
               0,
@@ -18433,7 +18433,7 @@
         "target": 30,
         "digit": 3,
         "prompt": "Use the X-Wing to fill r4c4.",
-        "proof": "Focus on 5. In row 3, the only two positions for 5 are r3c4 and r3c7. In row 8, the only two positions for 5 are r8c4 and r8c7. These four cells form a rectangle.\n\nIf r3c4 is 5, then r8c7 must be 5, because r3c4 blocks 5 at r8c4 in their shared column 4. That leaves r8c7 as the only position for 5 in row 8. This uses one diagonal pair.\n\nIf r3c7 is 5, then r8c4 must be 5, because r3c7 blocks 5 at r8c7 in their shared column 7. That leaves r8c4 as the only position for 5 in row 8. This uses the other diagonal pair.\n\nEither way, each of columns 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r7c4, r1c7, r2c7: these cells are elsewhere in those columns.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4. Only 3 remains at r4c4 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 5. In row 3, the only two positions for 5 are r3c4 and r3c7. In row 8, the only two positions for 5 are r8c4 and r8c7. These four cells form a rectangle.\n\nIf r3c4 is 5, then r8c7 must be 5, because r3c4 blocks 5 at r8c4 in their shared column 4. That leaves r8c7 as the only position for 5 in row 8. This uses one diagonal pair.\n\nIf r3c7 is 5, then r8c4 must be 5, because r3c7 blocks 5 at r8c7 in their shared column 7. That leaves r8c4 as the only position for 5 in row 8. This uses the other diagonal pair.\n\nEither way, each of columns 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r7c4, r1c7, r2c7: these cells are elsewhere in those columns.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4. Either diagonal pair puts 5 inside the rectangle in each of columns 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
         "provenance": {
           "source": "generated-transform",
           "puzzleId": "catalog:advanced:1:transpose:digit-shift-0",

@@ -38,6 +38,17 @@ describe('X-Wing teaching coverage',()=>{
   }
  })
 
+ it('keeps the rule and final placement specific about the rectangle and candidate change',()=>{
+  expect(lesson.rule).toContain('other cells of those two columns')
+  for(const scenario of lesson.scenarios){
+   const finish=scenario.steps[1]
+   expect(finish.explanation).toContain('X-Wing')
+   expect(finish.explanation).toContain('rectangle')
+   expect(finish.explanation).toContain(`${coordinate(scenario.target)} changes from {${scenario.candidates[scenario.target].join(', ')}} to {${scenario.digit}}`)
+   expect(finish.explanation).not.toMatch(/proven eliminations/i)
+  }
+ })
+
  it('describes the complete rectangle and both local cases using full candidate domains',()=>{
   for(const scenario of lesson.scenarios){
    const [step,finish]=scenario.steps

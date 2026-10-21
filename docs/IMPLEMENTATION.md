@@ -41,7 +41,7 @@ Harder Classic/X generation has a fixed operation budget, then uses independentl
 
 ## Practical lessons
 
-- `src/practical-lessons.ts` exposes eight general techniques, each with two real positions and replayable provenance.
+- `src/practical-lessons.ts` exposes eight general techniques with replayable provenance. X-Wing has four real positions and every other technique has two.
 - `src/practical-variant-lessons.ts` exposes four diagonal/cage techniques, each with two real positions.
 - `src/components/Walkthrough.tsx` reveals and applies the stored deductions through a real placement, pruning related notes as values change.
 

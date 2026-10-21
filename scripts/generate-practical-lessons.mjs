@@ -37,7 +37,7 @@ const metadata = [
   ['locked-candidates', 'Locked candidates', 'intermediate', 'When a digit is confined to one line inside a box, remove it from the rest of that line; the same rule works from a line into a box.'],
   ['naked-pair', 'Naked pair', 'intermediate', 'Two cells with the same two candidates reserve those digits. Remove both digits from other cells in their shared unit.'],
   ['naked-triple', 'Naked triple', 'advanced', 'A unit is a row, column or box. If three cells in one unit have only three different candidates between them, those digits must fill those cells. Their candidate lists need not be identical. Remove those digits from the other cells in that unit.'],
-  ['x-wing', 'X-Wing', 'advanced', 'Focus on one digit. If its only two positions in each of two rows form the corners of a rectangle, it must occupy one of the two diagonal pairs. Either way, remove that digit from the two columns outside the rectangle. The same reasoning works with rows and columns swapped.'],
+  ['x-wing', 'X-Wing', 'advanced', 'Focus on one digit. If its only two positions in each of two rows form the corners of a rectangle, it must occupy one of the two diagonal pairs. Either way, remove that digit from the other cells of those two columns. The same reasoning works with rows and columns swapped.'],
   ['swordfish', 'Swordfish', 'expert', 'Focus on one digit. If its only positions in each of three rows lie in the same three columns, those rows need three placements of that digit. They must occupy different columns, because a digit cannot repeat in a column, so all three columns get their digit in those rows. Remove it elsewhere in those columns. Rows and columns can swap roles.'],
   ['xy-wing', 'XY-Wing', 'expert', 'The pivot is a cell with candidates {x, y}; the wings are two cells with {x, z} and {y, z}, where x, y and z are different digits. All three cells have exactly two candidates. Each wing must share a unit with the pivot; a unit is a row, column or box. Either pivot value forces z in one wing. Remove z from any other cell that shares a unit with each wing.'],
 ]
@@ -218,7 +218,13 @@ function inspect(originalPuzzle, provenance, { onlyTechnique, limit = 2 } = {}) 
     if (placement && (!onlyTechnique || deduction.technique === onlyTechnique) && !repeatedSource && found[deduction.technique].length < limit && board.filter(Boolean).length >= 22) {
       const steps = [{ ...clone(deduction), board: board.slice(), candidates: clone(notes) }]
       if (!deduction.placements.length) steps.push({ ...clone(next), board: nextBoard.slice(), candidates: clone(nextNotes) })
-      if (deduction.technique === 'x-wing') explainXWing(steps[0], placement)
+      if (deduction.technique === 'x-wing') {
+        explainXWing(steps[0], placement)
+        const { digit, orientation, rows, columns } = steps[0].xWing
+        const crossingName = orientation === 'rows' ? 'column' : 'row'
+        const crossings = (orientation === 'rows' ? columns : rows).map(value => value + 1).join(' and ')
+        finishExplanation(steps, placement, `Either diagonal pair puts ${digit} inside the rectangle in each of ${crossingName}s ${crossings}. The X-Wing therefore removes ${digit} from ${coord(placement.cell)}.`)
+      }
       if (deduction.technique === 'naked-triple') explainTriple(steps, placement)
       if (deduction.technique === 'xy-wing') explainXYWing(steps, placement)
       if (deduction.technique === 'swordfish') {
