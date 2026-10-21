@@ -158,7 +158,6 @@ export default function App() {
     const level=availableDifficulties(nextVariant).includes(nextDifficulty)?nextDifficulty:'beginner'
     const seeds=nextVariant==='classic'?practiceSeeds.current:(variantPracticeSeeds.current[nextVariant]??={})
     if(nextMode==='practice'&&(!seeds[level]||fresh))seeds[level]=crypto.randomUUID()
-    const request=nextMode==='daily'?generatedDailyRequest(date,nextVariant,level):generatedPracticeRequest(seeds[level]!,nextVariant,level)
     generation.current?.abort()
     const controller=new AbortController();generation.current=controller
     const serial=++generationSerial.current
@@ -166,6 +165,7 @@ export default function App() {
     setDifficulty(level);setMode(nextMode);setPage(nextMode);setVariant(nextVariant);setDailyDate(date)
     let nextPuzzle:Puzzle
     try{
+      const request=nextMode==='daily'?generatedDailyRequest(date,nextVariant,level):generatedPracticeRequest(seeds[level]!,nextVariant,level)
       let savedLegacy:Puzzle|undefined
       if(nextVariant==='classic'&&!fresh){
         const old=nextMode==='daily'?getDailyPuzzle(date,level):getPracticePuzzle(level,seeds[level]!)
