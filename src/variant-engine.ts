@@ -306,4 +306,3 @@ export function rateVariant(values: readonly number[], rules: Rules, options: { 
     : givens >= 42 && givens <= 48 && approachability.initialSingles >= 3 && trace.every(s => s.technique === 'naked-single'))
   return { rubric: 'variant-logical-v1', solved, logicalDifficulty, difficulty: logicalDifficulty === 'beginner' && !approachability.accepted ? null : logicalDifficulty, trace, techniques: [...new Set(trace.map(s => s.technique))], lowerTierStalled, status, approachability }
 }
-
