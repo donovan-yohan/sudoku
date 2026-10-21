@@ -47,7 +47,8 @@ test('undoing a completed puzzle announces unfinished state',async({page})=>{
 test('placement lesson readouts describe the placed value',async({page})=>{
  await page.goto('/');await page.getByRole('button',{name:'Learn',exact:true}).click();await page.locator('.lesson-link').first().click()
  await page.locator('[data-cell="8"]').click();await page.getByRole('button',{name:'Choose 9',exact:true}).click();await page.getByRole('button',{name:'Check reasoning',exact:true}).click()
- await expect(page.locator('.lesson-board-column .selection-readout')).toContainText('contains 9')
+ await expect(page.getByRole('group',{name:'Selected cell candidates',exact:true})).toContainText('contains 9')
+ await expect(page.locator('.lesson-board-column .selection-readout')).toHaveCount(0)
 })
 
 test('hinted final placement earns the same full-board finale',async({page})=>{
