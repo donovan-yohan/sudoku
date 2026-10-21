@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test('daily board supports keyboard entry, notes and history without stealing toolbar keys', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'A little more clarity, every day.' })).toBeVisible()
+  await expect(page.getByRole('grid', { name: 'Daily Sudoku' })).toBeVisible()
   const board = page.getByRole('grid', { name: 'Daily Sudoku' })
   await expect(board.getByRole('row')).toHaveCount(9)
   await expect(board.getByRole('gridcell')).toHaveCount(81)
@@ -35,7 +35,7 @@ test('hints explain before applying, dialogs trap focus and Escape restores it',
   await expect(page.getByRole('button', { name: 'Apply this step' })).toBeVisible()
   expect(await board.locator('.cell-value').allTextContents()).toEqual(before)
   await page.getByRole('button', { name: 'Apply this step' }).click()
-  await expect(page.getByText('Explained placement applied. You can undo it.')).toBeVisible()
+  await expect(page.locator('.game-status')).toContainText('Explained placement applied. You can undo it.')
   await page.getByRole('button', { name: 'Restart puzzle' }).click()
   const dialog = page.getByRole('dialog', { name: 'Start this puzzle again?' })
   await expect(dialog).toBeVisible()
@@ -179,8 +179,19 @@ test('each guided lesson applies two checked deductions and persists only comple
         await page.getByRole('button', { name: 'Try example 2' }).click()
       }
     }
-    await expect(page.getByText('Lesson complete. Both examples checked.')).toBeVisible()
+    await expect(page.getByText('Lesson complete.',{exact:true})).toBeVisible()
     await page.getByRole('button', { name: 'Back to lessons', exact: true }).click()
     await expect(page.getByRole('button', { name: new RegExp(`^${lesson.title}.*Completed`) })).toBeVisible()
   }
+})
+
+test('lesson idle state omits repeated selection instructions',async({page})=>{
+  await page.goto('/')
+  await page.getByRole('button',{name:'Learn',exact:true}).click()
+  await page.locator('.lesson-link').first().click()
+  for(const text of ['Select a cell to inspect its candidates.','Select a cell for a larger candidate readout.','Select one cell, one number and one action.'])await expect(page.getByText(text,{exact:true})).toHaveCount(0)
+  await page.locator('[data-cell="8"]').click()
+  await expect(page.locator('.candidate-readout')).toContainText('r1c9')
+  await page.getByRole('button',{name:'Choose 9',exact:true}).click()
+  await expect(page.locator('.proposed-action')).toContainText('Place 9 in r1c9.')
 })

@@ -15,8 +15,8 @@ function checkExamples(id: Technique) {
   expect(entry.scenarios[0].id).not.toBe(entry.scenarios[1].id)
   expect(JSON.stringify(entry.scenarios[0].candidates)).not.toBe(JSON.stringify(entry.scenarios[1].candidates))
   for (const scenario of entry.scenarios) {
-    expect(scenario.caption.toLowerCase()).toContain('partial')
-    expect(scenario.caption.toLowerCase()).toContain('not a playable puzzle')
+    expect(scenario.caption).toContain('Candidate study.')
+    expect(scenario.caption).not.toContain('No unique puzzle')
     expect(scenario.prompt.length).toBeGreaterThan(30)
     expect(scenario.proof.length).toBeGreaterThan(60)
     expect(validateScenario(entry, scenario), scenario.id).toBe(true)

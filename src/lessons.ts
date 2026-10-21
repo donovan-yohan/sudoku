@@ -11,7 +11,7 @@ const sees = (a: number, b: number) => a !== b && (Math.floor(a / 9) === Math.fl
 const coordinate = (cell: number) => `row ${Math.floor(cell / 9) + 1}, column ${cell % 9 + 1}`
 const isCell = (cell: number) => Number.isInteger(cell) && cell >= 0 && cell < 81
 const isDigit = (digit: number) => Number.isInteger(digit) && digit >= 1 && digit <= 9
-const caption = (context: string) => `Partial candidate diagram — not a playable puzzle. ${context} Every empty cell shows its complete assumed candidate set; these are supplied logical premises, not personal notes. No unique puzzle or prior elimination history is claimed.`
+const caption = (context: string) => `Candidate study. ${context}`
 
 function legalCandidates(board: number[]): number[][] {
   return CELLS.map(cell => board[cell] ? [] : DIGITS.filter(digit => !CELLS.some(peer => sees(cell, peer) && board[peer] === digit)))
@@ -251,7 +251,7 @@ export const LESSONS: Lesson[] = [{
   id: 'naked-single', title: 'Naked single', tier: 'beginner',
   summary: 'Find a cell with one remaining candidate.',
   rule: 'A candidate is a digit not yet ruled out. If an empty cell has exactly one candidate, that digit must go there.',
-  prerequisites: ['Each row, column and 3 × 3 box contains 1–9 once.', 'A candidate list must be complete; missing personal notes are not evidence.'],
+  prerequisites: ['Each row, column and 3 × 3 box contains 1–9 once.'],
   steps: ['Read the complete candidate list in the highlighted cell.', 'Check how its row, column and box exclude the other digits.', 'Place the sole remaining candidate.'],
   scenarios: nakedSingleExamples(),
 }, {
@@ -364,5 +364,5 @@ export function evaluateLesson(scenario: Scenario, action: LessonAction): { corr
   if (action?.cell === scenario.target && action.digit === scenario.digit && action.kind === scenario.kind) {
     return { correct: true, message: scenario.proof }
   }
-  return { correct: false, message: `Use the complete candidate lists, not a guessed answer. ${lesson.steps[0]} The question asks for one ${scenario.kind === 'place' ? 'placement' : 'elimination'} in the named target cell.` }
+  return { correct: false, message: `${lesson.steps[0]} The question asks for one ${scenario.kind === 'place' ? 'placement' : 'elimination'} in the named target cell.` }
 }

@@ -47,7 +47,8 @@ test('undoing a completed puzzle announces unfinished state',async({page})=>{
 test('placement lesson readouts describe the placed value',async({page})=>{
  await page.goto('/');await page.getByRole('button',{name:'Learn',exact:true}).click();await page.locator('.lesson-link').first().click()
  await page.locator('[data-cell="8"]').click();await page.getByRole('button',{name:'Choose 9',exact:true}).click();await page.getByRole('button',{name:'Check reasoning',exact:true}).click()
- await expect(page.locator('.lesson-board-column .selection-readout')).toContainText('contains 9')
+ await expect(page.getByRole('group',{name:'Selected cell candidates',exact:true})).toContainText('contains 9')
+ await expect(page.locator('.lesson-board-column .selection-readout')).toHaveCount(0)
 })
 
 test('hinted final placement earns the same full-board finale',async({page})=>{
@@ -64,6 +65,8 @@ test('hinted final placement earns the same full-board finale',async({page})=>{
  await page.getByRole('button',{name:'Apply this step',exact:true}).click()
  await expect(page.locator('.game-status')).toContainText('Puzzle complete')
  await expect(page.locator('[data-reward-variant="finale"]')).toHaveCount(1)
+ const widths=await page.locator('.reward-layer,.reward-layer *').evaluateAll(elements=>elements.flatMap(element=>{const style=getComputedStyle(element);return ['borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth'].map(key=>parseFloat(style[key as keyof CSSStyleDeclaration] as string)||0)}))
+ expect(Math.max(...widths)).toBeLessThanOrEqual(1)
 })
 
 test('reduced motion suppresses effects while preserving completion status',async({page})=>{

@@ -3,7 +3,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import Board from './components/Board'
 import Learning, { parseLessonProgress } from './components/Learning'
-import { LESSONS } from './lessons'
+import { LESSONS, evaluateLesson } from './lessons'
 import HintPanel from './components/HintPanel'
 import Dialog from './components/Dialog'
 
@@ -11,7 +11,9 @@ describe('Assistance', () => {
   it('offers an explanatory hint only after an explicit request', () => {
     const html = renderToStaticMarkup(createElement(HintPanel, { values: Array(81).fill(0), onApply: () => {}, onHint: () => {} }))
     expect(html).toContain('Hint')
-    expect(html).toContain('You choose whether to apply it')
+    expect(html).not.toContain('You choose whether to apply it')
+    expect(html).toContain('aria-label="Hint"')
+    expect(html).toContain('<svg')
     expect(html).not.toContain('Apply this step')
   })
   it('labels a native modal dialog with its supplied heading', () => {
@@ -23,11 +25,30 @@ describe('Assistance', () => {
 })
 
 describe('Lesson interface', () => {
-  it('lists the genuine catalog with its prerequisites and local completion status', () => {
+  it('lists the genuine catalog without defensive catalog prose', () => {
     const html = renderToStaticMarkup(createElement(Learning, { onReturn: () => {} }))
     for (const lesson of LESSONS) expect(html).toContain(lesson.title)
-    expect(html).toContain('Prerequisites')
+    expect(html).not.toContain('Prerequisites')
+    expect(html).not.toContain('your own pencil notes are not proof')
+    expect(html).not.toContain('guided, bounded deductions')
+    expect(html).not.toContain('does not measure independent mastery')
     expect(html).toContain('Not started')
+    expect(html).not.toContain('A new way to see the grid')
+  })
+  it('retains short candidate-study captions without audit disclaimers',()=>{
+    for(const lesson of LESSONS){
+     expect(lesson.prerequisites.join(' ')).not.toContain('missing personal notes are not evidence')
+     for(const scenario of lesson.scenarios){
+      expect(scenario.caption).toMatch(/^Candidate study\./)
+      expect(scenario.caption).not.toMatch(/proof|claimed|not a playable|assumed|No unique/i)
+     }
+    }
+  })
+  it('gives mathematical retry guidance without accusing the learner of guessing',()=>{
+    const scenario=LESSONS[0].scenarios[0]
+    const result=evaluateLesson(scenario,{cell:scenario.target,digit:scenario.digit===9?1:9,kind:scenario.kind})
+    expect(result.correct).toBe(false)
+    expect(result.message).not.toContain('not a guessed answer')
   })
   it('accepts only known scenario ids in the versioned progress envelope', () => {
     const scenario = LESSONS[0].scenarios[0].id
