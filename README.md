@@ -2,6 +2,10 @@
 
 A quieter Sudoku app with daily puzzles, practice, and interactive technique lessons.
 
+Play at https://sudoku.donovanyohan.com.
+
+Eight techniques, two interactive examples each: naked single, hidden single, locked candidates, naked pair, naked triple, X-Wing, Swordfish, and XY-Wing. Four puzzle levels use a finite original bank of 16 uniquely solvable bases with deterministic Sudoku-preserving variations. See [verification](docs/VERIFICATION.md) for executed checks and their limits.
+
 ## Development
 
 ```sh

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 const browser=await chromium.launch(),origin=process.env.SUDOKU_URL||'http://127.0.0.1:5175'
 const results=[]
 for(const theme of ['light','dark']){
- const page=await browser.newPage({viewport:{width:390,height:844},colorScheme:theme})
+ const page=await browser.newPage({viewport:{width:390,height:844},colorScheme:theme,bypassCSP:true})
  await page.goto(origin);await page.waitForSelector('[role=gridcell]')
  for(const view of ['play','learn','lesson']){
   if(view==='learn')await page.getByRole('button',{name:'Learn',exact:true}).click()
