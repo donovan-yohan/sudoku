@@ -190,14 +190,14 @@ for (const width of [320, 390, 1440]) test(`play and lesson views fit ${width}px
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 })
 
-test('each real walkthrough applies every step in both examples and persists only completed placements', async ({ page }) => {
+test('each real walkthrough applies every example and persists only completed placements', async ({ page }) => {
   test.setTimeout(180_000)
   expect(PRACTICAL_LESSONS).toHaveLength(8)
   const passed: string[] = []
   await page.goto('/'); await waitForBoard(page); await waitForSavedSession(page)
   await page.getByRole('button', { name: 'Learn', exact: true }).click()
   for (const lesson of PRACTICAL_LESSONS) {
-    expect(lesson.scenarios).toHaveLength(2)
+    expect(lesson.scenarios).toHaveLength(lesson.id === 'x-wing' ? 4 : 2)
     await page.getByRole('button', { name: new RegExp(`^${lesson.title}.*Not started`) }).click()
     await expect(page.getByRole('heading', { name: lesson.title, exact: true })).toBeVisible()
     await expect(page.locator('.walkthrough-heading')).toContainText(lesson.rule)
@@ -251,14 +251,14 @@ test('each real walkthrough applies every step in both examples and persists onl
       await expect(page.locator('.walkthrough-result')).toHaveCount(0)
       expect(await page.evaluate(() => JSON.parse(localStorage.getItem('sudoku-lessons-v1') || '{}'))).toEqual({ version: 1, passed })
       await page.getByRole('button', { name: /All lessons/ }).click()
-      const status = example === 0 ? 'In progress' : 'Completed'
+      const status = example < lesson.scenarios.length - 1 ? 'In progress' : 'Completed'
       await expect(page.getByRole('button', { name: new RegExp(`^${lesson.title}.*${status}`) })).toBeVisible()
       await page.reload(); await waitForBoard(page)
       await page.getByRole('button', { name: 'Learn', exact: true }).click()
       await expect(page.getByRole('button', { name: new RegExp(`^${lesson.title}.*${status}`) })).toBeVisible()
       const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('sudoku-lessons-v1') || '{}'))
       expect(stored).toEqual({ version: 1, passed })
-      if (example === 0) await page.getByRole('button', { name: new RegExp(`^${lesson.title}.*In progress`) }).click()
+      if (example < lesson.scenarios.length - 1) await page.getByRole('button', { name: new RegExp(`^${lesson.title}.*In progress`) }).click()
     }
   }
 })

@@ -9794,7 +9794,7 @@
     "generalTechnique": "naked-triple",
     "title": "Naked triple",
     "tier": "advanced",
-    "rule": "Three cells in one unit whose candidates together contain only three digits reserve those digits. Remove them from the other cells in that unit.",
+    "rule": "A unit is a row, column or box. If three cells in one unit have only three different candidates between them, those digits must fill those cells. Their candidate lists need not be identical. Remove those digits from the other cells in that unit.",
     "scenarios": [
       {
         "id": "naked-triple-1",
@@ -10193,7 +10193,7 @@
                 "digit": 9
               }
             ],
-            "explanation": "r4c4, r5c4, r6c4 in column 4 contain only 3, 7, 9. These 3 digits occupy those 3 cells, so remove them from the other cells of column 4.",
+            "explanation": "Look at column 4. r4c4 has {3, 7, 9}; r5c4 has {3, 9}; r6c4 has {7, 9}. These candidate lists are not identical, but together they contain only 3, 7, 9.\n\nThese three cells must contain three different digits, because a digit cannot repeat in column 4. They have only these three digits available, so 3, 7, 9 must fill these three cells in some order. No other cell in column 4 can use any of them, even though we do not yet know their exact order.\n\nRemove 9 from r7c4: {4, 6, 9} becomes {4, 6}. Remove 7 from r8c4: {4, 6, 7, 8} becomes {4, 6, 8}. Remove 7 and 9 from r9c4: {7, 8, 9} becomes {8}.\n\nr9c4 changes from {7, 8, 9} to {8}. Only 8 remains, so place 8 in r9c4.",
             "board": [
               0,
               0,
@@ -10567,7 +10567,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 8 remains at r9c4 after excluding its row, column, box and proven eliminations.",
+            "explanation": "The triple reserves 3, 7, 9 for r4c4, r5c4, r6c4 in column 4; none of those digits can go in the other cells of column 4.\n\nr9c4 changes from {7, 8, 9} to {8}. Only 8 remains, so place 8 in r9c4.",
             "board": [
               0,
               0,
@@ -10928,7 +10928,7 @@
         "target": 75,
         "digit": 8,
         "prompt": "Use the triple to fill r9c4.",
-        "proof": "r4c4, r5c4, r6c4 in column 4 contain only 3, 7, 9. These 3 digits occupy those 3 cells, so remove them from the other cells of column 4. Only 8 remains at r9c4 after excluding its row, column, box and proven eliminations.",
+        "proof": "Look at column 4. r4c4 has {3, 7, 9}; r5c4 has {3, 9}; r6c4 has {7, 9}. These candidate lists are not identical, but together they contain only 3, 7, 9.\n\nThese three cells must contain three different digits, because a digit cannot repeat in column 4. They have only these three digits available, so 3, 7, 9 must fill these three cells in some order. No other cell in column 4 can use any of them, even though we do not yet know their exact order.\n\nRemove 9 from r7c4: {4, 6, 9} becomes {4, 6}. Remove 7 from r8c4: {4, 6, 7, 8} becomes {4, 6, 8}. Remove 7 and 9 from r9c4: {7, 8, 9} becomes {8}.\n\nr9c4 changes from {7, 8, 9} to {8}. Only 8 remains, so place 8 in r9c4. The triple reserves 3, 7, 9 for r4c4, r5c4, r6c4 in column 4; none of those digits can go in the other cells of column 4.\n\nr9c4 changes from {7, 8, 9} to {8}. Only 8 remains, so place 8 in r9c4.",
         "provenance": {
           "source": "catalog",
           "puzzleId": "catalog:advanced:3",
@@ -11693,7 +11693,7 @@
                 "digit": 1
               }
             ],
-            "explanation": "r7c7, r7c8, r7c9 in row 7 contain only 1, 8, 9. These 3 digits occupy those 3 cells, so remove them from the other cells of row 7.",
+            "explanation": "Look at row 7. r7c7 has {8, 9}; r7c8 has {1, 8}; r7c9 has {1, 8, 9}. These candidate lists are not identical, but together they contain only 1, 8, 9.\n\nThese three cells must contain three different digits, because a digit cannot repeat in row 7. They have only these three digits available, so 1, 8, 9 must fill these three cells in some order. No other cell in row 7 can use any of them, even though we do not yet know their exact order.\n\nRemove 1 and 8 from r7c1: {1, 3, 8} becomes {3}. Remove 8 from r7c2: {5, 6, 8} becomes {5, 6}. Remove 1 from r7c3: {1, 3, 5, 6} becomes {3, 5, 6}.\n\nr7c1 changes from {1, 3, 8} to {3}. Only 3 remains, so place 3 in r7c1.",
             "board": [
               0,
               0,
@@ -12067,7 +12067,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 3 remains at r7c1 after excluding its row, column, box and proven eliminations.",
+            "explanation": "The triple reserves 1, 8, 9 for r7c7, r7c8, r7c9 in row 7; none of those digits can go in the other cells of row 7.\n\nr7c1 changes from {1, 3, 8} to {3}. Only 3 remains, so place 3 in r7c1.",
             "board": [
               0,
               0,
@@ -12428,7 +12428,7 @@
         "target": 54,
         "digit": 3,
         "prompt": "Use the triple to fill r7c1.",
-        "proof": "r7c7, r7c8, r7c9 in row 7 contain only 1, 8, 9. These 3 digits occupy those 3 cells, so remove them from the other cells of row 7. Only 3 remains at r7c1 after excluding its row, column, box and proven eliminations.",
+        "proof": "Look at row 7. r7c7 has {8, 9}; r7c8 has {1, 8}; r7c9 has {1, 8, 9}. These candidate lists are not identical, but together they contain only 1, 8, 9.\n\nThese three cells must contain three different digits, because a digit cannot repeat in row 7. They have only these three digits available, so 1, 8, 9 must fill these three cells in some order. No other cell in row 7 can use any of them, even though we do not yet know their exact order.\n\nRemove 1 and 8 from r7c1: {1, 3, 8} becomes {3}. Remove 8 from r7c2: {5, 6, 8} becomes {5, 6}. Remove 1 from r7c3: {1, 3, 5, 6} becomes {3, 5, 6}.\n\nr7c1 changes from {1, 3, 8} to {3}. Only 3 remains, so place 3 in r7c1. The triple reserves 1, 8, 9 for r7c7, r7c8, r7c9 in row 7; none of those digits can go in the other cells of row 7.\n\nr7c1 changes from {1, 3, 8} to {3}. Only 3 remains, so place 3 in r7c1.",
         "provenance": {
           "source": "practice",
           "puzzleId": "v1:practice:practical-2:advanced:3:0",
@@ -12805,7 +12805,7 @@
     "generalTechnique": "x-wing",
     "title": "X-Wing",
     "tier": "advanced",
-    "rule": "If a digit has the same two possible columns in two rows, remove it from those columns outside the rows. Rows and columns can swap roles.",
+    "rule": "Focus on one digit. If its only two positions in each of two rows form the corners of a rectangle, it must occupy one of the two diagonal pairs. Either way, remove that digit from the other cells of those two columns. The same reasoning works with rows and columns swapped.",
     "scenarios": [
       {
         "id": "x-wing-1",
@@ -13123,7 +13123,7 @@
                 "digit": 6
               }
             ],
-            "explanation": "For 6, columns 3, 9 are confined to rows 3, 6 (r3c3, r6c3, r3c9, r6c9). Each must use a different cover, so remove 6 from other cells in those rows.",
+            "explanation": "Focus on 6. In column 3, the only two positions for 6 are r3c3 and r6c3. In column 9, the only two positions for 6 are r3c9 and r6c9. These four cells form a rectangle.\n\nIf r3c3 is 6, then r6c9 must be 6, because r3c3 blocks 6 at r3c9 in their shared row 3. That leaves r6c9 as the only position for 6 in column 9. This uses one diagonal pair.\n\nIf r6c3 is 6, then r3c9 must be 6, because r6c3 blocks 6 at r6c9 in their shared row 6. That leaves r3c9 as the only position for 6 in column 9. This uses the other diagonal pair.\n\nEither way, each of rows 3 and 6 gets its 6 in the rectangle. Remove 6 from r3c4, r3c8, r6c5: these cells are elsewhere in those rows.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5.",
             "board": [
               9,
               0,
@@ -13403,7 +13403,19 @@
               [],
               [],
               []
-            ]
+            ],
+            "xWing": {
+              "digit": 6,
+              "orientation": "columns",
+              "rows": [
+                2,
+                5
+              ],
+              "columns": [
+                2,
+                8
+              ]
+            }
           },
           {
             "technique": "naked-single",
@@ -13418,7 +13430,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 5 remains at r6c5 after excluding its row, column, box and proven eliminations.",
+            "explanation": "Either diagonal pair puts 6 inside the rectangle in each of rows 3 and 6. The X-Wing therefore removes 6 from r6c5.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5.",
             "board": [
               9,
               0,
@@ -13701,7 +13713,7 @@
         "target": 49,
         "digit": 5,
         "prompt": "Use the X-Wing to fill r6c5.",
-        "proof": "For 6, columns 3, 9 are confined to rows 3, 6 (r3c3, r6c3, r3c9, r6c9). Each must use a different cover, so remove 6 from other cells in those rows. Only 5 remains at r6c5 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 6. In column 3, the only two positions for 6 are r3c3 and r6c3. In column 9, the only two positions for 6 are r3c9 and r6c9. These four cells form a rectangle.\n\nIf r3c3 is 6, then r6c9 must be 6, because r3c3 blocks 6 at r3c9 in their shared row 3. That leaves r6c9 as the only position for 6 in column 9. This uses one diagonal pair.\n\nIf r6c3 is 6, then r3c9 must be 6, because r6c3 blocks 6 at r6c9 in their shared row 6. That leaves r3c9 as the only position for 6 in column 9. This uses the other diagonal pair.\n\nEither way, each of rows 3 and 6 gets its 6 in the rectangle. Remove 6 from r3c4, r3c8, r6c5: these cells are elsewhere in those rows.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5. Either diagonal pair puts 6 inside the rectangle in each of rows 3 and 6. The X-Wing therefore removes 6 from r6c5.\n\nr6c5 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r6c5.",
         "provenance": {
           "source": "catalog",
           "puzzleId": "catalog:advanced:0",
@@ -14652,7 +14664,7 @@
                 "digit": 5
               }
             ],
-            "explanation": "For 5, columns 3, 8 are confined to rows 4, 7 (r4c3, r7c3, r4c8, r7c8). Each must use a different cover, so remove 5 from other cells in those rows.",
+            "explanation": "Focus on 5. In column 3, the only two positions for 5 are r4c3 and r7c3. In column 8, the only two positions for 5 are r4c8 and r7c8. These four cells form a rectangle.\n\nIf r4c3 is 5, then r7c8 must be 5, because r4c3 blocks 5 at r4c8 in their shared row 4. That leaves r7c8 as the only position for 5 in column 8. This uses one diagonal pair.\n\nIf r7c3 is 5, then r4c8 must be 5, because r7c3 blocks 5 at r7c8 in their shared row 7. That leaves r4c8 as the only position for 5 in column 8. This uses the other diagonal pair.\n\nEither way, each of rows 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r4c7, r7c1, r7c2: these cells are elsewhere in those rows.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
             "board": [
               0,
               0,
@@ -15006,7 +15018,19 @@
               [],
               [],
               []
-            ]
+            ],
+            "xWing": {
+              "digit": 5,
+              "orientation": "columns",
+              "rows": [
+                3,
+                6
+              ],
+              "columns": [
+                2,
+                7
+              ]
+            }
           },
           {
             "technique": "naked-single",
@@ -15021,7 +15045,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 3 remains at r4c4 after excluding its row, column, box and proven eliminations.",
+            "explanation": "Either diagonal pair puts 5 inside the rectangle in each of rows 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
             "board": [
               0,
               0,
@@ -15377,7 +15401,7 @@
         "target": 30,
         "digit": 3,
         "prompt": "Use the X-Wing to fill r4c4.",
-        "proof": "For 5, columns 3, 8 are confined to rows 4, 7 (r4c3, r7c3, r4c8, r7c8). Each must use a different cover, so remove 5 from other cells in those rows. Only 3 remains at r4c4 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 5. In column 3, the only two positions for 5 are r4c3 and r7c3. In column 8, the only two positions for 5 are r4c8 and r7c8. These four cells form a rectangle.\n\nIf r4c3 is 5, then r7c8 must be 5, because r4c3 blocks 5 at r4c8 in their shared row 4. That leaves r7c8 as the only position for 5 in column 8. This uses one diagonal pair.\n\nIf r7c3 is 5, then r4c8 must be 5, because r7c3 blocks 5 at r7c8 in their shared row 7. That leaves r4c8 as the only position for 5 in column 8. This uses the other diagonal pair.\n\nEither way, each of rows 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r4c7, r7c1, r7c2: these cells are elsewhere in those rows.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4. Either diagonal pair puts 5 inside the rectangle in each of rows 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
         "provenance": {
           "source": "catalog",
           "puzzleId": "catalog:advanced:1",
@@ -15727,6 +15751,3125 @@
             }
           ]
         }
+      },
+      {
+        "id": "x-wing-3",
+        "variant": "classic",
+        "kind": "place",
+        "caption": "X-Wing: fill r5c6.",
+        "board": [
+          9,
+          7,
+          8,
+          1,
+          2,
+          3,
+          6,
+          4,
+          5,
+          0,
+          1,
+          3,
+          0,
+          0,
+          7,
+          9,
+          2,
+          8,
+          5,
+          2,
+          0,
+          8,
+          9,
+          0,
+          1,
+          7,
+          3,
+          0,
+          0,
+          0,
+          0,
+          1,
+          8,
+          2,
+          0,
+          0,
+          3,
+          0,
+          2,
+          4,
+          7,
+          0,
+          8,
+          9,
+          1,
+          8,
+          0,
+          1,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          8,
+          1,
+          0,
+          6,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          8,
+          7,
+          2,
+          8,
+          0,
+          7,
+          3,
+          0,
+          0,
+          1,
+          9
+        ],
+        "candidates": [
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [
+            4,
+            6
+          ],
+          [],
+          [],
+          [
+            5,
+            6
+          ],
+          [
+            4,
+            5,
+            6
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [
+            4,
+            6
+          ],
+          [],
+          [],
+          [
+            4,
+            6
+          ],
+          [],
+          [],
+          [],
+          [
+            4,
+            6,
+            7
+          ],
+          [
+            4,
+            5,
+            6,
+            9
+          ],
+          [
+            4,
+            5,
+            6,
+            7,
+            9
+          ],
+          [
+            3,
+            9
+          ],
+          [],
+          [],
+          [],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [],
+          [
+            5,
+            6
+          ],
+          [],
+          [],
+          [],
+          [
+            5,
+            6
+          ],
+          [],
+          [],
+          [],
+          [],
+          [
+            4,
+            5,
+            6,
+            9
+          ],
+          [],
+          [
+            2,
+            3,
+            9
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            2,
+            9
+          ],
+          [],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            4,
+            7
+          ],
+          [],
+          [
+            4,
+            5,
+            7,
+            9
+          ],
+          [
+            5,
+            9
+          ],
+          [],
+          [],
+          [
+            4,
+            5
+          ],
+          [],
+          [],
+          [],
+          [
+            4,
+            5,
+            6,
+            9
+          ],
+          [
+            4,
+            5,
+            6,
+            9
+          ],
+          [
+            2,
+            5,
+            6,
+            9
+          ],
+          [
+            4,
+            5,
+            6
+          ],
+          [
+            2,
+            9
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [
+            4,
+            5,
+            6
+          ],
+          [],
+          [],
+          [
+            4,
+            5,
+            6
+          ],
+          [
+            4,
+            5
+          ],
+          [],
+          []
+        ],
+        "evidence": [
+          20,
+          23,
+          74,
+          77
+        ],
+        "steps": [
+          {
+            "technique": "x-wing",
+            "cells": [
+              20,
+              23,
+              74,
+              77
+            ],
+            "digit": 6,
+            "placements": [],
+            "eliminations": [
+              {
+                "cell": 29,
+                "digit": 6
+              },
+              {
+                "cell": 65,
+                "digit": 6
+              },
+              {
+                "cell": 41,
+                "digit": 6
+              }
+            ],
+            "explanation": "Focus on 6. In row 3, the only two positions for 6 are r3c3 and r3c6. In row 9, the only two positions for 6 are r9c3 and r9c6. These four cells form a rectangle.\n\nIf r3c3 is 6, then r9c6 must be 6, because r3c3 blocks 6 at r9c3 in their shared column 3. That leaves r9c6 as the only position for 6 in row 9. This uses one diagonal pair.\n\nIf r3c6 is 6, then r9c3 must be 6, because r3c6 blocks 6 at r9c6 in their shared column 6. That leaves r9c3 as the only position for 6 in row 9. This uses the other diagonal pair.\n\nEither way, each of columns 3 and 6 gets its 6 in the rectangle. Remove 6 from r4c3, r8c3, r5c6: these cells are elsewhere in those columns.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6.",
+            "board": [
+              9,
+              7,
+              8,
+              1,
+              2,
+              3,
+              6,
+              4,
+              5,
+              0,
+              1,
+              3,
+              0,
+              0,
+              7,
+              9,
+              2,
+              8,
+              5,
+              2,
+              0,
+              8,
+              9,
+              0,
+              1,
+              7,
+              3,
+              0,
+              0,
+              0,
+              0,
+              1,
+              8,
+              2,
+              0,
+              0,
+              3,
+              0,
+              2,
+              4,
+              7,
+              0,
+              8,
+              9,
+              1,
+              8,
+              0,
+              1,
+              0,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              3,
+              0,
+              0,
+              8,
+              1,
+              0,
+              6,
+              2,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              3,
+              8,
+              7,
+              2,
+              8,
+              0,
+              7,
+              3,
+              0,
+              0,
+              1,
+              9
+            ],
+            "candidates": [
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                6
+              ],
+              [],
+              [],
+              [
+                5,
+                6
+              ],
+              [
+                4,
+                5,
+                6
+              ],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                6
+              ],
+              [],
+              [],
+              [
+                4,
+                6
+              ],
+              [],
+              [],
+              [],
+              [
+                4,
+                6,
+                7
+              ],
+              [
+                4,
+                5,
+                6,
+                9
+              ],
+              [
+                4,
+                5,
+                6,
+                7,
+                9
+              ],
+              [
+                3,
+                9
+              ],
+              [],
+              [],
+              [],
+              [
+                3,
+                5
+              ],
+              [
+                4,
+                6
+              ],
+              [],
+              [
+                5,
+                6
+              ],
+              [],
+              [],
+              [],
+              [
+                5,
+                6
+              ],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                5,
+                6,
+                9
+              ],
+              [],
+              [
+                2,
+                3,
+                9
+              ],
+              [
+                5,
+                6
+              ],
+              [
+                2,
+                9
+              ],
+              [],
+              [
+                3,
+                5
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                4,
+                7
+              ],
+              [],
+              [
+                4,
+                5,
+                7,
+                9
+              ],
+              [
+                5,
+                9
+              ],
+              [],
+              [],
+              [
+                4,
+                5
+              ],
+              [],
+              [],
+              [],
+              [
+                4,
+                5,
+                6,
+                9
+              ],
+              [
+                4,
+                5,
+                6,
+                9
+              ],
+              [
+                2,
+                5,
+                6,
+                9
+              ],
+              [
+                4,
+                5,
+                6
+              ],
+              [
+                2,
+                9
+              ],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                5,
+                6
+              ],
+              [],
+              [],
+              [
+                4,
+                5,
+                6
+              ],
+              [
+                4,
+                5
+              ],
+              [],
+              []
+            ],
+            "xWing": {
+              "digit": 6,
+              "orientation": "rows",
+              "rows": [
+                2,
+                8
+              ],
+              "columns": [
+                2,
+                5
+              ]
+            }
+          },
+          {
+            "technique": "naked-single",
+            "cells": [
+              41
+            ],
+            "digit": 5,
+            "placements": [
+              {
+                "cell": 41,
+                "digit": 5
+              }
+            ],
+            "eliminations": [],
+            "explanation": "Either diagonal pair puts 6 inside the rectangle in each of columns 3 and 6. The X-Wing therefore removes 6 from r5c6.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6.",
+            "board": [
+              9,
+              7,
+              8,
+              1,
+              2,
+              3,
+              6,
+              4,
+              5,
+              0,
+              1,
+              3,
+              0,
+              0,
+              7,
+              9,
+              2,
+              8,
+              5,
+              2,
+              0,
+              8,
+              9,
+              0,
+              1,
+              7,
+              3,
+              0,
+              0,
+              0,
+              0,
+              1,
+              8,
+              2,
+              0,
+              0,
+              3,
+              0,
+              2,
+              4,
+              7,
+              0,
+              8,
+              9,
+              1,
+              8,
+              0,
+              1,
+              0,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              3,
+              0,
+              0,
+              8,
+              1,
+              0,
+              6,
+              2,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              3,
+              8,
+              7,
+              2,
+              8,
+              0,
+              7,
+              3,
+              0,
+              0,
+              1,
+              9
+            ],
+            "candidates": [
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                6
+              ],
+              [],
+              [],
+              [
+                5,
+                6
+              ],
+              [
+                4,
+                5,
+                6
+              ],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                6
+              ],
+              [],
+              [],
+              [
+                4,
+                6
+              ],
+              [],
+              [],
+              [],
+              [
+                4,
+                6,
+                7
+              ],
+              [
+                4,
+                5,
+                6,
+                9
+              ],
+              [
+                4,
+                5,
+                7,
+                9
+              ],
+              [
+                3,
+                9
+              ],
+              [],
+              [],
+              [],
+              [
+                3,
+                5
+              ],
+              [
+                4,
+                6
+              ],
+              [],
+              [
+                5,
+                6
+              ],
+              [],
+              [],
+              [],
+              [
+                5
+              ],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                5,
+                6,
+                9
+              ],
+              [],
+              [
+                2,
+                3,
+                9
+              ],
+              [
+                5,
+                6
+              ],
+              [
+                2,
+                9
+              ],
+              [],
+              [
+                3,
+                5
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                4,
+                7
+              ],
+              [],
+              [
+                4,
+                5,
+                7,
+                9
+              ],
+              [
+                5,
+                9
+              ],
+              [],
+              [],
+              [
+                4,
+                5
+              ],
+              [],
+              [],
+              [],
+              [
+                4,
+                5,
+                6,
+                9
+              ],
+              [
+                4,
+                5,
+                9
+              ],
+              [
+                2,
+                5,
+                6,
+                9
+              ],
+              [
+                4,
+                5,
+                6
+              ],
+              [
+                2,
+                9
+              ],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                4,
+                5,
+                6
+              ],
+              [],
+              [],
+              [
+                4,
+                5,
+                6
+              ],
+              [
+                4,
+                5
+              ],
+              [],
+              []
+            ]
+          }
+        ],
+        "target": 41,
+        "digit": 5,
+        "prompt": "Use the X-Wing to fill r5c6.",
+        "proof": "Focus on 6. In row 3, the only two positions for 6 are r3c3 and r3c6. In row 9, the only two positions for 6 are r9c3 and r9c6. These four cells form a rectangle.\n\nIf r3c3 is 6, then r9c6 must be 6, because r3c3 blocks 6 at r9c3 in their shared column 3. That leaves r9c6 as the only position for 6 in row 9. This uses one diagonal pair.\n\nIf r3c6 is 6, then r9c3 must be 6, because r3c6 blocks 6 at r9c6 in their shared column 6. That leaves r9c3 as the only position for 6 in row 9. This uses the other diagonal pair.\n\nEither way, each of columns 3 and 6 gets its 6 in the rectangle. Remove 6 from r4c3, r8c3, r5c6: these cells are elsewhere in those columns.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6. Either diagonal pair puts 6 inside the rectangle in each of columns 3 and 6. The X-Wing therefore removes 6 from r5c6.\n\nr5c6 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r5c6.",
+        "provenance": {
+          "source": "generated-transform",
+          "puzzleId": "catalog:advanced:0:transpose:digit-shift-0",
+          "sourcePuzzle": [
+            9,
+            0,
+            5,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            8,
+            0,
+            4,
+            0,
+            0,
+            0,
+            7,
+            2,
+            0,
+            9,
+            1,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            7,
+            0,
+            8,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            7,
+            0,
+            3,
+            0,
+            4,
+            0,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0,
+            5,
+            0,
+            3,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0
+          ],
+          "transformation": {
+            "transpose": true,
+            "digitShift": 0
+          },
+          "originalPuzzle": [
+            9,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            4,
+            5,
+            0,
+            1,
+            0,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            5,
+            0,
+            0,
+            8,
+            9,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            1,
+            8,
+            0,
+            0,
+            0,
+            3,
+            0,
+            2,
+            4,
+            0,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            8,
+            1,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            8,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "priorSteps": [
+            {
+              "technique": "hidden-single",
+              "cells": [
+                3
+              ],
+              "digit": 1,
+              "placements": [
+                {
+                  "cell": 3,
+                  "digit": 1
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 4, only r1c4 can contain 1."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                40
+              ],
+              "digit": 7,
+              "placements": [
+                {
+                  "cell": 40,
+                  "digit": 7
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 5, only r5c5 can contain 7."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                71
+              ],
+              "digit": 7,
+              "placements": [
+                {
+                  "cell": 71,
+                  "digit": 7
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 9, only r8c9 can contain 7."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                70
+              ],
+              "digit": 8,
+              "placements": [
+                {
+                  "cell": 70,
+                  "digit": 8
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 8, only r8c8 can contain 8."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                25
+              ],
+              "digit": 7,
+              "placements": [
+                {
+                  "cell": 25,
+                  "digit": 7
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 8, only r3c8 can contain 7."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                24
+              ],
+              "digit": 1,
+              "placements": [
+                {
+                  "cell": 24,
+                  "digit": 1
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 3, only r3c7 can contain 1."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                19
+              ],
+              "digit": 2,
+              "placements": [
+                {
+                  "cell": 19,
+                  "digit": 2
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 3, only r3c2 can contain 2."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                44
+              ],
+              "digit": 1,
+              "placements": [
+                {
+                  "cell": 44,
+                  "digit": 1
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 5, only r5c9 can contain 1."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                42
+              ],
+              "digit": 8,
+              "placements": [
+                {
+                  "cell": 42,
+                  "digit": 8
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 5, only r5c7 can contain 8."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                6
+              ],
+              "digit": 6,
+              "placements": [
+                {
+                  "cell": 6,
+                  "digit": 6
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 6 remains at r1c7 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                5
+              ],
+              "digit": 3,
+              "placements": [
+                {
+                  "cell": 5,
+                  "digit": 3
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 3 remains at r1c6 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                1
+              ],
+              "digit": 7,
+              "placements": [
+                {
+                  "cell": 1,
+                  "digit": 7
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 7 remains at r1c2 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                2
+              ],
+              "digit": 8,
+              "placements": [
+                {
+                  "cell": 2,
+                  "digit": 8
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 8 remains at r1c3 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                16
+              ],
+              "digit": 2,
+              "placements": [
+                {
+                  "cell": 16,
+                  "digit": 2
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 2 remains at r2c8 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                15
+              ],
+              "digit": 9,
+              "placements": [
+                {
+                  "cell": 15,
+                  "digit": 9
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 9 remains at r2c7 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                17
+              ],
+              "digit": 8,
+              "placements": [
+                {
+                  "cell": 17,
+                  "digit": 8
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 8 remains at r2c9 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                11
+              ],
+              "digit": 3,
+              "placements": [
+                {
+                  "cell": 11,
+                  "digit": 3
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 2, only r2c3 can contain 3."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                45
+              ],
+              "digit": 8,
+              "placements": [
+                {
+                  "cell": 45,
+                  "digit": 8
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 6, only r6c1 can contain 8."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                47
+              ],
+              "digit": 1,
+              "placements": [
+                {
+                  "cell": 47,
+                  "digit": 1
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 6, only r6c3 can contain 1."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                63
+              ],
+              "digit": 1,
+              "placements": [
+                {
+                  "cell": 63,
+                  "digit": 1
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 8, only r8c1 can contain 1."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                79
+              ],
+              "digit": 1,
+              "placements": [
+                {
+                  "cell": 79,
+                  "digit": 1
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 9, only r9c8 can contain 1."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                76
+              ],
+              "digit": 3,
+              "placements": [
+                {
+                  "cell": 76,
+                  "digit": 3
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 9, only r9c5 can contain 3."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                55
+              ],
+              "digit": 3,
+              "placements": [
+                {
+                  "cell": 55,
+                  "digit": 3
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 7, only r7c2 can contain 3."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                72
+              ],
+              "digit": 2,
+              "placements": [
+                {
+                  "cell": 72,
+                  "digit": 2
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 1, only r9c1 can contain 2."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                33
+              ],
+              "digit": 2,
+              "placements": [
+                {
+                  "cell": 33,
+                  "digit": 2
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 7, only r4c7 can contain 2."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                80
+              ],
+              "digit": 9,
+              "placements": [
+                {
+                  "cell": 80,
+                  "digit": 9
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 9, only r9c9 can contain 9."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                61
+              ],
+              "digit": 6,
+              "placements": [
+                {
+                  "cell": 61,
+                  "digit": 6
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In box 9, only r7c8 can contain 6."
+            },
+            {
+              "technique": "naked-pair",
+              "cells": [
+                41,
+                49
+              ],
+              "digit": 5,
+              "placements": [],
+              "eliminations": [
+                {
+                  "cell": 30,
+                  "digit": 5
+                },
+                {
+                  "cell": 30,
+                  "digit": 6
+                },
+                {
+                  "cell": 48,
+                  "digit": 5
+                },
+                {
+                  "cell": 48,
+                  "digit": 6
+                },
+                {
+                  "cell": 50,
+                  "digit": 5
+                },
+                {
+                  "cell": 50,
+                  "digit": 6
+                }
+              ],
+              "explanation": "r5c6, r6c5 in box 5 contain only 5, 6. These 2 digits occupy those 2 cells, so remove them from the other cells of box 5."
+            },
+            {
+              "technique": "naked-triple",
+              "cells": [
+                23,
+                41,
+                77
+              ],
+              "digit": 4,
+              "placements": [],
+              "eliminations": [
+                {
+                  "cell": 68,
+                  "digit": 4
+                },
+                {
+                  "cell": 68,
+                  "digit": 5
+                },
+                {
+                  "cell": 68,
+                  "digit": 6
+                }
+              ],
+              "explanation": "r3c6, r5c6, r9c6 in column 6 contain only 4, 5, 6. These 3 digits occupy those 3 cells, so remove them from the other cells of column 6."
+            }
+          ]
+        }
+      },
+      {
+        "id": "x-wing-4",
+        "variant": "classic",
+        "kind": "place",
+        "caption": "X-Wing: fill r4c4.",
+        "board": [
+          0,
+          0,
+          0,
+          8,
+          4,
+          0,
+          0,
+          0,
+          9,
+          0,
+          4,
+          0,
+          6,
+          9,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          9,
+          0,
+          7,
+          2,
+          0,
+          4,
+          0,
+          0,
+          9,
+          0,
+          0,
+          0,
+          7,
+          2,
+          0,
+          0,
+          5,
+          7,
+          3,
+          2,
+          1,
+          6,
+          4,
+          9,
+          8,
+          0,
+          2,
+          0,
+          9,
+          0,
+          4,
+          0,
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          9,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          6,
+          9,
+          0,
+          1,
+          7,
+          9,
+          5,
+          0,
+          7,
+          2,
+          0,
+          0,
+          0,
+          4
+        ],
+        "candidates": [
+          [
+            1,
+            2,
+            3,
+            6,
+            7
+          ],
+          [
+            1,
+            3,
+            6
+          ],
+          [
+            1,
+            2,
+            5,
+            6,
+            7
+          ],
+          [],
+          [],
+          [
+            1,
+            3,
+            5
+          ],
+          [
+            1,
+            3,
+            5,
+            6,
+            7
+          ],
+          [
+            3,
+            5,
+            6,
+            7
+          ],
+          [],
+          [
+            1,
+            3,
+            7,
+            8
+          ],
+          [],
+          [
+            1,
+            5,
+            7,
+            8
+          ],
+          [],
+          [],
+          [
+            1,
+            3,
+            5
+          ],
+          [
+            1,
+            3,
+            5,
+            7,
+            8
+          ],
+          [],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            3,
+            6,
+            8
+          ],
+          [
+            1,
+            3,
+            6,
+            8
+          ],
+          [],
+          [
+            1,
+            3,
+            5
+          ],
+          [],
+          [],
+          [
+            1,
+            3,
+            5,
+            6,
+            8
+          ],
+          [],
+          [
+            1,
+            3,
+            6
+          ],
+          [
+            1,
+            4,
+            6,
+            8
+          ],
+          [],
+          [
+            1,
+            4,
+            6,
+            8
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            5,
+            8
+          ],
+          [],
+          [],
+          [
+            3,
+            6
+          ],
+          [
+            1,
+            3,
+            6
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [
+            1,
+            6,
+            8
+          ],
+          [],
+          [
+            1,
+            6,
+            8
+          ],
+          [],
+          [
+            3,
+            8
+          ],
+          [],
+          [
+            1,
+            3,
+            6,
+            7
+          ],
+          [
+            3,
+            6,
+            7
+          ],
+          [],
+          [
+            1,
+            3,
+            4,
+            6,
+            7
+          ],
+          [
+            1,
+            3,
+            6
+          ],
+          [
+            1,
+            4,
+            6,
+            7
+          ],
+          [
+            1,
+            3,
+            4,
+            5
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            1,
+            3,
+            5,
+            8
+          ],
+          [],
+          [
+            3,
+            5,
+            6,
+            8
+          ],
+          [],
+          [
+            2,
+            3,
+            4,
+            8
+          ],
+          [
+            3,
+            8
+          ],
+          [
+            2,
+            4,
+            8
+          ],
+          [
+            3,
+            4,
+            5
+          ],
+          [],
+          [],
+          [
+            3,
+            5
+          ],
+          [],
+          [],
+          [],
+          [],
+          [
+            1,
+            6
+          ],
+          [],
+          [],
+          [
+            1,
+            3,
+            8
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            3,
+            6,
+            8
+          ],
+          []
+        ],
+        "evidence": [
+          21,
+          24,
+          66,
+          69
+        ],
+        "steps": [
+          {
+            "technique": "x-wing",
+            "cells": [
+              21,
+              24,
+              66,
+              69
+            ],
+            "digit": 5,
+            "placements": [],
+            "eliminations": [
+              {
+                "cell": 30,
+                "digit": 5
+              },
+              {
+                "cell": 57,
+                "digit": 5
+              },
+              {
+                "cell": 6,
+                "digit": 5
+              },
+              {
+                "cell": 15,
+                "digit": 5
+              }
+            ],
+            "explanation": "Focus on 5. In row 3, the only two positions for 5 are r3c4 and r3c7. In row 8, the only two positions for 5 are r8c4 and r8c7. These four cells form a rectangle.\n\nIf r3c4 is 5, then r8c7 must be 5, because r3c4 blocks 5 at r8c4 in their shared column 4. That leaves r8c7 as the only position for 5 in row 8. This uses one diagonal pair.\n\nIf r3c7 is 5, then r8c4 must be 5, because r3c7 blocks 5 at r8c7 in their shared column 7. That leaves r8c4 as the only position for 5 in row 8. This uses the other diagonal pair.\n\nEither way, each of columns 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r7c4, r1c7, r2c7: these cells are elsewhere in those columns.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
+            "board": [
+              0,
+              0,
+              0,
+              8,
+              4,
+              0,
+              0,
+              0,
+              9,
+              0,
+              4,
+              0,
+              6,
+              9,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              9,
+              0,
+              7,
+              2,
+              0,
+              4,
+              0,
+              0,
+              9,
+              0,
+              0,
+              0,
+              7,
+              2,
+              0,
+              0,
+              5,
+              7,
+              3,
+              2,
+              1,
+              6,
+              4,
+              9,
+              8,
+              0,
+              2,
+              0,
+              9,
+              0,
+              4,
+              0,
+              0,
+              5,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              9,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0,
+              6,
+              9,
+              0,
+              1,
+              7,
+              9,
+              5,
+              0,
+              7,
+              2,
+              0,
+              0,
+              0,
+              4
+            ],
+            "candidates": [
+              [
+                1,
+                2,
+                3,
+                6,
+                7
+              ],
+              [
+                1,
+                3,
+                6
+              ],
+              [
+                1,
+                2,
+                5,
+                6,
+                7
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                5
+              ],
+              [
+                1,
+                3,
+                5,
+                6,
+                7
+              ],
+              [
+                3,
+                5,
+                6,
+                7
+              ],
+              [],
+              [
+                1,
+                3,
+                7,
+                8
+              ],
+              [],
+              [
+                1,
+                5,
+                7,
+                8
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                5
+              ],
+              [
+                1,
+                3,
+                5,
+                7,
+                8
+              ],
+              [],
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                3,
+                6,
+                8
+              ],
+              [
+                1,
+                3,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                3,
+                5
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                5,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                3,
+                6
+              ],
+              [
+                1,
+                4,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                4,
+                6,
+                8
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                3,
+                5,
+                8
+              ],
+              [],
+              [],
+              [
+                3,
+                6
+              ],
+              [
+                1,
+                3,
+                6
+              ],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                1,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                6,
+                8
+              ],
+              [],
+              [
+                3,
+                8
+              ],
+              [],
+              [
+                1,
+                3,
+                6,
+                7
+              ],
+              [
+                3,
+                6,
+                7
+              ],
+              [],
+              [
+                1,
+                3,
+                4,
+                6,
+                7
+              ],
+              [
+                1,
+                3,
+                6
+              ],
+              [
+                1,
+                4,
+                6,
+                7
+              ],
+              [
+                1,
+                3,
+                4,
+                5
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                1,
+                3,
+                5,
+                8
+              ],
+              [],
+              [
+                3,
+                5,
+                6,
+                8
+              ],
+              [],
+              [
+                2,
+                3,
+                4,
+                8
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                2,
+                4,
+                8
+              ],
+              [
+                3,
+                4,
+                5
+              ],
+              [],
+              [],
+              [
+                3,
+                5
+              ],
+              [],
+              [],
+              [],
+              [],
+              [
+                1,
+                6
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                8
+              ],
+              [
+                3,
+                6
+              ],
+              [
+                3,
+                6,
+                8
+              ],
+              []
+            ],
+            "xWing": {
+              "digit": 5,
+              "orientation": "rows",
+              "rows": [
+                2,
+                7
+              ],
+              "columns": [
+                3,
+                6
+              ]
+            }
+          },
+          {
+            "technique": "naked-single",
+            "cells": [
+              30
+            ],
+            "digit": 3,
+            "placements": [
+              {
+                "cell": 30,
+                "digit": 3
+              }
+            ],
+            "eliminations": [],
+            "explanation": "Either diagonal pair puts 5 inside the rectangle in each of columns 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
+            "board": [
+              0,
+              0,
+              0,
+              8,
+              4,
+              0,
+              0,
+              0,
+              9,
+              0,
+              4,
+              0,
+              6,
+              9,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              9,
+              0,
+              7,
+              2,
+              0,
+              4,
+              0,
+              0,
+              9,
+              0,
+              0,
+              0,
+              7,
+              2,
+              0,
+              0,
+              5,
+              7,
+              3,
+              2,
+              1,
+              6,
+              4,
+              9,
+              8,
+              0,
+              2,
+              0,
+              9,
+              0,
+              4,
+              0,
+              0,
+              5,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              9,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0,
+              6,
+              9,
+              0,
+              1,
+              7,
+              9,
+              5,
+              0,
+              7,
+              2,
+              0,
+              0,
+              0,
+              4
+            ],
+            "candidates": [
+              [
+                1,
+                2,
+                3,
+                6,
+                7
+              ],
+              [
+                1,
+                3,
+                6
+              ],
+              [
+                1,
+                2,
+                5,
+                6,
+                7
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                5
+              ],
+              [
+                1,
+                3,
+                6,
+                7
+              ],
+              [
+                3,
+                5,
+                6,
+                7
+              ],
+              [],
+              [
+                1,
+                3,
+                7,
+                8
+              ],
+              [],
+              [
+                1,
+                5,
+                7,
+                8
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                5
+              ],
+              [
+                1,
+                3,
+                7,
+                8
+              ],
+              [],
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                3,
+                6,
+                8
+              ],
+              [
+                1,
+                3,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                3,
+                5
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                5,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                3,
+                6
+              ],
+              [
+                1,
+                4,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                4,
+                6,
+                8
+              ],
+              [
+                3
+              ],
+              [
+                3,
+                5,
+                8
+              ],
+              [],
+              [],
+              [
+                3,
+                6
+              ],
+              [
+                1,
+                3,
+                6
+              ],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [
+                1,
+                6,
+                8
+              ],
+              [],
+              [
+                1,
+                6,
+                8
+              ],
+              [],
+              [
+                3,
+                8
+              ],
+              [],
+              [
+                1,
+                3,
+                6,
+                7
+              ],
+              [
+                3,
+                6,
+                7
+              ],
+              [],
+              [
+                1,
+                3,
+                4,
+                6,
+                7
+              ],
+              [
+                1,
+                3,
+                6
+              ],
+              [
+                1,
+                4,
+                6,
+                7
+              ],
+              [
+                1,
+                3,
+                4
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                1,
+                3,
+                5,
+                8
+              ],
+              [],
+              [
+                3,
+                5,
+                6,
+                8
+              ],
+              [],
+              [
+                2,
+                3,
+                4,
+                8
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                2,
+                4,
+                8
+              ],
+              [
+                3,
+                4,
+                5
+              ],
+              [],
+              [],
+              [
+                3,
+                5
+              ],
+              [],
+              [],
+              [],
+              [],
+              [
+                1,
+                6
+              ],
+              [],
+              [],
+              [
+                1,
+                3,
+                8
+              ],
+              [
+                3,
+                6
+              ],
+              [
+                3,
+                6,
+                8
+              ],
+              []
+            ]
+          }
+        ],
+        "target": 30,
+        "digit": 3,
+        "prompt": "Use the X-Wing to fill r4c4.",
+        "proof": "Focus on 5. In row 3, the only two positions for 5 are r3c4 and r3c7. In row 8, the only two positions for 5 are r8c4 and r8c7. These four cells form a rectangle.\n\nIf r3c4 is 5, then r8c7 must be 5, because r3c4 blocks 5 at r8c4 in their shared column 4. That leaves r8c7 as the only position for 5 in row 8. This uses one diagonal pair.\n\nIf r3c7 is 5, then r8c4 must be 5, because r3c7 blocks 5 at r8c7 in their shared column 7. That leaves r8c4 as the only position for 5 in row 8. This uses the other diagonal pair.\n\nEither way, each of columns 4 and 7 gets its 5 in the rectangle. Remove 5 from r4c4, r7c4, r1c7, r2c7: these cells are elsewhere in those columns.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4. Either diagonal pair puts 5 inside the rectangle in each of columns 4 and 7. The X-Wing therefore removes 5 from r4c4.\n\nr4c4 changes from {3, 5} to {3}. Only 3 remains, so place 3 in r4c4.",
+        "provenance": {
+          "source": "generated-transform",
+          "puzzleId": "catalog:advanced:1:transpose:digit-shift-0",
+          "sourcePuzzle": [
+            0,
+            0,
+            0,
+            0,
+            5,
+            0,
+            0,
+            0,
+            9,
+            0,
+            4,
+            0,
+            0,
+            7,
+            2,
+            0,
+            0,
+            5,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            8,
+            6,
+            0,
+            0,
+            0,
+            9,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            6,
+            0,
+            0,
+            0,
+            2,
+            7,
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            2,
+            4,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            8,
+            5,
+            0,
+            7,
+            4
+          ],
+          "transformation": {
+            "transpose": true,
+            "digitShift": 0
+          },
+          "originalPuzzle": [
+            0,
+            0,
+            0,
+            8,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            4,
+            0,
+            6,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            9,
+            0,
+            0,
+            2,
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            7,
+            2,
+            0,
+            0,
+            5,
+            7,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            8,
+            0,
+            2,
+            0,
+            9,
+            0,
+            4,
+            0,
+            0,
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            9,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            6,
+            0,
+            0,
+            1,
+            7,
+            9,
+            5,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            4
+          ],
+          "priorSteps": [
+            {
+              "technique": "hidden-single",
+              "cells": [
+                4
+              ],
+              "digit": 4,
+              "placements": [
+                {
+                  "cell": 4,
+                  "digit": 4
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 1, only r1c5 can contain 4."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                39
+              ],
+              "digit": 2,
+              "placements": [
+                {
+                  "cell": 39,
+                  "digit": 2
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 5, only r5c4 can contain 2."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                43
+              ],
+              "digit": 9,
+              "placements": [
+                {
+                  "cell": 43,
+                  "digit": 9
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 5, only r5c8 can contain 9."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                28
+              ],
+              "digit": 9,
+              "placements": [
+                {
+                  "cell": 28,
+                  "digit": 9
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 4, only r4c2 can contain 9."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                68
+              ],
+              "digit": 9,
+              "placements": [
+                {
+                  "cell": 68,
+                  "digit": 9
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 8, only r8c6 can contain 9."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                8
+              ],
+              "digit": 9,
+              "placements": [
+                {
+                  "cell": 8,
+                  "digit": 9
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 1, only r1c9 can contain 9."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                13
+              ],
+              "digit": 9,
+              "placements": [
+                {
+                  "cell": 13,
+                  "digit": 9
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In row 2, only r2c5 can contain 9."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                22
+              ],
+              "digit": 7,
+              "placements": [
+                {
+                  "cell": 22,
+                  "digit": 7
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 5, only r3c5 can contain 7."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                41
+              ],
+              "digit": 6,
+              "placements": [
+                {
+                  "cell": 41,
+                  "digit": 6
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 6, only r5c6 can contain 6."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                42
+              ],
+              "digit": 4,
+              "placements": [
+                {
+                  "cell": 42,
+                  "digit": 4
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 7, only r5c7 can contain 4."
+            },
+            {
+              "technique": "naked-single",
+              "cells": [
+                38
+              ],
+              "digit": 3,
+              "placements": [
+                {
+                  "cell": 38,
+                  "digit": 3
+                }
+              ],
+              "eliminations": [],
+              "explanation": "Only 3 remains at r5c3 after excluding its row, column, box and proven eliminations."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                62
+              ],
+              "digit": 2,
+              "placements": [
+                {
+                  "cell": 62,
+                  "digit": 2
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 9, only r7c9 can contain 2."
+            },
+            {
+              "technique": "hidden-single",
+              "cells": [
+                76
+              ],
+              "digit": 2,
+              "placements": [
+                {
+                  "cell": 76,
+                  "digit": 2
+                }
+              ],
+              "eliminations": [],
+              "explanation": "In column 5, only r9c5 can contain 2."
+            },
+            {
+              "technique": "locked-candidates",
+              "cells": [
+                59,
+                77
+              ],
+              "digit": 8,
+              "placements": [],
+              "eliminations": [
+                {
+                  "cell": 58,
+                  "digit": 8
+                }
+              ],
+              "explanation": "In column 6, 8 is confined to r7c6, r9c6 in box 8; remove 8 elsewhere in box 8."
+            },
+            {
+              "technique": "locked-candidates",
+              "cells": [
+                61,
+                79
+              ],
+              "digit": 8,
+              "placements": [],
+              "eliminations": [
+                {
+                  "cell": 69,
+                  "digit": 8
+                },
+                {
+                  "cell": 78,
+                  "digit": 8
+                }
+              ],
+              "explanation": "In column 8, 8 is confined to r7c8, r9c8 in box 9; remove 8 elsewhere in box 9."
+            },
+            {
+              "technique": "locked-candidates",
+              "cells": [
+                63,
+                64,
+                65
+              ],
+              "digit": 8,
+              "placements": [],
+              "eliminations": [
+                {
+                  "cell": 54,
+                  "digit": 8
+                },
+                {
+                  "cell": 55,
+                  "digit": 8
+                },
+                {
+                  "cell": 56,
+                  "digit": 8
+                },
+                {
+                  "cell": 74,
+                  "digit": 8
+                }
+              ],
+              "explanation": "In row 8, 8 is confined to r8c1, r8c2, r8c3 in box 7; remove 8 elsewhere in box 7."
+            }
+          ]
+        }
       }
     ]
   },
@@ -15735,7 +18878,7 @@
     "generalTechnique": "swordfish",
     "title": "Swordfish",
     "tier": "expert",
-    "rule": "If a digit in three rows is confined to three columns, those columns are reserved. Remove the digit from the other cells in those columns. Rows and columns can swap roles.",
+    "rule": "Focus on one digit. If its only positions in each of three rows lie in the same three columns, those rows need three placements of that digit. They must occupy different columns, because a digit cannot repeat in a column, so all three columns get their digit in those rows. Remove it elsewhere in those columns. Rows and columns can swap roles.",
     "scenarios": [
       {
         "id": "swordfish-1",
@@ -16061,7 +19204,7 @@
                 "digit": 6
               }
             ],
-            "explanation": "For 6, rows 2, 4, 8 are confined to columns 3, 4, 5 (r2c3, r2c4, r4c3, r4c5, r8c4, r8c5). Each must use a different cover, so remove 6 from other cells in those columns.",
+            "explanation": "Focus on 6. In row 2, the only two positions for 6 are r2c3 and r2c4 (r2c3 has {2, 6, 8}; r2c4 has {3, 6, 8}). In row 4, the only two positions for 6 are r4c3 and r4c5 (r4c3 has {2, 6, 7, 8}; r4c5 has {2, 6, 8}). In row 8, the only two positions for 6 are r8c4 and r8c5 (r8c4 has {3, 6}; r8c5 has {3, 6}). These three rows each need one 6; the three placements must occupy different columns because a digit cannot repeat in a column.\n\nIf r2c3 is 6, then r4c5 must be 6, because r2c3 blocks 6 at r4c3 in their shared column 3, leaving r4c5 as the only position for 6 in row 4. Then r8c4 must be 6, because r4c5 blocks 6 at r8c5 in their shared column 5, leaving r8c4 as the only position for 6 in row 8.\n\nIf r2c4 is 6, then r8c5 must be 6, because r2c4 blocks 6 at r8c4 in their shared column 4, leaving r8c5 as the only position for 6 in row 8. Then r4c3 must be 6, because r8c5 blocks 6 at r4c5 in their shared column 5, leaving r4c3 as the only position for 6 in row 4.\n\nEither way, each of columns 3, 4, 5 gets its 6 in these three rows. Other cells in those columns cannot contain 6. Remove 6 from r5c3: {2, 6, 7, 8} becomes {2, 7, 8}. Remove 6 from r1c4: {1, 6, 8, 9} becomes {1, 8, 9}. Remove 6 from r6c4: {6, 8, 9} becomes {8, 9}. Remove 6 from r1c5: {6, 8} becomes {8}.\n\nr1c5 changes from {6, 8} to {8}. Only 8 remains, so place 8 in r1c5.",
             "board": [
               0,
               3,
@@ -16356,7 +19499,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 8 remains at r1c5 after excluding its row, column, box and proven eliminations.",
+            "explanation": "The Swordfish reserves 6 in columns 3, 4, 5. Each of columns 3, 4, 5 gets its 6 in these three rows. This removes 6 from r1c5.\n\nr1c5 changes from {6, 8} to {8}. Only 8 remains, so place 8 in r1c5.",
             "board": [
               0,
               3,
@@ -16638,7 +19781,7 @@
         "target": 4,
         "digit": 8,
         "prompt": "Use the Swordfish to fill r1c5.",
-        "proof": "For 6, rows 2, 4, 8 are confined to columns 3, 4, 5 (r2c3, r2c4, r4c3, r4c5, r8c4, r8c5). Each must use a different cover, so remove 6 from other cells in those columns. Only 8 remains at r1c5 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 6. In row 2, the only two positions for 6 are r2c3 and r2c4 (r2c3 has {2, 6, 8}; r2c4 has {3, 6, 8}). In row 4, the only two positions for 6 are r4c3 and r4c5 (r4c3 has {2, 6, 7, 8}; r4c5 has {2, 6, 8}). In row 8, the only two positions for 6 are r8c4 and r8c5 (r8c4 has {3, 6}; r8c5 has {3, 6}). These three rows each need one 6; the three placements must occupy different columns because a digit cannot repeat in a column.\n\nIf r2c3 is 6, then r4c5 must be 6, because r2c3 blocks 6 at r4c3 in their shared column 3, leaving r4c5 as the only position for 6 in row 4. Then r8c4 must be 6, because r4c5 blocks 6 at r8c5 in their shared column 5, leaving r8c4 as the only position for 6 in row 8.\n\nIf r2c4 is 6, then r8c5 must be 6, because r2c4 blocks 6 at r8c4 in their shared column 4, leaving r8c5 as the only position for 6 in row 8. Then r4c3 must be 6, because r8c5 blocks 6 at r4c5 in their shared column 5, leaving r4c3 as the only position for 6 in row 4.\n\nEither way, each of columns 3, 4, 5 gets its 6 in these three rows. Other cells in those columns cannot contain 6. Remove 6 from r5c3: {2, 6, 7, 8} becomes {2, 7, 8}. Remove 6 from r1c4: {1, 6, 8, 9} becomes {1, 8, 9}. Remove 6 from r6c4: {6, 8, 9} becomes {8, 9}. Remove 6 from r1c5: {6, 8} becomes {8}.\n\nr1c5 changes from {6, 8} to {8}. Only 8 remains, so place 8 in r1c5. The Swordfish reserves 6 in columns 3, 4, 5. Each of columns 3, 4, 5 gets its 6 in these three rows. This removes 6 from r1c5.\n\nr1c5 changes from {6, 8} to {8}. Only 8 remains, so place 8 in r1c5.",
         "provenance": {
           "source": "generated",
           "puzzleId": "practical-search-v1:16379108:2495",
@@ -17474,25 +20617,23 @@
           []
         ],
         "evidence": [
-          0,
-          5,
-          45,
-          49,
-          50,
-          76,
-          77
+          19,
+          28,
+          21,
+          39,
+          34,
+          43
         ],
         "steps": [
           {
             "technique": "swordfish",
             "cells": [
-              0,
-              5,
-              45,
-              49,
-              50,
-              76,
-              77
+              19,
+              28,
+              21,
+              39,
+              34,
+              43
             ],
             "digit": 7,
             "placements": [],
@@ -17514,7 +20655,7 @@
                 "digit": 7
               }
             ],
-            "explanation": "For 7, rows 1, 6, 9 are confined to columns 1, 5, 6 (r1c1, r1c6, r6c1, r6c5, r6c6, r9c5, r9c6). Each must use a different cover, so remove 7 from other cells in those columns.",
+            "explanation": "Focus on 7. In column 2, the only two positions for 7 are r3c2 and r4c2 (r3c2 has {3, 7, 9}; r4c2 has {4, 7, 9}). In column 4, the only two positions for 7 are r3c4 and r5c4 (r3c4 has {3, 7, 8, 9}; r5c4 has {3, 7, 9}). In column 8, the only two positions for 7 are r4c8 and r5c8 (r4c8 has {4, 7}; r5c8 has {4, 7}). These three columns each need one 7; the three placements must occupy different rows because a digit cannot repeat in a row.\n\nIf r3c2 is 7, then r5c4 must be 7, because r3c2 blocks 7 at r3c4 in their shared row 3, leaving r5c4 as the only position for 7 in column 4. Then r4c8 must be 7, because r5c4 blocks 7 at r5c8 in their shared row 5, leaving r4c8 as the only position for 7 in column 8.\n\nIf r4c2 is 7, then r5c8 must be 7, because r4c2 blocks 7 at r4c8 in their shared row 4, leaving r5c8 as the only position for 7 in column 8. Then r3c4 must be 7, because r5c8 blocks 7 at r5c4 in their shared row 5, leaving r3c4 as the only position for 7 in column 4.\n\nEither way, each of rows 3, 4, 5 gets its 7 in these three columns. Other cells in those rows cannot contain 7. Remove 7 from r4c1: {1, 2, 7, 9} becomes {1, 2, 9}. Remove 7 from r5c1: {7, 9} becomes {9}. Remove 7 from r3c5: {3, 7, 8, 9} becomes {3, 8, 9}. Remove 7 from r4c6: {1, 7, 9} becomes {1, 9}.\n\nr5c1 changes from {7, 9} to {9}. Only 9 remains, so place 9 in r5c1.",
             "board": [
               0,
               2,
@@ -17809,7 +20950,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 9 remains at r5c1 after excluding its row, column, box and proven eliminations.",
+            "explanation": "The Swordfish reserves 7 in rows 3, 4, 5. Each of rows 3, 4, 5 gets its 7 in these three columns. This removes 7 from r5c1.\n\nr5c1 changes from {7, 9} to {9}. Only 9 remains, so place 9 in r5c1.",
             "board": [
               0,
               2,
@@ -18091,7 +21232,7 @@
         "target": 36,
         "digit": 9,
         "prompt": "Use the Swordfish to fill r5c1.",
-        "proof": "For 7, rows 1, 6, 9 are confined to columns 1, 5, 6 (r1c1, r1c6, r6c1, r6c5, r6c6, r9c5, r9c6). Each must use a different cover, so remove 7 from other cells in those columns. Only 9 remains at r5c1 after excluding its row, column, box and proven eliminations.",
+        "proof": "Focus on 7. In column 2, the only two positions for 7 are r3c2 and r4c2 (r3c2 has {3, 7, 9}; r4c2 has {4, 7, 9}). In column 4, the only two positions for 7 are r3c4 and r5c4 (r3c4 has {3, 7, 8, 9}; r5c4 has {3, 7, 9}). In column 8, the only two positions for 7 are r4c8 and r5c8 (r4c8 has {4, 7}; r5c8 has {4, 7}). These three columns each need one 7; the three placements must occupy different rows because a digit cannot repeat in a row.\n\nIf r3c2 is 7, then r5c4 must be 7, because r3c2 blocks 7 at r3c4 in their shared row 3, leaving r5c4 as the only position for 7 in column 4. Then r4c8 must be 7, because r5c4 blocks 7 at r5c8 in their shared row 5, leaving r4c8 as the only position for 7 in column 8.\n\nIf r4c2 is 7, then r5c8 must be 7, because r4c2 blocks 7 at r4c8 in their shared row 4, leaving r5c8 as the only position for 7 in column 8. Then r3c4 must be 7, because r5c8 blocks 7 at r5c4 in their shared row 5, leaving r3c4 as the only position for 7 in column 4.\n\nEither way, each of rows 3, 4, 5 gets its 7 in these three columns. Other cells in those rows cannot contain 7. Remove 7 from r4c1: {1, 2, 7, 9} becomes {1, 2, 9}. Remove 7 from r5c1: {7, 9} becomes {9}. Remove 7 from r3c5: {3, 7, 8, 9} becomes {3, 8, 9}. Remove 7 from r4c6: {1, 7, 9} becomes {1, 9}.\n\nr5c1 changes from {7, 9} to {9}. Only 9 remains, so place 9 in r5c1. The Swordfish reserves 7 in rows 3, 4, 5. Each of rows 3, 4, 5 gets its 7 in these three columns. This removes 7 from r5c1.\n\nr5c1 changes from {7, 9} to {9}. Only 9 remains, so place 9 in r5c1.",
         "provenance": {
           "source": "generated-transform",
           "puzzleId": "practical-search-v1:16379108:2495:transpose:digit-shift-1",
@@ -18735,7 +21876,7 @@
     "generalTechnique": "xy-wing",
     "title": "XY-Wing",
     "tier": "expert",
-    "rule": "A two-candidate pivot sees two wings, each sharing one pivot digit and the same third digit. Remove that third digit from cells seeing both wings.",
+    "rule": "The pivot is a cell with candidates {x, y}; the wings are two cells with {x, z} and {y, z}, where x, y and z are different digits. All three cells have exactly two candidates. Each wing must share a unit with the pivot; a unit is a row, column or box. Either pivot value forces z in one wing. Remove z from any other cell that shares a unit with each wing.",
     "scenarios": [
       {
         "id": "xy-wing-1",
@@ -18993,7 +22134,7 @@
                 "digit": 9
               }
             ],
-            "explanation": "r2c3 is 2/4; its wings r8c3 (2/9) and r1c2 (4/9) see the pivot. Either pivot value forces 9 in a wing, so remove 9 from cells seeing both wings.",
+            "explanation": "The pivot is r2c3, the cell that connects the two wings. r2c3 has {2, 4}. The wings are r8c3 and r1c2: r8c3 has {2, 9} and shares column 3 with the pivot; r1c2 has {4, 9} and shares box 1 with the pivot. All three cells have exactly two candidates. Each wing shares a different pivot candidate, and both wings have 9 as their other candidate.\n\nIf r2c3 is 2, then r8c3 cannot be 2, because both cells are in column 3. Its only other candidate is 9, so r8c3 must be 9.\n\nIf r2c3 is 4, then r1c2 cannot be 4, because both cells are in box 1. Its only other candidate is 9, so r1c2 must be 9.\n\nEither way, at least one wing contains 9. r3c3 shares column 3 with r8c3 and box 1 with r1c2. r7c2 shares box 7 with r8c3 and column 2 with r1c2. Each of those cells shares a unit with both possible locations of 9, so it cannot contain 9 in either case. Remove 9 from r3c3: {1, 9} becomes {1}. Remove 9 from r7c2: {4, 9} becomes {4}.\n\nr3c3 changes from {1, 9} to {1}. Only 1 remains, so place 1 in r3c3.",
             "board": [
               6,
               0,
@@ -19234,7 +22375,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 1 remains at r3c3 after excluding its row, column, box and proven eliminations.",
+            "explanation": "The two possible values at r2c3 force 9 at either r8c3 or r1c2. r3c3 shares column 3 with r8c3 and box 1 with r1c2, so it cannot be 9.\n\nr3c3 changes from {1, 9} to {1}. Only 1 remains, so place 1 in r3c3.",
             "board": [
               6,
               0,
@@ -19464,7 +22605,7 @@
         "target": 20,
         "digit": 1,
         "prompt": "Use the XY-Wing to fill r3c3.",
-        "proof": "r2c3 is 2/4; its wings r8c3 (2/9) and r1c2 (4/9) see the pivot. Either pivot value forces 9 in a wing, so remove 9 from cells seeing both wings. Only 1 remains at r3c3 after excluding its row, column, box and proven eliminations.",
+        "proof": "The pivot is r2c3, the cell that connects the two wings. r2c3 has {2, 4}. The wings are r8c3 and r1c2: r8c3 has {2, 9} and shares column 3 with the pivot; r1c2 has {4, 9} and shares box 1 with the pivot. All three cells have exactly two candidates. Each wing shares a different pivot candidate, and both wings have 9 as their other candidate.\n\nIf r2c3 is 2, then r8c3 cannot be 2, because both cells are in column 3. Its only other candidate is 9, so r8c3 must be 9.\n\nIf r2c3 is 4, then r1c2 cannot be 4, because both cells are in box 1. Its only other candidate is 9, so r1c2 must be 9.\n\nEither way, at least one wing contains 9. r3c3 shares column 3 with r8c3 and box 1 with r1c2. r7c2 shares box 7 with r8c3 and column 2 with r1c2. Each of those cells shares a unit with both possible locations of 9, so it cannot contain 9 in either case. Remove 9 from r3c3: {1, 9} becomes {1}. Remove 9 from r7c2: {4, 9} becomes {4}.\n\nr3c3 changes from {1, 9} to {1}. Only 1 remains, so place 1 in r3c3. The two possible values at r2c3 force 9 at either r8c3 or r1c2. r3c3 shares column 3 with r8c3 and box 1 with r1c2, so it cannot be 9.\n\nr3c3 changes from {1, 9} to {1}. Only 1 remains, so place 1 in r3c3.",
         "provenance": {
           "source": "catalog",
           "puzzleId": "catalog:expert:0",
@@ -20465,7 +23606,7 @@
                 "digit": 6
               }
             ],
-            "explanation": "r2c4 is 3/8; its wings r3c5 (3/6) and r2c2 (8/6) see the pivot. Either pivot value forces 6 in a wing, so remove 6 from cells seeing both wings.",
+            "explanation": "The pivot is r2c4, the cell that connects the two wings. r2c4 has {3, 8}. The wings are r3c5 and r2c2: r3c5 has {3, 6} and shares box 2 with the pivot; r2c2 has {6, 8} and shares row 2 with the pivot. All three cells have exactly two candidates. Each wing shares a different pivot candidate, and both wings have 6 as their other candidate.\n\nIf r2c4 is 3, then r3c5 cannot be 3, because both cells are in box 2. Its only other candidate is 6, so r3c5 must be 6.\n\nIf r2c4 is 8, then r2c2 cannot be 8, because both cells are in row 2. Its only other candidate is 6, so r2c2 must be 6.\n\nEither way, at least one wing contains 6. r3c2 shares row 3 with r3c5 and column 2 with r2c2. r3c3 shares row 3 with r3c5 and box 1 with r2c2. Each of those cells shares a unit with both possible locations of 6, so it cannot contain 6 in either case. Remove 6 from r3c2: {6, 7, 8} becomes {7, 8}. Remove 6 from r3c3: {5, 6} becomes {5}.\n\nr3c3 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r3c3.",
             "board": [
               3,
               2,
@@ -20785,7 +23926,7 @@
               }
             ],
             "eliminations": [],
-            "explanation": "Only 5 remains at r3c3 after excluding its row, column, box and proven eliminations.",
+            "explanation": "The two possible values at r2c4 force 6 at either r3c5 or r2c2. r3c3 shares row 3 with r3c5 and box 1 with r2c2, so it cannot be 6.\n\nr3c3 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r3c3.",
             "board": [
               3,
               2,
@@ -21094,7 +24235,7 @@
         "target": 20,
         "digit": 5,
         "prompt": "Use the XY-Wing to fill r3c3.",
-        "proof": "r2c4 is 3/8; its wings r3c5 (3/6) and r2c2 (8/6) see the pivot. Either pivot value forces 6 in a wing, so remove 6 from cells seeing both wings. Only 5 remains at r3c3 after excluding its row, column, box and proven eliminations.",
+        "proof": "The pivot is r2c4, the cell that connects the two wings. r2c4 has {3, 8}. The wings are r3c5 and r2c2: r3c5 has {3, 6} and shares box 2 with the pivot; r2c2 has {6, 8} and shares row 2 with the pivot. All three cells have exactly two candidates. Each wing shares a different pivot candidate, and both wings have 6 as their other candidate.\n\nIf r2c4 is 3, then r3c5 cannot be 3, because both cells are in box 2. Its only other candidate is 6, so r3c5 must be 6.\n\nIf r2c4 is 8, then r2c2 cannot be 8, because both cells are in row 2. Its only other candidate is 6, so r2c2 must be 6.\n\nEither way, at least one wing contains 6. r3c2 shares row 3 with r3c5 and column 2 with r2c2. r3c3 shares row 3 with r3c5 and box 1 with r2c2. Each of those cells shares a unit with both possible locations of 6, so it cannot contain 6 in either case. Remove 6 from r3c2: {6, 7, 8} becomes {7, 8}. Remove 6 from r3c3: {5, 6} becomes {5}.\n\nr3c3 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r3c3. The two possible values at r2c4 force 6 at either r3c5 or r2c2. r3c3 shares row 3 with r3c5 and box 1 with r2c2, so it cannot be 6.\n\nr3c3 changes from {5, 6} to {5}. Only 5 remains, so place 5 in r3c3.",
         "provenance": {
           "source": "catalog",
           "puzzleId": "catalog:expert:2",

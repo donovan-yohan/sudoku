@@ -2,7 +2,7 @@
 .walkthrough-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; }
 .walkthrough-controls>button { font-size:12px; }
 .lesson-step { border-top:1px solid var(--line); margin-top:16px; padding-top:16px; font-size:14px; line-height:1.7; }
-.lesson-step>p { margin-bottom:12px; }
+.step-explanation>p { margin-bottom:12px; }
 .lesson-step .primary-button { font-size:12px; }
 .walkthrough-result { font:14px ui-monospace,SFMono-Regular,Menlo,monospace; text-align:center; margin-top:18px; }
 .lesson-type { display:flex; margin:20px 0; }
@@ -11,5 +11,11 @@
 .walkthrough-heading { width:min(100%,640px); margin:20px auto; }
 .walkthrough-heading h2 { margin-bottom:14px; }
 .walkthrough-heading p { font-size:14px; line-height:1.7; margin:0; }
-.walkthrough-examples { display:flex; justify-content:center; gap:8px; margin-top:20px; }
+.walkthrough-examples { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:20px; }
 .walkthrough-examples>button { font-size:12px; min-height:36px; padding:8px 12px; }
+.x-wing-possibilities { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:16px 0; }
+.x-wing-possibilities table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:12px; text-align:center; }
+.x-wing-possibilities caption { text-align:left; margin-bottom:8px; }
+.x-wing-possibilities th,.x-wing-possibilities td { border:1px solid var(--line); padding:8px 2px; font-weight:400; }
+.x-wing-possibilities td[data-cell] { font:18px ui-monospace,SFMono-Regular,Menlo,monospace; }
+@media(max-width:380px) { .x-wing-possibilities { grid-template-columns:1fr; } }

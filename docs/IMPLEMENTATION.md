@@ -41,7 +41,7 @@ Harder Classic/X generation has a fixed operation budget, then uses independentl
 
 ## Practical lessons
 
-- `src/practical-lessons.ts` exposes eight general techniques, each with two real positions and replayable provenance.
+- `src/practical-lessons.ts` exposes eight general techniques with replayable provenance. X-Wing has four real positions and every other technique has two.
 - `src/practical-variant-lessons.ts` exposes four diagonal/cage techniques, each with two real positions.
 - `src/components/Walkthrough.tsx` reveals and applies the stored deductions through a real placement, pruning related notes as values change.
 
@@ -62,3 +62,7 @@ Use versioned date/mode/difficulty seeds for generated Classic, X (both diagonal
 Daily archive uses native date/calendar input with previous/next-day controls, bounded from 2026-01-01 through the device's current UTC date. Future days remain generatable from their stable seeds but are not navigable before their date. Preserve per-mode/difficulty/date progress and separate random-practice identities.
 
 Learning separates General, X Sudoku and Killer Sudoku catalogs. General techniques remain available to every player; variant sections contain validated diagonal and cage techniques, not duplicated general lessons with changed headings. Each lesson uses a real puzzle position and demonstrates its technique through to a number placement. Show a concise rule, relevant board notes and specific mathematical steps. Remove prerequisite lists, instructional checklists, candidate-study captions, place/eliminate radio forms, arbitrary candidate-elimination quizzes and learning-process narration. Internally retain original puzzle and replayable prior deductions; display notes are only a projection of verified domains.
+
+X-Wing has four examples, two per orientation. Optional typed rectangle metadata supports two read-only possibility tables alongside the revealed case-by-case explanation. Hypotheses never become board entries; only the recorded eliminations and final placement advance the walkthrough. The additional examples replay transformed original clues, not hand-transformed candidate snapshots. Sharing metadata uses `Daily Sudoku` and one approved 1200×630 PNG.
+
+Naked triple, Swordfish and XY-Wing explanations name full relevant candidate lists, the causal argument and the target's before/after domains. Swordfish covers row- and column-based reasoning. Its second example chooses an independently validated alternative premise at the identical recorded state without changing detector actions or prior history. Tests keep that exception local to the displayed teaching step.
