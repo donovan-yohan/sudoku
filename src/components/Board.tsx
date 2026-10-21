@@ -1,0 +1,50 @@
+import { useRef, type KeyboardEvent } from 'react'
+import type { Board as BoardValues } from '../types'
+
+export interface BoardProps {
+  values: BoardValues
+  givens: BoardValues
+  notes: number[][]
+  selected: number
+  onSelect: (cell: number) => void
+  onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void
+  label: string
+  evidence?: number[]
+  conflicts?: number[]
+  candidates?: boolean
+  candidateFocus?: number | null
+}
+
+export default function Board({ values, givens, notes, selected, onSelect, onKeyDown, label, evidence = [], conflicts = [], candidates = false, candidateFocus = null }: BoardProps) {
+  const cells = useRef<(HTMLButtonElement | null)[]>([])
+  function handleKey(event: KeyboardEvent<HTMLDivElement>) {
+    const row = Math.floor(selected / 9), column = selected % 9
+    const targets: Record<string, number> = {
+      ArrowLeft: row * 9 + (column + 8) % 9,
+      ArrowRight: row * 9 + (column + 1) % 9,
+      ArrowUp: ((row + 8) % 9) * 9 + column,
+      ArrowDown: ((row + 1) % 9) * 9 + column,
+      Home: event.ctrlKey ? 0 : row * 9,
+      End: event.ctrlKey ? 80 : row * 9 + 8,
+    }
+    if (targets[event.key] !== undefined && !event.metaKey && !event.altKey) {
+      event.preventDefault()
+      onSelect(targets[event.key])
+      cells.current[targets[event.key]]?.focus()
+    } else onKeyDown?.(event)
+  }
+  return <div className={`sudoku-board${candidates ? ' lesson-board' : ''}`} role="grid" aria-label={label} aria-rowcount={9} aria-colcount={9} onKeyDown={handleKey}>
+    {Array.from({ length: 9 }, (_, row) => <div role="row" className="board-row" key={row}>
+      {Array.from({ length: 9 }, (_, column) => {
+        const cell = row * 9 + column, value = values[cell], marks = notes[cell] || []
+        const isGiven = Boolean(givens[cell]), conflict = conflicts.includes(cell)
+        const peer = Math.floor(selected / 9) === row || selected % 9 === column || (Math.floor(selected / 27) === Math.floor(row / 3) && Math.floor((selected % 9) / 3) === Math.floor(column / 3))
+        const description = `Row ${row + 1}, column ${column + 1}, ${value ? `${isGiven ? 'given' : 'entry'} ${value}` : `empty${marks.length ? `, ${candidates ? 'candidates' : 'notes'} ${marks.join(', ')}` : ''}`}${conflict ? ', conflict' : ''}${evidence.includes(cell) ? ', evidence' : ''}`
+        const classes = ['cell', isGiven && 'given', selected === cell && 'selected', peer && 'peer', value && value === values[selected] && 'matching', conflict && 'conflict', evidence.includes(cell) && 'evidence', column === 2 || column === 5 ? 'box-right' : '', row === 2 || row === 5 ? 'box-bottom' : ''].filter(Boolean).join(' ')
+        return <button type="button" role="gridcell" aria-rowindex={row + 1} aria-colindex={column + 1} aria-label={description} aria-selected={selected === cell} aria-readonly={isGiven} aria-invalid={conflict || undefined} tabIndex={selected === cell ? 0 : -1} className={classes} data-cell={cell} key={cell} ref={element => { cells.current[cell] = element }} onClick={() => onSelect(cell)}>
+          {value ? <span className="cell-value" aria-hidden="true">{value}</span> : marks.length > 0 ? <span className="cell-notes" aria-hidden="true">{Array.from({ length: 9 }, (_, digit) => <span key={digit}>{marks.includes(digit + 1) && (candidateFocus === null || candidateFocus === digit + 1) ? `${digit + 1} ` : ''}</span>)}</span> : null}
+        </button>
+      })}
+    </div>)}
+  </div>
+}
