@@ -42,5 +42,6 @@ test('failed startup never saves or ticks a placeholder and retry loads the requ
  await expect(page.locator('.cell.given')).toHaveCount(45)
  await waitForSavedGame(page)
  expect(await page.evaluate(()=>Object.keys(localStorage).filter(key=>key.startsWith('sudoku-game-v1:v1:')))).toEqual([])
- expect(failures).toBeGreaterThanOrEqual(2)
+ // A controlling service worker can serve the successful retry from its shell.
+ expect(failures).toBeGreaterThanOrEqual(1)
 })

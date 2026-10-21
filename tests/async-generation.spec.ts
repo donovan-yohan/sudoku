@@ -73,7 +73,7 @@ for (const variant of variants) test(`actual worker preserves distinct daily and
     await waitForBoard(page, `v2:daily:${date}:${variant}:${level}`)
     expect(await snapshot(page)).toEqual(daily.get(level))
   }
-  expect(workers.some(url => url.includes('generation.worker.ts'))).toBe(true)
+  expect(workers.some(url => url.includes('generation.worker'))).toBe(true)
 })
 
 test('switching variants keeps each practice seed and daily edit isolated in one session', async ({ page }) => {
