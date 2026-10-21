@@ -1,7 +1,8 @@
 import {expect,test} from '@playwright/test'
+import { waitForBoard } from './puzzle-fixture'
 
 for(const width of [320,390,1440])for(const theme of ['light','dark'] as const)test(`quiet centered play at ${width}px in ${theme}`,async({page})=>{
- await page.setViewportSize({width,height:900});await page.emulateMedia({colorScheme:theme});await page.goto('/')
+ await page.setViewportSize({width,height:900});await page.emulateMedia({colorScheme:theme});await page.goto('/'); await waitForBoard(page)
  const board=page.getByRole('grid',{name:'Daily Sudoku'})
  await expect(board).toBeVisible()
  await expect(page.locator('aside,.hero,.site-footer')).toHaveCount(0)
@@ -21,7 +22,7 @@ for(const width of [320,390,1440])for(const theme of ['light','dark'] as const)t
 })
 
 test('hairline strokes remain consistent through keyboard focus, hints, dialogs and lessons',async({page})=>{
- await page.goto('/')
+ await page.goto('/'); await waitForBoard(page)
  const assertStrokes=async()=>{
   const strokes=await page.locator('body *').evaluateAll(es=>es.filter(e=>e.getBoundingClientRect().width&&e.getBoundingClientRect().height&&getComputedStyle(e).visibility!=='hidden').flatMap(e=>{const s=getComputedStyle(e);return ['borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth'].map(k=>parseFloat(s[k as keyof CSSStyleDeclaration] as string)||0).concat(s.outlineStyle==='none'?0:parseFloat(s.outlineWidth)||0)}))
   expect(Math.max(...strokes)).toBeLessThanOrEqual(1)
@@ -34,7 +35,7 @@ test('hairline strokes remain consistent through keyboard focus, hints, dialogs 
 })
 
 test('lightbulb opens only requested hint and closes without editing',async({page})=>{
- await page.goto('/')
+ await page.goto('/'); await waitForBoard(page)
  const board=page.getByRole('grid'),before=await board.locator('.cell-value').allTextContents()
  await page.getByRole('button',{name:'Hint',exact:true}).click()
  await expect(page.getByRole('button',{name:'Apply this step',exact:true})).toBeVisible()

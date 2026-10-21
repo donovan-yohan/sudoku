@@ -1,0 +1,39 @@
+/* Apply to the actual .cell-value span, never its button or the grid.
+   For a newly acknowledged digit, animate all nine occurrences in board order:
+   --digit-order: 0..8. Remount/key the span with the event serial; CSS needs no
+   serial variable. Do not derive an event from rewardedDigits on mount/restore.
+   Clear the event after 712ms (440ms + 8 * 34ms), not on the first animationend.
+   Suppressed effects still acknowledge rewards. Reduced motion has no animationend. */
+.digit-celebrate {
+  position:relative;
+  display:inline-block;
+  animation:digit-celebrate-hop 440ms cubic-bezier(.2,.7,.3,1) both;
+  animation-delay:calc(var(--digit-order,0) * 34ms);
+}
+.digit-celebrate::after {
+  content:"";
+  position:absolute;
+  top:12%;
+  bottom:12%;
+  left:0;
+  width:1px;
+  background:linear-gradient(transparent,currentColor,transparent);
+  opacity:0;
+  pointer-events:none;
+  animation:digit-celebrate-shimmer 440ms ease-out both;
+  animation-delay:calc(var(--digit-order,0) * 34ms);
+}
+@keyframes digit-celebrate-hop {
+  0%,100% { transform:translateY(0); }
+  36% { transform:translateY(-.09em); }
+  66% { transform:translateY(-.025em); }
+}
+@keyframes digit-celebrate-shimmer {
+  0%,15% { opacity:0; transform:translateX(-.08em) skewX(-12deg); }
+  36% { opacity:.42; }
+  78%,100% { opacity:0; transform:translateX(.68em) skewX(-12deg); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .digit-celebrate,.digit-celebrate::after { animation:none; transform:none; }
+  .digit-celebrate::after { opacity:0; }
+}

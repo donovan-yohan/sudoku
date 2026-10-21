@@ -1,0 +1,10 @@
+.cell.diagonal { background-image:linear-gradient(135deg,transparent 48%,rgb(var(--ink) / .12) 49%,rgb(var(--ink) / .12) 51%,transparent 52%); }
+.cage-edge { position:absolute; inset:3px; pointer-events:none; border:0 dashed rgb(var(--ink) / .6); }
+.cage-edge.cage-top { border-top-width:1px; }
+.cage-edge.cage-bottom { border-bottom-width:1px; }
+.cage-edge.cage-left { border-left-width:1px; }
+.cage-edge.cage-right { border-right-width:1px; }
+.cage-total { position:absolute; top:4px; left:5px; font:9px/1.1 ui-sans-serif,system-ui,sans-serif; color:var(--fg); background:var(--bg); padding:0 1px; z-index:1; pointer-events:none; }
+.cell.caged .cell-value { padding-top:4px; }
+.cell.caged .cell-notes { inset:11px 5px 4px; font-size:9px; }
+@media(max-width:360px) { .cage-total { top:3px; left:4px; font-size:8px; } .cell.caged .cell-notes { font-size:8px; } }

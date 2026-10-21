@@ -44,17 +44,24 @@ function blankDiagram(): { board: number[]; candidates: number[][] } {
 }
 
 function hiddenSingleExamples(): [Scenario, Scenario] {
+  // Original authoring search: engine.solve(empty), seeded structural/digit
+  // permutations (16379102), then uniqueness-preserving clue removal. Freeze
+  // the clues here; derive every candidate directly from their peer restrictions.
+  const clues = [
+    '400000020030000956590100700002730060704206100003010470005300090840000005000085010',
+    '500072040007400965060800020608500370132047056700300010005080401310095682800000500',
+  ]
   return [ROWS[3], BOXES[8]].map((unit, index) => {
-    const state = blankDiagram()
+    const board = [...clues[index]].map(Number)
+    const candidates = legalCandidates(board)
     const target = index === 0 ? 32 : 80
     const digit = index === 0 ? 4 : 7
-    for (const cell of unit) if (cell !== target) state.candidates[cell] = DIGITS.filter(value => value !== digit)
     const name = index === 0 ? 'row 4' : 'box 9 (bottom right)'
     return {
-      ...state, id: `hidden-single-${index + 1}`, caption: caption(`Inspect every candidate in ${name}.`),
+      board, candidates, id: `hidden-single-${index + 1}`, caption: `Find ${digit} in ${name}.`,
       evidence: [...unit], target, digit, kind: 'place',
-      prompt: `Where must ${digit} go in ${name}? Select its only possible cell and place it.`,
-      proof: `In ${name}, ${coordinate(target)} is the only cell whose complete candidate list contains ${digit}. The unit must contain ${digit} once, so place it there even though that cell has other candidates.`,
+      prompt: `Where must ${digit} go in ${name}? Select its cell and place it.`,
+      proof: `In ${name}, only ${coordinate(target)} has ${digit} among its candidates {${candidates[target].join(', ')}}. Every other empty cell in this unit excludes ${digit}. The unit must contain ${digit} once, so place it there.`,
     } satisfies Scenario
   }) as [Scenario, Scenario]
 }

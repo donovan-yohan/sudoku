@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { waitForBoard } from './puzzle-fixture'
 
 async function openHintWithKeyboard(page: Page) {
   const hint = page.getByRole('button', { name: 'Hint', exact: true })
@@ -14,7 +15,7 @@ async function openHintWithKeyboard(page: Page) {
 }
 
 test('closing a hint with the keyboard returns focus without changing the board', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/'); await waitForBoard(page)
   const board = page.getByRole('grid', { name: 'Daily Sudoku' })
   const before = await board.getByRole('gridcell').allTextContents()
   const hint = await openHintWithKeyboard(page)
@@ -30,7 +31,7 @@ test('closing a hint with the keyboard returns focus without changing the board'
 })
 
 test('applying a placement with the keyboard returns focus to Hint', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/'); await waitForBoard(page)
   const board = page.getByRole('grid', { name: 'Daily Sudoku' })
   const before = await board.getByRole('gridcell').allTextContents()
   const hint = await openHintWithKeyboard(page)

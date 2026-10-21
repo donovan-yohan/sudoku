@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import Board from './components/Board'
 import Learning, { parseLessonProgress } from './components/Learning'
 import { LESSONS, evaluateLesson } from './lessons'
+import {PRACTICAL_LESSONS} from './practical-lessons'
 import HintPanel from './components/HintPanel'
 import Dialog from './components/Dialog'
 
@@ -35,12 +36,12 @@ describe('Lesson interface', () => {
     expect(html).toContain('Not started')
     expect(html).not.toContain('A new way to see the grid')
   })
-  it('retains short candidate-study captions without audit disclaimers',()=>{
-    for(const lesson of LESSONS){
-     expect(lesson.prerequisites.join(' ')).not.toContain('missing personal notes are not evidence')
+  it('uses real puzzle walkthroughs rather than candidate-study captions',()=>{
+    for(const lesson of PRACTICAL_LESSONS){
      for(const scenario of lesson.scenarios){
-      expect(scenario.caption).toMatch(/^Candidate study\./)
-      expect(scenario.caption).not.toMatch(/proof|claimed|not a playable|assumed|No unique/i)
+      expect(scenario.board.filter(Boolean).length).toBeGreaterThanOrEqual(22)
+      expect(scenario.caption).not.toMatch(/Candidate study|claimed|not a playable|assumed|No unique/i)
+      expect(scenario.steps.at(-1)?.placements.length).toBeGreaterThan(0)
      }
     }
   })
@@ -58,6 +59,17 @@ describe('Lesson interface', () => {
 })
 
 describe('Sudoku board', () => {
+  it('marks both X diagonals without changing the number of gridcells',()=>{
+    const html=renderToStaticMarkup(createElement(Board,{values:Array(81).fill(0),givens:Array(81).fill(0),notes:Array.from({length:81},()=>[]),selected:0,onSelect:()=>{},label:'X Sudoku',variant:'x'}))
+    expect((html.match(/class="cell[^\"]* diagonal/g)||[])).toHaveLength(17)
+    expect((html.match(/role="gridcell"/g)||[])).toHaveLength(81)
+  })
+  it('renders Killer cage sums and accessible membership without exposing solutions',()=>{
+    const html=renderToStaticMarkup(createElement(Board,{values:Array(81).fill(0),givens:Array(81).fill(0),notes:Array.from({length:81},()=>[]),selected:0,onSelect:()=>{},label:'Killer Sudoku',variant:'killer',cages:[{cells:[0,1],sum:3}]}))
+    expect(html).toContain('class="cage-total"')
+    expect(html).toContain('cage sum 3')
+    expect((html.match(/data-cage="0"/g)||[])).toHaveLength(2)
+  })
   it('separates visible candidate digits to match the spoken label', () => {
     const html=renderToStaticMarkup(createElement(Board,{values:Array(81).fill(0),givens:Array(81).fill(0),notes:Array.from({length:81},()=>[1,2,3]),selected:0,onSelect:()=>{},label:'Candidates',candidates:true}))
     expect(html).toContain('>1 </span>')

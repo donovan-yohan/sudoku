@@ -1,0 +1,10 @@
+.archive-control { display:flex; align-items:center; gap:4px; min-width:0; }
+.archive-control button { min-width:32px; min-height:36px; padding:4px; border-color:transparent; font-size:22px; }
+.archive-control input { min-width:0; width:135px; min-height:36px; padding:6px; font:11px ui-monospace,SFMono-Regular,Menlo,monospace; border-color:transparent; }
+.archive-control input:focus-visible { outline:1px solid var(--fg); outline-offset:2px; }
+.mode-select { min-width:0; max-width:112px; min-height:36px; font-size:11px; border-color:transparent; padding:4px; }
+.generation-status { min-height:300px; display:grid; align-content:center; justify-items:center; font-size:13px; color:var(--muted); }
+@media(max-width:420px) { .puzzle-heading { gap:2px; } .archive-control input { width:110px; padding:2px; font-size:10px; } .archive-control button { min-width:24px; } .mode-select { width:88px; font-size:10px; } .timer { font-size:10px; } }
+.game-mode { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.game-mode select { padding:8px 10px; font-size:12px; min-height:38px; width:100%; }
+@media(max-width:360px) { .archive-control { gap:0; } .archive-control button { min-width:24px; } .archive-control input { width:105px; } }

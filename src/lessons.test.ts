@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { LESSONS, evaluateLesson, validateScenario } from './lessons'
 import type { Lesson, Scenario, Technique } from './types'
+// @ts-expect-error standalone .mjs test oracle has no declaration file
+import { enumerate } from '../scripts/independent-oracle.mjs'
 
 const clone = (scenario: Scenario): Scenario => structuredClone(scenario)
 const lesson = (id: Technique): Lesson => {
@@ -15,7 +17,8 @@ function checkExamples(id: Technique) {
   expect(entry.scenarios[0].id).not.toBe(entry.scenarios[1].id)
   expect(JSON.stringify(entry.scenarios[0].candidates)).not.toBe(JSON.stringify(entry.scenarios[1].candidates))
   for (const scenario of entry.scenarios) {
-    expect(scenario.caption).toContain('Candidate study.')
+    if (id === 'hidden-single') expect(scenario.caption).not.toMatch(/candidate study|diagram|no unique puzzle/i)
+    else expect(scenario.caption).toContain('Candidate study.')
     expect(scenario.caption).not.toContain('No unique puzzle')
     expect(scenario.prompt.length).toBeGreaterThan(30)
     expect(scenario.proof.length).toBeGreaterThan(60)
@@ -32,13 +35,13 @@ function checkExamples(id: Technique) {
   }
 }
 
-// Frozen completions were obtained with a separate exact-cover authoring probe.
-// They are test-only satisfiability witnesses, never lesson answers or UI data.
+// Frozen completions are test-only satisfiability witnesses, never lesson
+// answers or UI data. Hidden-single clue boards also pass the independent oracle.
 const WITNESSES: Record<string, string> = {
   'naked-single-1': '123456789456789123789123456271364895835291647964578231312645978597812364648937512',
   'naked-single-2': '234158697176923458895467321429375816567891234318246579743589162952614783681732945',
-  'hidden-single-1': '142356789798412356356879142213794568467581293589263471924635817831947625675128934',
-  'hidden-single-2': '172345689689172345345896712917538264463217598258469173724951836896723451531684927',
+  'hidden-single-1': '478659321231847956596123748182734569754296183963518472615372894847961235329485617',
+  'hidden-single-2': '593672148287413965461859723648521379132947856759368214975286431314795682826134597',
   'locked-candidates-1': '312456789789312456456789312231845967697231845845697231123574698968123574574968123',
   'locked-candidates-2': '162345789789612345345879162271563498694781253853294671516937824428156937937428516',
   'naked-pair-1': '213475689896213745745689213427561398351928476689734521132846957578392164964157832',
@@ -175,7 +178,7 @@ describe('diagram integrity', () => {
     }
   })
   it('rejects inconsistent authored examples before accepting the expected click', () => {
-    const scenario = clone(lesson('hidden-single').scenarios[0])
+    const scenario = clone(lesson('xy-wing').scenarios[0])
     scenario.candidates[70] = [2]
     scenario.candidates[71] = [2]
     expect(evaluateLesson(scenario, { cell: scenario.target, digit: scenario.digit, kind: scenario.kind }).correct).toBe(false)
@@ -187,10 +190,13 @@ describe('diagram integrity', () => {
     }
   })
   it('rejects a globally inconsistent candidate state even when every unit has every digit available', () => {
-    const entry = lesson('hidden-single')
+    const entry = lesson('xy-wing')
     const scenario = clone(entry.scenarios[0])
     scenario.candidates[70] = [2]
     scenario.candidates[71] = [2]
+    for (const unit of units) for (const digit of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+      expect(unit.some(cell => scenario.candidates[cell].includes(digit))).toBe(true)
+    }
     expect(validateScenario(entry, scenario)).toBe(false)
   })
 })
@@ -336,6 +342,46 @@ describe('locked candidates lesson', () => {
 
 describe('hidden single lesson', () => {
   it('teaches the only location for a digit, in a row and in a box', () => checkExamples('hidden-single'))
+  for (const [index, scenario] of lesson('hidden-single').scenarios.entries()) {
+    it(`${scenario.id} derives a genuine hidden single from a compact original clue board`, () => {
+      // Derive legality independently from the givens, not the lesson validator
+      // or any hand-pruned candidate domains.
+      const legal = cells.map(cell => scenario.board[cell] ? [] :
+        [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(digit =>
+          !cells.some(other => peers(cell, other) && scenario.board[other] === digit)))
+      const givens = scenario.board.filter(Boolean).length
+      expect(givens).toBeGreaterThanOrEqual(24)
+      expect(givens).toBeLessThanOrEqual(45)
+      expect(scenario.candidates).toEqual(legal)
+      expect(scenario.board[scenario.target]).toBe(0)
+      expect(scenario.kind).toBe('place')
+      const unit = (index === 0 ? rows : boxes).find(unit =>
+        unit.length === scenario.evidence.length && unit.every(cell => scenario.evidence.includes(cell)))
+      expect(unit, 'Evidence must contain the complete row / box').toBeDefined()
+      const empty = unit!.filter(cell => !scenario.board[cell])
+      expect(empty.length).toBeGreaterThanOrEqual(3)
+      for (const cell of empty) {
+        // Every displayed list in the relevant unit remains small, and no
+        // naked single distracts from the only-location deduction.
+        expect(legal[cell].length, `cell ${cell}`).toBeGreaterThanOrEqual(2)
+        expect(legal[cell].length, `cell ${cell}`).toBeLessThanOrEqual(4)
+      }
+      expect(unit!.filter(cell => legal[cell].includes(scenario.digit))).toEqual([scenario.target])
+      const unitName = index === 0 ? `row ${Math.floor(scenario.target / 9) + 1}` :
+        `box ${Math.floor(scenario.target / 27) * 3 + Math.floor(scenario.target % 9 / 3) + 1}`
+      expect(scenario.prompt).toContain(unitName)
+      expect(scenario.proof).toContain(unitName)
+      expect(scenario.proof).toContain(`row ${Math.floor(scenario.target / 9) + 1}, column ${scenario.target % 9 + 1}`)
+      // Uniqueness and the action must follow from actual clues even when
+      // the independent oracle receives no authored candidate arrays.
+      const solved = enumerate(scenario.board)
+      expect(solved.count).toBe(1)
+      expect(solved.first[scenario.target]).toBe(scenario.digit)
+      const opposite = legal.map(list => [...list])
+      opposite[scenario.target] = opposite[scenario.target].filter(digit => digit !== scenario.digit)
+      expect(enumerate(scenario.board, opposite, 1).count).toBe(0)
+    })
+  }
   it('rejects a second candidate location even when the target is unchanged', () => {
     const entry = lesson('hidden-single')
     const scenario = clone(entry.scenarios[0])
