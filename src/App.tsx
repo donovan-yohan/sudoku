@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import Board from './components/Board'
+import Board, { type MistakeEvent } from './components/Board'
 import Learning from './components/Learning'
 import Dialog from './components/Dialog'
 import HintPanel from './components/HintPanel'
 import RewardEffects from './components/RewardEffects'
-import { peers } from './engine'
+import Calendar from './components/Calendar'
+import './digit-rewards.css'
 import { readGame, reduceGame, saveGame } from './game'
 import { loadSession, saveSession } from './session'
-import { DIFFICULTIES, getDailyPuzzle, getPracticePuzzle } from './puzzles'
-import type { Deduction, Difficulty, GameAction, GameState, Puzzle } from './types'
+import { getDailyPuzzle, getPracticePuzzle } from './puzzles'
+import {availableDifficulties} from './variant-generator'
+import {generatedDailyRequest,generatedPracticeRequest} from './generated-puzzles'
+import {requestGeneratedPuzzle} from './generation-client'
+import type {GameVariant,VariantDeduction} from './variant-engine'
+import type { Difficulty, GameAction, GameState, Puzzle } from './types'
 
 type Page = 'daily' | 'practice' | 'learn'
 type Theme = 'device' | 'light' | 'dark'
@@ -28,25 +33,60 @@ function formatTime(seconds: number) { return `${Math.floor(seconds / 60)}:${Str
 export default function App() {
   const [today, setToday] = useState(() => new Date().toISOString().slice(0, 10))
   const [session] = useState(() => loadSession(today))
+  const [legacy] = useState(()=>{
+    try{
+      if(session.generator==='v2'||session.variant&&session.variant!=='classic')return false
+      const initial=session.mode==='daily'?getDailyPuzzle(session.dailyDate,session.difficulty):getPracticePuzzle(session.difficulty,session.practiceSeeds[session.difficulty]!)
+      return Boolean(localStorage.getItem(`sudoku-game-v1:${initial.id}`))&&readGame(initial).warning===null
+    }catch{return false}
+  })
+  const [variant,setVariant]=useState<GameVariant>(session.variant??'classic')
+  const [generated,setGenerated]=useState(!legacy)
+  const [loading,setLoading]=useState(!legacy)
+  const [generationError,setGenerationError]=useState('')
+  const generation=useRef<AbortController|null>(null)
+  const generationSerial=useRef(0)
+  const generatedCache=useRef(new Map<string,Puzzle>())
   const [dailyDate, setDailyDate] = useState(session.dailyDate)
   const [page, setPage] = useState<Page>(session.mode)
   const [mode, setMode] = useState<'daily' | 'practice'>(session.mode)
   const [difficulty, setDifficulty] = useState<Difficulty>(session.difficulty)
-  const [puzzle, setPuzzle] = useState<Puzzle>(() => session.mode==='daily'?getDailyPuzzle(session.dailyDate,session.difficulty):getPracticePuzzle(session.difficulty,session.practiceSeeds[session.difficulty]!))
+  const [puzzle, setPuzzle] = useState<Puzzle>(() => legacy&&session.mode==='practice'?getPracticePuzzle(session.difficulty,session.practiceSeeds[session.difficulty]!):getDailyPuzzle(session.dailyDate,session.difficulty))
   const [restored] = useState(() => readGame(puzzle))
   const [state, setState] = useState<GameState>(restored.state)
   const stateRef = useRef(state); stateRef.current = state
   const [saveWarning, setSaveWarning] = useState<string | null>(restored.warning)
   const [theme, setTheme] = useState<Theme>(initialTheme)
   const [effects, setEffects] = useState(() => { try { return localStorage.getItem('sudoku-effects') !== 'off' } catch { return true } })
+  const [showMistakes, setShowMistakes] = useState(() => { try { return localStorage.getItem('sudoku-show-mistakes') === 'on' } catch { return false } })
+  const [mistakeEvent, setMistakeEvent] = useState<MistakeEvent | null>(null)
+  const mistakeSerial = useRef(0)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [help, setHelp] = useState(false)
   const [restart, setRestart] = useState(false)
   const [announcement, setAnnouncement] = useState('')
   const [reward, setReward] = useState({ units: [] as number[], count: 0, complete: false, serial: 0 })
+  const [digitReward,setDigitReward]=useState<{digits:number[];serial:number}|null>(null)
+  const digitSerial=useRef(0)
+  useEffect(()=>{
+    if(!digitReward)return
+    const timer=window.setTimeout(()=>setDigitReward(current=>current?.serial===digitReward.serial?null:current),800)
+    return ()=>window.clearTimeout(timer)
+  },[digitReward])
   const practiceSeeds = useRef<Partial<Record<Difficulty, string>>>({...session.practiceSeeds})
-  useEffect(() => { saveSession({version:1,mode,difficulty,dailyDate,practiceSeeds:practiceSeeds.current}) }, [mode,difficulty,dailyDate,puzzle.id])
+  const variantPracticeSeeds=useRef(session.variantPracticeSeeds??{})
+  useEffect(() => {
+    if(loading||generationError)return
+    saveSession({version:1,mode,difficulty,dailyDate,practiceSeeds:practiceSeeds.current,...(generated?{generator:'v2' as const,variant,variantPracticeSeeds:variantPracticeSeeds.current}:{})})
+  }, [mode,difficulty,dailyDate,puzzle.id,variant,generated,loading,generationError])
+  useEffect(()=>{
+    if(!legacy)void load(session.mode,session.difficulty,false,session.dailyDate,session.variant??'classic')
+    return ()=>generation.current?.abort()
+  },[])
   const complete = state.values.every((value, index) => value === puzzle.solution[index])
-  const conflicts = state.values.flatMap((value, index) => value && peers(index).some(peer => state.values[peer] === value) ? [index] : [])
+  const digitCounts=Array.from({length:10},()=>0)
+  state.values.forEach(value=>{if(value)digitCounts[value]++})
+  const mistakes = showMistakes ? state.values.flatMap((value, cell) => !puzzle.givens[cell] && value && value !== puzzle.solution[cell] ? [cell] : []) : []
   const selectedDescription = `${coordinate(state.selected)}. ${puzzle.givens[state.selected] ? `Given ${state.values[state.selected]}. Starting numbers stay fixed.` : state.values[state.selected] ? `Entry ${state.values[state.selected]}.` : state.notes[state.selected].length ? `Notes: ${state.notes[state.selected].join(', ')}.` : 'Empty.'}`
 
   useEffect(() => {
@@ -57,22 +97,25 @@ export default function App() {
     return () => media.removeEventListener('change', apply)
   }, [theme])
   useEffect(() => {
+    if(loading||generationError)return
     const success = saveGame(state)
     if (!success) setSaveWarning('Progress could not be saved in this browser. You can keep playing, but this session may be lost when you leave.')
-  }, [state])
+  }, [state,loading,generationError])
   useEffect(() => {
     const timer = window.setInterval(() => {
       setToday(new Date().toISOString().slice(0, 10))
-      if (page !== 'learn' && document.visibilityState === 'visible') {
+      if (page !== 'learn' && !loading && !generationError && document.visibilityState === 'visible') {
         setState(previous => reduceGame(previous, { type: 'tick' }, puzzle))
       }
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [page, puzzle])
+  }, [page, puzzle,loading,generationError])
 
   function commit(previous:GameState,next:GameState) {
     stateRef.current=next;setState(next)
     const units=next.rewarded.filter(unit=>!previous.rewarded.includes(unit))
+    const digits=next.rewardedDigits.filter(digit=>!previous.rewardedDigits.includes(digit))
+    if(digits.length&&effects)setDigitReward({digits,serial:++digitSerial.current})
     if(units.length){
       const finished=next.values.every((value,index)=>value===puzzle.solution[index])
       setReward(old=>({units,count:next.rewarded.length,complete:finished,serial:old.serial+1}))
@@ -81,18 +124,24 @@ export default function App() {
     return units.length>0
   }
   function dispatch(action: GameAction) {
+    if(loading||generationError)return
     const previous = stateRef.current
+    setDigitReward(null)
     const next = reduceGame(previous, action, puzzle)
+    const cell = previous.selected
+    const newMistake = action.type === 'digit' && showMistakes && !previous.noteMode && !puzzle.givens[cell] && next.values[cell] !== previous.values[cell] && next.values[cell] !== 0 && next.values[cell] !== puzzle.solution[cell]
+    setMistakeEvent(newMistake ? { cell, serial: ++mistakeSerial.current } : null)
     const earned=commit(previous,next)
     if (action.type === 'select') return
     if(action.type==='undo'||action.type==='redo')setAnnouncement(action.type==='undo'?'Move undone. Keep working.':'Move restored.')
     if (action.type === 'restart') { setReward({ units: [], count: 0, complete: false, serial: 0 }); setAnnouncement('Entries and notes cleared.'); return }
     if (!earned && action.type === 'digit') {
       const value = next.values[next.selected]
-      setAnnouncement(value && peers(next.selected).some(peer => next.values[peer] === value) ? `${value} conflicts with another number in this row, column or box.` : next.noteMode ? 'Notes updated.' : puzzle.givens[next.selected] ? 'This starting number cannot be changed.' : 'Entry updated.')
+      setAnnouncement(next.noteMode ? 'Notes updated.' : puzzle.givens[next.selected] ? 'This starting number cannot be changed.' : showMistakes && value && value !== puzzle.solution[next.selected] ? `${value} is incorrect.` : 'Entry updated.')
     }
   }
-  function applyHint(deduction: Deduction) {
+  function applyHint(deduction: VariantDeduction) {
+    setMistakeEvent(null)
     let next = stateRef.current
     const noteMode = next.noteMode
     for (const placement of deduction.placements) {
@@ -103,21 +152,47 @@ export default function App() {
     const earned=commit(stateRef.current,next)
     if(!earned)setAnnouncement(deduction.placements.length ? 'Explained placement applied. You can undo it.' : 'Logical eliminations recorded for the next hint. Manual notes were not changed.')
   }
-  function load(nextMode: 'daily' | 'practice', nextDifficulty = difficulty, fresh = false, date = dailyDate) {
-    if (nextMode === 'practice' && (!practiceSeeds.current[nextDifficulty] || fresh)) practiceSeeds.current[nextDifficulty] = `${Date.now()}-${Math.random()}`
-    const nextPuzzle = nextMode === 'daily' ? getDailyPuzzle(date, nextDifficulty) : getPracticePuzzle(nextDifficulty, practiceSeeds.current[nextDifficulty]!)
+  async function load(nextMode: 'daily' | 'practice', nextDifficulty = difficulty, fresh = false, date = dailyDate,nextVariant=variant) {
+    setDigitReward(null)
+    setMistakeEvent(null)
+    const level=availableDifficulties(nextVariant).includes(nextDifficulty)?nextDifficulty:'beginner'
+    const seeds=nextVariant==='classic'?practiceSeeds.current:(variantPracticeSeeds.current[nextVariant]??={})
+    if(nextMode==='practice'&&(!seeds[level]||fresh))seeds[level]=crypto.randomUUID()
+    const request=nextMode==='daily'?generatedDailyRequest(date,nextVariant,level):generatedPracticeRequest(seeds[level]!,nextVariant,level)
+    generation.current?.abort()
+    const controller=new AbortController();generation.current=controller
+    const serial=++generationSerial.current
+    setLoading(true);setGenerationError('');setGenerated(true)
+    setDifficulty(level);setMode(nextMode);setPage(nextMode);setVariant(nextVariant);setDailyDate(date)
+    let nextPuzzle:Puzzle
+    try{
+      let savedLegacy:Puzzle|undefined
+      if(nextVariant==='classic'&&!fresh){
+        const old=nextMode==='daily'?getDailyPuzzle(date,level):getPracticePuzzle(level,seeds[level]!)
+        try{if(localStorage.getItem(`sudoku-game-v1:${old.id}`)&&readGame(old).warning===null)savedLegacy=old}catch{ /* Storage denial must not prevent generation. */ }
+      }
+      nextPuzzle=savedLegacy??generatedCache.current.get(request.id)??await requestGeneratedPuzzle(request,controller.signal)
+      if(controller.signal.aborted||serial!==generationSerial.current)return
+      generatedCache.current.set(request.id,nextPuzzle)
+    }catch(error){
+      if(controller.signal.aborted||serial!==generationSerial.current)return
+      setGenerationError(error instanceof Error?error.message:'Puzzle generation failed. Try again.');setLoading(false);return
+    }
     const loaded = readGame(nextPuzzle)
     setPuzzle(nextPuzzle); setState(loaded.state); stateRef.current = loaded.state
-    setSaveWarning(loaded.warning); setDifficulty(nextDifficulty); setMode(nextMode); setPage(nextMode)
+    setSaveWarning(loaded.warning);setLoading(false)
     setReward({ units: [], count: loaded.state.rewarded.length, complete: false, serial: 0 })
     setAnnouncement('')
   }
   function navigate(next: Page) {
+    setDigitReward(null)
+    setMistakeEvent(null)
     if (next === 'learn') { setReward(previous => ({ ...previous, units: [], complete: false, serial: 0 })); setPage(next); return }
     if (next === mode) setPage(next)
     else load(next)
   }
   function handleBoardKey(event: KeyboardEvent<HTMLDivElement>) {
+    if (!/^[1-9]$/.test(event.key)) setMistakeEvent(null)
     if (event.altKey) return
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
       event.preventDefault(); dispatch({ type: event.shiftKey ? 'redo' : 'undo' }); return
@@ -127,31 +202,49 @@ export default function App() {
     else if (event.key.toLowerCase() === 'n') { event.preventDefault(); dispatch({ type: 'toggle-notes' }) }
     else if (event.key === 'Backspace' || event.key === 'Delete') { event.preventDefault(); dispatch({ type: 'erase' }) }
   }
+  function changeEffects(next: boolean) {
+    setDigitReward(null)
+    setEffects(next)
+    setReward({ units: [], count: state.rewarded.length, complete: false, serial: 0 })
+    try { localStorage.setItem('sudoku-effects', next ? 'on' : 'off') } catch { setSaveWarning('Effects preference could not be saved in this browser.') }
+  }
+  function changeShowMistakes(next: boolean) {
+    setMistakeEvent(null)
+    setAnnouncement('')
+    setShowMistakes(next)
+    try { localStorage.setItem('sudoku-show-mistakes', next ? 'on' : 'off') } catch { setSaveWarning('Preferences could not be saved in this browser. You can keep playing.') }
+  }
   return <div className="app-shell">
     <a className="skip-link" href="#main">Skip to puzzle</a>
     <header className="site-header">
       <a className="wordmark" href="#main" onClick={() => navigate('daily')} aria-label="Sudoku home"><svg viewBox="0 0 27 27" width="27" height="27" fill="none" aria-hidden="true"><path d="M1 1h25v25H1zM9.3 1v25M17.7 1v25M1 9.3h25M1 17.7h25" stroke="currentColor" /><path d="M3 3h4v4H3zM20 11h4v5h-4zM11 20h5v4h-5z" fill="currentColor" /></svg><span>Sudoku</span></a>
       <nav className="main-nav" aria-label="Main navigation">{(['daily', 'practice', 'learn'] as const).map(item => <button type="button" key={item} aria-current={page === item ? 'page' : undefined} className={page === item ? 'active' : ''} onClick={() => navigate(item)}>{item[0].toUpperCase() + item.slice(1)}</button>)}</nav>
-      <div className="header-actions"><button type="button" className="theme-button" onClick={() => setTheme(theme === 'device' ? 'light' : theme === 'light' ? 'dark' : 'device')} aria-label={`Theme: ${theme === 'device' ? 'device setting' : theme}. Change theme`}>{theme === 'device' ? '◐ Device' : theme === 'light' ? '☼ Light' : '◑ Dark'}</button><button type="button" onClick={() => setHelp(true)}>Help</button></div>
+      <div className="header-actions"><button type="button" className="settings-button" aria-label="Settings" title="Settings" onClick={() => setSettingsOpen(true)}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true"><path d="m9 3-.6 2.4-1.3.8-2.4-.7-3 5.2 1.8 1.7v1.5l-1.8 1.7 3 5.2 2.4-.7 1.3.8L9 23h6l.6-2.4 1.3-.8 2.4.7 3-5.2-1.8-1.7v-1.5l1.8-1.7-3-5.2-2.4.7-1.3-.8L15 3Z" transform="translate(1 0) scale(.92)"/><circle cx="12" cy="12" r="3"/></svg></button><button type="button" onClick={() => setHelp(true)}>Help</button></div>
     </header>
     <main id="main" tabIndex={-1}>
       {page === 'learn' ? <Learning onReturn={() => navigate(mode)} /> : <section className="play-section" aria-label={`${mode === 'daily' ? 'Daily' : 'Practice'} puzzle`}>
         <h1 className="sr-only">{mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'}</h1>
-        <div className="puzzle-heading"><p className="puzzle-date">{mode === 'daily' ? <><time dateTime={dailyDate}>{new Date(`${dailyDate}T12:00:00Z`).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}</time> · UTC</> : 'Practice'}</p><span className="timer" aria-label={`Elapsed ${formatTime(state.elapsed)}`}>{formatTime(state.elapsed)}</span></div>
+        <div className="puzzle-heading">{mode === 'daily' ? <Calendar date={dailyDate} today={today} onChange={date=>{void load('daily',difficulty,false,date)}} /> : <p className="puzzle-date">Practice</p>}<select className="mode-select" aria-label="Game mode" value={variant} onChange={event=>{void load(mode,difficulty,false,dailyDate,event.target.value as GameVariant)}}><option value="classic">Classic</option><option value="x">X Sudoku</option><option value="killer">Killer Sudoku</option></select><span className="timer" aria-label={`Elapsed ${formatTime(state.elapsed)}`}>{formatTime(state.elapsed)}</span></div>
         {mode === 'daily' && today !== dailyDate && <div className="notice"><button type="button" onClick={() => { setDailyDate(today); load('daily', difficulty, false, today) }}>Open today's puzzle</button></div>}
-        <div className="difficulty-control" role="group" aria-label="Difficulty">{DIFFICULTIES.map(level => <button type="button" aria-pressed={difficulty === level} title={descriptions[level]} className={difficulty === level ? 'active' : ''} key={level} onClick={() => load(mode, level)}>{titles[level]}</button>)}</div>
-        <div className="board-column">
-          <div className="board-wrap" data-progress={state.rewarded.length}><Board values={state.values} givens={puzzle.givens} notes={state.notes} selected={state.selected} onSelect={cell => dispatch({ type: 'select', cell })} onKeyDown={handleBoardKey} conflicts={conflicts} label={mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'} />{effects && <RewardEffects {...reward} />}</div>
+        <div className="difficulty-control" role="group" aria-label="Difficulty">{availableDifficulties(variant).map(level => <button type="button" aria-pressed={difficulty === level} title={descriptions[level]} className={difficulty === level ? 'active' : ''} key={level} onClick={() => load(mode, level)}>{titles[level]}</button>)}</div>
+        {loading?<div className="generation-status" role="status">Generating puzzle…</div>:generationError?<div className="generation-status" role="status"><p>{generationError}</p><button type="button" onClick={()=>load(mode)}>Try again</button></div>:<div className="board-column" data-puzzle-id={puzzle.id}>
+          <div className="board-wrap" data-progress={state.rewarded.length}><Board values={state.values} givens={puzzle.givens} notes={state.notes} selected={state.selected} onSelect={cell => dispatch({ type: 'select', cell })} onKeyDown={handleBoardKey} variant={puzzle.variant} cages={puzzle.cages} digitReward={effects?digitReward:null} mistakes={mistakes} mistakeEvent={mistakeEvent} onMistakeEnd={event => setMistakeEvent(current => current && current.cell === event.cell && current.serial === event.serial ? null : current)} label={mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'} />{effects && <RewardEffects {...reward} />}</div>
           <p className="sr-only">{selectedDescription}</p>
           <p className={`game-status${complete ? ' complete-status' : ' sr-only'}`} role="status" aria-live="polite">{complete ? 'Puzzle complete.' : announcement}</p>
-          <div className="number-pad" role="group" aria-label="Enter a number">{Array.from({ length: 9 }, (_, index) => <button type="button" key={index} aria-label={`${state.noteMode ? 'Toggle note' : 'Enter'} ${index + 1}`} onClick={() => dispatch({ type: 'digit', digit: index + 1 })}>{index + 1}</button>)}<button type="button" className="erase-button" aria-label="Erase" title="Erase" onClick={() => dispatch({ type: 'erase' })}>⌫</button></div>
-          <div className="game-toolbar" role="group" aria-label="Puzzle tools"><button type="button" disabled={!state.past.length} onClick={() => dispatch({ type: 'undo' })}>Undo</button><button type="button" disabled={!state.future.length} onClick={() => dispatch({ type: 'redo' })}>Redo</button><button type="button" aria-pressed={state.noteMode} onClick={() => dispatch({ type: 'toggle-notes' })}>{state.noteMode ? 'Notes on' : 'Notes off'}</button><button type="button" onClick={() => dispatch({ type: 'auto-notes' })}>Auto-notes</button></div>
-          <div className="play-actions"><HintPanel key={puzzle.id} values={state.values} onApply={applyHint} onHint={deduction => { if (deduction) dispatch({ type: 'hint-used' }) }} /><button type="button" className="icon-button" aria-label="Restart puzzle" title="Restart puzzle" onClick={() => setRestart(true)}>↻</button>{mode === 'practice' && <button type="button" className="icon-button" aria-label="New practice puzzle" title="New practice puzzle" onClick={() => load('practice', difficulty, true)}>+</button>}</div>
-        </div>
+          <div className="number-pad" role="group" aria-label="Enter a number">{Array.from({ length: 9 }, (_, index) => <button type="button" key={index} disabled={digitCounts[index+1]>=9} aria-label={`${state.noteMode ? 'Toggle note' : 'Enter'} ${index + 1}`} onClick={() => dispatch({ type: 'digit', digit: index + 1 })}>{index + 1}</button>)}<button type="button" className="erase-button" aria-label="Erase" title="Erase" onClick={() => dispatch({ type: 'erase' })}>⌫</button></div>
+          <div className="game-toolbar" role="group" aria-label="Puzzle tools"><button type="button" disabled={!state.past.length} onClick={() => dispatch({ type: 'undo' })}>Undo</button><button type="button" disabled={!state.future.length} onClick={() => dispatch({ type: 'redo' })}>Redo</button><button type="button" className="notes-button" aria-pressed={state.noteMode} onClick={() => dispatch({ type: 'toggle-notes' })}><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true"><path d="m3 13 10-10 4 4L7 17H3Zm8-8 4 4M3 13l4 4"/></svg>Notes</button></div>
+          <div className="play-actions"><HintPanel key={puzzle.id} values={state.values} rules={{variant:puzzle.variant??'classic',...(puzzle.cages?{cages:puzzle.cages}:{})}} onApply={applyHint} onHint={deduction => { if (deduction) dispatch({ type: 'hint-used' }) }} /><button type="button" className="icon-button" aria-label="Restart puzzle" title="Restart puzzle" onClick={() => setRestart(true)}>↻</button>{mode === 'practice' && <button type="button" className="icon-button" aria-label="New practice puzzle" title="New practice puzzle" onClick={() => load('practice', difficulty, true)}>+</button>}</div>
+        </div>}
       </section>}
       {saveWarning && <div className="notice" role="status"><p>{saveWarning}</p><button type="button" onClick={() => setSaveWarning(null)}>Dismiss</button></div>}
     </main>
-    {help && <Dialog title="A few simple rules." className="help-dialog" onClose={() => setHelp(false)}><p>Fill each row, column and outlined 3 × 3 box with the numbers 1–9, once in each group. Starting numbers stay fixed.</p><h3>Keyboard & touch</h3><p>Select a cell, then choose a number. On the board: arrows move; 1–9 enter; N toggles notes; Backspace or Delete erases; ⌘/Ctrl+Z undoes; ⌘/Ctrl+Shift+Z redoes. Tab moves to the next control.</p><h3>Only on this device</h3><p>Progress and preferences are saved in this browser. They do not sync. Clearing site data or private browsing may remove them. The daily puzzle changes at 00:00 UTC; you can finish an older puzzle first.</p><h3>Motion preferences</h3><p>Completion effects are optional and always respect your device's reduced-motion setting. Sound is off.</p><button type="button" aria-pressed={effects} onClick={() => { const next = !effects; setEffects(next); setReward({ units: [], count: state.rewarded.length, complete: false, serial: 0 }); try { localStorage.setItem('sudoku-effects', next ? 'on' : 'off') } catch { setSaveWarning('Effects preference could not be saved in this browser.') } }}>{effects ? 'Effects on' : 'Effects off'}</button><button type="button" autoFocus onClick={() => setHelp(false)}>Back to the grid</button></Dialog>}
+    {settingsOpen && <Dialog title="Settings" className="settings-dialog" onClose={() => setSettingsOpen(false)}>
+      <button type="button" className="settings-close" autoFocus onClick={() => setSettingsOpen(false)}>Close</button>
+      <div className="setting-row"><label htmlFor="settings-theme">Theme</label><select id="settings-theme" value={theme} onChange={event => setTheme(event.target.value as Theme)}><option value="device">Device</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+      <label className="setting-row"><span>Completion effects</span><input type="checkbox" checked={effects} onChange={event => changeEffects(event.target.checked)} /></label>
+      <label className="setting-row"><span>Show mistakes</span><input type="checkbox" checked={showMistakes} onChange={event => changeShowMistakes(event.target.checked)} /></label>
+    </Dialog>}
+    {help && <Dialog title="A few simple rules." className="help-dialog" onClose={() => setHelp(false)}><p>Fill each row, column and outlined 3 × 3 box with the numbers 1–9, once in each group. Starting numbers stay fixed.</p><h3>Keyboard & touch</h3><p>Select a cell, then choose a number. On the board: arrows move; 1–9 enter; N toggles notes; Backspace or Delete erases; ⌘/Ctrl+Z undoes; ⌘/Ctrl+Shift+Z redoes. Tab moves to the next control.</p><h3>Only on this device</h3><p>Progress and preferences are saved in this browser. They do not sync. Clearing site data or private browsing may remove them. The daily puzzle changes at 00:00 UTC; you can finish an older puzzle first.</p><button type="button" autoFocus onClick={() => setHelp(false)}>Back to the grid</button></Dialog>}
     {restart && <Dialog title="Start this puzzle again?" onClose={() => setRestart(false)}><p>Clear your entries and notes for this puzzle? The starting numbers will stay.</p><div className="dialog-actions"><button type="button" autoFocus onClick={() => setRestart(false)}>Keep playing</button><button type="button" onClick={() => { dispatch({ type: 'restart' }); setRestart(false) }}>Clear entries and notes</button></div></Dialog>}
   </div>
 }

@@ -1,0 +1,15 @@
+.walkthrough { width:min(100%,504px); margin:24px auto 0; }
+.walkthrough-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; }
+.walkthrough-controls>button { font-size:12px; }
+.lesson-step { border-top:1px solid var(--line); margin-top:16px; padding-top:16px; font-size:14px; line-height:1.7; }
+.lesson-step>p { margin-bottom:12px; }
+.lesson-step .primary-button { font-size:12px; }
+.walkthrough-result { font:14px ui-monospace,SFMono-Regular,Menlo,monospace; text-align:center; margin-top:18px; }
+.lesson-type { display:flex; margin:20px 0; }
+.lesson-type>button { flex:1; padding:10px 6px; font-size:12px; }
+.lesson-type>button+button { border-left:0; }
+.walkthrough-heading { width:min(100%,640px); margin:20px auto; }
+.walkthrough-heading h2 { margin-bottom:14px; }
+.walkthrough-heading p { font-size:14px; line-height:1.7; margin:0; }
+.walkthrough-examples { display:flex; justify-content:center; gap:8px; margin-top:20px; }
+.walkthrough-examples>button { font-size:12px; min-height:36px; padding:8px 12px; }

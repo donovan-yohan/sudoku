@@ -1,20 +1,17 @@
 import { useRef, useState } from 'react'
-import { candidates, findDeduction, isValidBoard, solve } from '../engine'
-import type { Board, Deduction } from '../types'
+import {requestVariantHint} from '../variant-hints'
+import type {Rules,VariantDeduction} from '../variant-engine'
+import type { Board } from '../types'
 
 const coordinate = (cell: number) => `r${Math.floor(cell / 9) + 1}c${cell % 9 + 1}`
-export default function HintPanel({ values, onApply, onHint }: { values: Board; onApply: (deduction: Deduction) => void; onHint: (deduction: Deduction | null) => void }) {
+export default function HintPanel({ values, rules={variant:'classic'}, onApply, onHint }: { values: Board; rules?:Rules; onApply: (deduction: VariantDeduction) => void; onHint: (deduction: VariantDeduction | null) => void }) {
   const trigger = useRef<HTMLButtonElement>(null)
   const signature = values.join('')
-  const [hintState, setHintState] = useState<{ signature: string; deduction: Deduction | null; logical: number[][]; message: string; applied: boolean } | null>(null)
+  const [hintState, setHintState] = useState<{ signature: string; deduction: VariantDeduction | null; logical: number[][]; message: string; applied: boolean } | null>(null)
   const current = hintState?.signature === signature ? hintState : null
   function request() {
-    if (!isValidBoard(values) || !solve(values)) {
-      setHintState({ signature, deduction: null, logical: [], message: 'Check the conflicting entries first.', applied: false }); onHint(null); return
-    }
-    const logical = current?.logical.length ? current.logical : candidates(values)
-    const deduction = findDeduction(values, logical)
-    setHintState({ signature, deduction, logical, message: deduction ? '' : 'No hint available for this position.', applied: false })
+    const {deduction,logical,message}=requestVariantHint(values,rules,current?.logical.length?current.logical:undefined)
+    setHintState({ signature, deduction, logical, message, applied: false })
     onHint(deduction)
   }
   const [open,setOpen]=useState(false)

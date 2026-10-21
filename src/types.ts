@@ -15,7 +15,10 @@ export interface Puzzle {
   givens: Board
   solution: Board
   difficulty: Difficulty
-  techniques: Technique[]
+  techniques: string[]
+  variant?: 'classic' | 'x' | 'killer'
+  cages?: {cells:number[];sum:number}[]
+  generatorVersion?: string
 }
 export interface GameSnapshot { values: Board; notes: number[][] }
 export interface GameState extends GameSnapshot {
@@ -26,13 +29,14 @@ export interface GameState extends GameSnapshot {
   past: GameSnapshot[]
   future: GameSnapshot[]
   rewarded: number[]
+  rewardedDigits: number[]
   elapsed: number
   hintsUsed: number
 }
 export type GameAction =
  | { type: 'select'; cell: number }
  | { type: 'digit'; digit: number }
- | { type: 'erase' | 'undo' | 'redo' | 'toggle-notes' | 'auto-notes' | 'tick' | 'hint-used' | 'restart' }
+ | { type: 'erase' | 'undo' | 'redo' | 'toggle-notes' | 'tick' | 'hint-used' | 'restart' }
 export interface LessonAction { cell: number; digit: number; kind: 'place' | 'eliminate' }
 export interface Scenario {
   id: string

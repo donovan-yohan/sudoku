@@ -16,7 +16,12 @@ Public, MIT-licensed Sudoku learning app for https://sudoku.donovanyohan.com.
 - Center the puzzle and compact controls. No hero, sidebar explainers, marketing slogans, reassurance, or instructional footer in daily/practice play.
 - Hints use a lightbulb icon with an accessible name. Show the actual deduction only after a request; no card or paragraph introducing hints.
 - Visible text must serve the current action. Delete internal proof/audit caveats and repeated obvious instructions rather than rephrasing them. Keep correctness evidence in tests and docs; put optional teaching detail behind a deliberate disclosure.
+- Lessons use actual clue-based puzzles and demonstrate how the named technique leads to a real number placement. No abstract blank-grid candidate quizzes, place/eliminate radio forms, arbitrary target-candidate tasks or learning-process narration. Show a concise rule and a concrete step-by-step board change, with relevant notes only. Keep full validated domains and prior solve provenance internally; do not fill unrelated cells with 1–9 noise.
 - All authored borders, outlines, and icon strokes are at most 1px. Distinguish grid/section hierarchy using opacity, never line thickness. Zero rounded corners remains required.
+- Settings hold theme, completion effects and opt-in Show mistakes. Mistakes are off by default; when enabled, incorrect user entries may use red and a brief cell-only shake. Respect reduced motion. Notes is a stable-label pencil toggle; no auto-notes feature.
+- Installable offline PWA uses original monochrome square icons and a complete versioned shell cache. Preserve local saves/preferences and never force a reload during a puzzle update.
+- Classic, Killer and X modes use their actual constraints throughout generation, uniqueness, hints, notes and presentation. Daily identity uses a versioned UTC date + game mode + difficulty seed; archive starts 2026-01-01, navigation ends today. Random practice has separate persisted identities. Beginner needs generous starting structure and an approachable singles-only path.
+- Keypad digits with at least nine visible copies are dimmed and disabled without consulting solution correctness. Newly completed correct sets of nine earn staggered digit-only hop/shimmer effects once per attempt, respecting effects-off/reduced-motion and no undo/reload replay.
 
 ## Engineering
 

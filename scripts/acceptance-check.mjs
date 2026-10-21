@@ -14,6 +14,7 @@ for(const width of [320,390,768,1440])for(const theme of ['light','dark']){
  await page.goto(origin);await page.waitForSelector('[role=gridcell]')
  for(const level of ['Beginner','Intermediate','Advanced','Expert']){
   await page.getByRole('button',{name:level,exact:true}).click()
+  await page.waitForSelector('[role=gridcell]')
   assert.equal(await page.locator('[role=gridcell]').count(),81)
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${width} ${theme} ${level} overflow`)
  }
