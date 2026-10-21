@@ -37,12 +37,11 @@ export default function App() {
   const [state, setState] = useState<GameState>(restored.state)
   const stateRef = useRef(state); stateRef.current = state
   const [saveWarning, setSaveWarning] = useState<string | null>(restored.warning)
-  const [saved, setSaved] = useState(false)
   const [theme, setTheme] = useState<Theme>(initialTheme)
   const [effects, setEffects] = useState(() => { try { return localStorage.getItem('sudoku-effects') !== 'off' } catch { return true } })
   const [help, setHelp] = useState(false)
   const [restart, setRestart] = useState(false)
-  const [announcement, setAnnouncement] = useState('Select an empty cell, then choose a number.')
+  const [announcement, setAnnouncement] = useState('')
   const [reward, setReward] = useState({ units: [] as number[], count: 0, complete: false, serial: 0 })
   const practiceSeeds = useRef<Partial<Record<Difficulty, string>>>({...session.practiceSeeds})
   useEffect(() => { saveSession({version:1,mode,difficulty,dailyDate,practiceSeeds:practiceSeeds.current}) }, [mode,difficulty,dailyDate,puzzle.id])
@@ -59,7 +58,6 @@ export default function App() {
   }, [theme])
   useEffect(() => {
     const success = saveGame(state)
-    setSaved(success)
     if (!success) setSaveWarning('Progress could not be saved in this browser. You can keep playing, but this session may be lost when you leave.')
   }, [state])
   useEffect(() => {
@@ -112,7 +110,7 @@ export default function App() {
     setPuzzle(nextPuzzle); setState(loaded.state); stateRef.current = loaded.state
     setSaveWarning(loaded.warning); setDifficulty(nextDifficulty); setMode(nextMode); setPage(nextMode)
     setReward({ units: [], count: loaded.state.rewarded.length, complete: false, serial: 0 })
-    setAnnouncement('Puzzle ready. Select an empty cell, then choose a number.')
+    setAnnouncement('')
   }
   function navigate(next: Page) {
     if (next === 'learn') { setReward(previous => ({ ...previous, units: [], complete: false, serial: 0 })); setPage(next); return }
@@ -137,26 +135,22 @@ export default function App() {
       <div className="header-actions"><button type="button" className="theme-button" onClick={() => setTheme(theme === 'device' ? 'light' : theme === 'light' ? 'dark' : 'device')} aria-label={`Theme: ${theme === 'device' ? 'device setting' : theme}. Change theme`}>{theme === 'device' ? '◐ Device' : theme === 'light' ? '☼ Light' : '◑ Dark'}</button><button type="button" onClick={() => setHelp(true)}>Help</button></div>
     </header>
     <main id="main" tabIndex={-1}>
-      {page === 'learn' ? <Learning onReturn={() => navigate(mode)} /> : <>
-        <section className="hero"><div><p className="eyebrow">A daily practice in seeing clearly</p><h1>A little more clarity,<br className="hero-break" /> every day.</h1><p className="hero-copy">A quiet puzzle. A fresh perspective. Take your time.</p></div><button type="button" className="text-link" onClick={() => navigate('learn')}>Learn a technique <span aria-hidden="true">↗</span></button></section>
-        <section className="play-section" aria-label={`${mode === 'daily' ? 'Daily' : 'Practice'} puzzle`}>
-          <div className="puzzle-heading"><div><p className="eyebrow">{mode === 'daily' ? 'Your daily puzzle' : 'Room to practice'}</p><h2>{mode === 'daily' ? 'Daily puzzle' : 'Practice puzzle'}</h2></div><p className="puzzle-date">{mode === 'daily' ? <><time dateTime={dailyDate}>{new Date(`${dailyDate}T12:00:00Z`).toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</time> · UTC</> : 'No clock to beat.'}</p></div>
-          {mode === 'daily' && today !== dailyDate && <div className="notice"><p>A new daily puzzle is available. You can finish this one first.</p><button type="button" onClick={() => { setDailyDate(today); load('daily', difficulty, false, today) }}>Open today's puzzle</button></div>}
-          <div className="difficulty-control" role="group" aria-label="Difficulty">{DIFFICULTIES.map(level => <button type="button" aria-pressed={difficulty === level} title={descriptions[level]} className={difficulty === level ? 'active' : ''} key={level} onClick={() => load(mode, level)}>{titles[level]}</button>)}</div>
-          <div className="play-layout"><div className="board-column">
-            <div className="board-meta"><span>{titles[difficulty]} <span aria-hidden="true">/</span> {state.values.filter(Boolean).length} of 81</span><span aria-label={`Elapsed ${formatTime(state.elapsed)}`}>{formatTime(state.elapsed)}</span></div>
-            <div className="board-wrap" data-progress={state.rewarded.length} data-effect={['line-sweep', 'ripple', 'scan', 'constellation'][state.rewarded.length % 4]}><Board values={state.values} givens={puzzle.givens} notes={state.notes} selected={state.selected} onSelect={cell => dispatch({ type: 'select', cell })} onKeyDown={handleBoardKey} conflicts={conflicts} label={mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'} />{effects && <RewardEffects {...reward} />}</div>
-            <p className="selection-readout">{selectedDescription}</p>
-            <p className="game-status" role="status" aria-live="polite">{complete ? 'Puzzle complete. A little more clarity.' : announcement}</p>
-            <div className="number-pad" role="group" aria-label="Enter a number">{Array.from({ length: 9 }, (_, index) => <button type="button" key={index} aria-label={`${state.noteMode ? 'Toggle note' : 'Enter'} ${index + 1}`} onClick={() => dispatch({ type: 'digit', digit: index + 1 })}>{index + 1}</button>)}<button type="button" className="erase-button" onClick={() => dispatch({ type: 'erase' })}>Erase</button></div>
-            <div className="game-toolbar" role="group" aria-label="Puzzle tools"><button type="button" disabled={!state.past.length} onClick={() => dispatch({ type: 'undo' })}>Undo</button><button type="button" disabled={!state.future.length} onClick={() => dispatch({ type: 'redo' })}>Redo</button><button type="button" aria-pressed={state.noteMode} onClick={() => dispatch({ type: 'toggle-notes' })}>{state.noteMode ? 'Notes on' : 'Notes off'}</button><button type="button" onClick={() => dispatch({ type: 'auto-notes' })}>Auto-notes</button></div>
-            <p className="save-status">{saved ? 'Saved on this device' : 'Playing without a local save'} <span aria-hidden="true">·</span> {state.hintsUsed} {state.hintsUsed === 1 ? 'hint' : 'hints'} used</p>
-          </div><aside className="puzzle-sidebar"><section className="sidebar-section"><p className="eyebrow">A moment of focus</p><h3>One cell at a time.</h3><p>Fill every row, column and 3 × 3 box with 1–9. No repeats. No rush.</p><details className="difficulty-details"><summary>Why this level?</summary><p>{descriptions[difficulty]} Ratings follow the logical techniques needed, not the number of starting clues.</p><p>This puzzle's solve path uses: {puzzle.techniques.map(technique => technique.replaceAll('-', ' ')).join(', ')}.</p></details></section><HintPanel key={puzzle.id} values={state.values} onApply={applyHint} onHint={deduction => { if (deduction) dispatch({ type: 'hint-used' }) }} /><section className="sidebar-section"><h3>Make room for a thought.</h3><p>Notes are your reminders, not proof. Auto-notes replaces them with the candidates allowed by the current rows, columns and boxes.</p><button type="button" className="text-link" onClick={() => navigate('learn')}>Explore the lessons <span aria-hidden="true">↗</span></button></section><div className="secondary-actions"><button type="button" onClick={() => setRestart(true)}>Restart puzzle</button>{mode === 'practice' && <button type="button" onClick={() => load('practice', difficulty, true)}>New practice puzzle</button>}</div></aside></div>
-        </section>
-      </>}
+      {page === 'learn' ? <Learning onReturn={() => navigate(mode)} /> : <section className="play-section" aria-label={`${mode === 'daily' ? 'Daily' : 'Practice'} puzzle`}>
+        <h1 className="sr-only">{mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'}</h1>
+        <div className="puzzle-heading"><p className="puzzle-date">{mode === 'daily' ? <><time dateTime={dailyDate}>{new Date(`${dailyDate}T12:00:00Z`).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}</time> · UTC</> : 'Practice'}</p><span className="timer" aria-label={`Elapsed ${formatTime(state.elapsed)}`}>{formatTime(state.elapsed)}</span></div>
+        {mode === 'daily' && today !== dailyDate && <div className="notice"><button type="button" onClick={() => { setDailyDate(today); load('daily', difficulty, false, today) }}>Open today's puzzle</button></div>}
+        <div className="difficulty-control" role="group" aria-label="Difficulty">{DIFFICULTIES.map(level => <button type="button" aria-pressed={difficulty === level} title={descriptions[level]} className={difficulty === level ? 'active' : ''} key={level} onClick={() => load(mode, level)}>{titles[level]}</button>)}</div>
+        <div className="board-column">
+          <div className="board-wrap" data-progress={state.rewarded.length}><Board values={state.values} givens={puzzle.givens} notes={state.notes} selected={state.selected} onSelect={cell => dispatch({ type: 'select', cell })} onKeyDown={handleBoardKey} conflicts={conflicts} label={mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'} />{effects && <RewardEffects {...reward} />}</div>
+          <p className="sr-only">{selectedDescription}</p>
+          <p className={`game-status${complete ? ' complete-status' : ' sr-only'}`} role="status" aria-live="polite">{complete ? 'Puzzle complete.' : announcement}</p>
+          <div className="number-pad" role="group" aria-label="Enter a number">{Array.from({ length: 9 }, (_, index) => <button type="button" key={index} aria-label={`${state.noteMode ? 'Toggle note' : 'Enter'} ${index + 1}`} onClick={() => dispatch({ type: 'digit', digit: index + 1 })}>{index + 1}</button>)}<button type="button" className="erase-button" aria-label="Erase" title="Erase" onClick={() => dispatch({ type: 'erase' })}>⌫</button></div>
+          <div className="game-toolbar" role="group" aria-label="Puzzle tools"><button type="button" disabled={!state.past.length} onClick={() => dispatch({ type: 'undo' })}>Undo</button><button type="button" disabled={!state.future.length} onClick={() => dispatch({ type: 'redo' })}>Redo</button><button type="button" aria-pressed={state.noteMode} onClick={() => dispatch({ type: 'toggle-notes' })}>{state.noteMode ? 'Notes on' : 'Notes off'}</button><button type="button" onClick={() => dispatch({ type: 'auto-notes' })}>Auto-notes</button></div>
+          <div className="play-actions"><HintPanel key={puzzle.id} values={state.values} onApply={applyHint} onHint={deduction => { if (deduction) dispatch({ type: 'hint-used' }) }} /><button type="button" className="icon-button" aria-label="Restart puzzle" title="Restart puzzle" onClick={() => setRestart(true)}>↻</button>{mode === 'practice' && <button type="button" className="icon-button" aria-label="New practice puzzle" title="New practice puzzle" onClick={() => load('practice', difficulty, true)}>+</button>}</div>
+        </div>
+      </section>}
       {saveWarning && <div className="notice" role="status"><p>{saveWarning}</p><button type="button" onClick={() => setSaveWarning(null)}>Dismiss</button></div>}
     </main>
-    <footer className="site-footer"><span>No account or app analytics. Progress stays in this browser.</span><a href="https://github.com/donovan-yohan/sudoku" target="_blank" rel="noreferrer">Open source ↗</a></footer>
     {help && <Dialog title="A few simple rules." className="help-dialog" onClose={() => setHelp(false)}><p>Fill each row, column and outlined 3 × 3 box with the numbers 1–9, once in each group. Starting numbers stay fixed.</p><h3>Keyboard & touch</h3><p>Select a cell, then choose a number. On the board: arrows move; 1–9 enter; N toggles notes; Backspace or Delete erases; ⌘/Ctrl+Z undoes; ⌘/Ctrl+Shift+Z redoes. Tab moves to the next control.</p><h3>Only on this device</h3><p>Progress and preferences are saved in this browser. They do not sync. Clearing site data or private browsing may remove them. The daily puzzle changes at 00:00 UTC; you can finish an older puzzle first.</p><h3>Motion preferences</h3><p>Completion effects are optional and always respect your device's reduced-motion setting. Sound is off.</p><button type="button" aria-pressed={effects} onClick={() => { const next = !effects; setEffects(next); setReward({ units: [], count: state.rewarded.length, complete: false, serial: 0 }); try { localStorage.setItem('sudoku-effects', next ? 'on' : 'off') } catch { setSaveWarning('Effects preference could not be saved in this browser.') } }}>{effects ? 'Effects on' : 'Effects off'}</button><button type="button" autoFocus onClick={() => setHelp(false)}>Back to the grid</button></Dialog>}
     {restart && <Dialog title="Start this puzzle again?" onClose={() => setRestart(false)}><p>Clear your entries and notes for this puzzle? The starting numbers will stay.</p><div className="dialog-actions"><button type="button" autoFocus onClick={() => setRestart(false)}>Keep playing</button><button type="button" onClick={() => { dispatch({ type: 'restart' }); setRestart(false) }}>Clear entries and notes</button></div></Dialog>}
   </div>

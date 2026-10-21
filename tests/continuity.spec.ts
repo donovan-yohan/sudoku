@@ -64,6 +64,8 @@ test('hinted final placement earns the same full-board finale',async({page})=>{
  await page.getByRole('button',{name:'Apply this step',exact:true}).click()
  await expect(page.locator('.game-status')).toContainText('Puzzle complete')
  await expect(page.locator('[data-reward-variant="finale"]')).toHaveCount(1)
+ const widths=await page.locator('.reward-layer,.reward-layer *').evaluateAll(elements=>elements.flatMap(element=>{const style=getComputedStyle(element);return ['borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth'].map(key=>parseFloat(style[key as keyof CSSStyleDeclaration] as string)||0)}))
+ expect(Math.max(...widths)).toBeLessThanOrEqual(1)
 })
 
 test('reduced motion suppresses effects while preserving completion status',async({page})=>{

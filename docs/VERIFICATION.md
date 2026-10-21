@@ -1,6 +1,6 @@
 # Verification record
 
-This file records executed checks separately from planning documents. Integration is in progress; it is not a release approval.
+This file records executed checks separately from planning documents. Release and follow-up results are distinguished below.
 
 ## Local incremental checks
 
@@ -32,6 +32,15 @@ This file records executed checks separately from planning documents. Integratio
 - Custom domain returned HTTP 200 with HTTPS, nosniff, permissions/referrer policies and the configured CSP. Production inline-theme bootstrap hash matched the allowlisted SHA-256. No script `unsafe-inline` is required; inline style support remains for effect coordinates.
 - Ran the complete 16-test Playwright suite against the actual public custom domain, not just development: all passed. Repeated the eight viewport/theme acceptance combinations plus actual entry-to-finale solve against production: no page errors, overflow, or external runtime requests observed. Repeated play/catalog/expert-lesson axe scans in both themes: no violations. The axe harness bypasses CSP only to inject the local test auditor; normal browser acceptance runs retain CSP.
 - Both named review reports are historical point-in-time findings. Their five distinct defects were fixed and covered by integration regressions; the reports themselves are not rewritten as unconditional approvals.
+
+## Quiet UI follow-up (2026-10-21)
+
+- Removed the idle hero, sidebar, hint introduction, routine save/hint counters and footer. Play uses one centered column with an accessible lightbulb-only hint control. Removed catalog disclaimers and repeated progress qualifications while preserving technique rules, questions and feedback.
+- `npm run check` passed 144 tests across eight files and the production type/build gate. `npm run test:e2e` passed 27 Chromium tests, including six centered width/theme contexts, on-demand hint behavior, keyboard focus/dialog/lesson hairlines and existing continuity/lesson flows.
+- All authored borders and outlines are at most 1px; grid hierarchy uses neutral opacity. Browser checks inspect actual rendered widths and distinguish ordinary/box boundaries. Finale strokes have a separate assertion in the hinted-completion regression.
+- Local axe checks returned no violations for play/catalog/expert lesson in both themes. Acceptance repeated 320/390/768/1440 light/dark contexts and actual keyboard entry through all effect variants to the color finale with no overflow, page errors or external runtime requests observed.
+- Copy provenance and prevention are recorded in `PRODUCT-COPY.md`. These local checks are not deployment evidence; the deployed source revision is verified separately at release.
+- Read-only code review found lost keyboard focus after hint dismissal. Dedicated keyboard regressions reproduced dismissal and placement failures before the fix and passed afterward. The trigger now regains focus after either action. Product-copy review found remaining prerequisite disclaimers, guessing language and repeated idle prompts; these were removed with focused RED/GREEN checks.
 
 ## Coverage limits
 

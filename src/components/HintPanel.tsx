@@ -1,20 +1,26 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { candidates, findDeduction, isValidBoard, solve } from '../engine'
 import type { Board, Deduction } from '../types'
 
 const coordinate = (cell: number) => `r${Math.floor(cell / 9) + 1}c${cell % 9 + 1}`
 export default function HintPanel({ values, onApply, onHint }: { values: Board; onApply: (deduction: Deduction) => void; onHint: (deduction: Deduction | null) => void }) {
+  const trigger = useRef<HTMLButtonElement>(null)
   const signature = values.join('')
   const [hintState, setHintState] = useState<{ signature: string; deduction: Deduction | null; logical: number[][]; message: string; applied: boolean } | null>(null)
   const current = hintState?.signature === signature ? hintState : null
   function request() {
     if (!isValidBoard(values) || !solve(values)) {
-      setHintState({ signature, deduction: null, logical: [], message: 'The current entries conflict with the puzzle. Review your entries or undo a move before asking for a deduction.', applied: false }); onHint(null); return
+      setHintState({ signature, deduction: null, logical: [], message: 'Check the conflicting entries first.', applied: false }); onHint(null); return
     }
     const logical = current?.logical.length ? current.logical : candidates(values)
     const deduction = findDeduction(values, logical)
-    setHintState({ signature, deduction, logical, message: deduction ? '' : 'No supported logical hint is available for this position. Review the board, undo a move or explore a lesson. No solution number has been revealed.', applied: false })
+    setHintState({ signature, deduction, logical, message: deduction ? '' : 'No hint available for this position.', applied: false })
     onHint(deduction)
+  }
+  const [open,setOpen]=useState(false)
+  function close() {
+    setOpen(false)
+    trigger.current?.focus()
   }
   function apply() {
     if (!current?.deduction || current.applied) return
@@ -23,15 +29,19 @@ export default function HintPanel({ values, onApply, onHint }: { values: Board; 
     deduction.eliminations.forEach(({ cell, digit }) => { logical[cell] = logical[cell].filter(candidate => candidate !== digit) })
     setHintState({ ...current, logical, applied: true })
     onApply(deduction)
+    if(deduction.placements.length)close()
   }
-  return <section className="hint-panel sidebar-section" aria-label="Logical assistance">
-    <h3>A nudge, not an answer.</h3><p>Look for one logical step. You choose whether to apply it.</p>
-    <button type="button" className="hint-button" onClick={request}>{current?.applied ? 'Find another hint' : 'Hint'}</button>
-    {current?.message && <p role="status">{current.message}</p>}
-    {current?.deduction && <div className="hint-explanation" role="status"><p className="eyebrow">{current.deduction.technique.replaceAll('-', ' ')}</p><p>{current.deduction.explanation}</p>
-      <ul>{current.deduction.placements.map(({ cell, digit }) => <li key={`p${cell}${digit}`}>Place {digit} in {coordinate(cell)}.</li>)}{current.deduction.eliminations.map(({ cell, digit }) => <li key={`e${cell}${digit}`}>Remove candidate {digit} from {coordinate(cell)}.</li>)}</ul>
-      {current.deduction.eliminations.length > 0 && <p>Applying this records a logical elimination for subsequent hints on this position. Your manual notes stay unchanged. Remove the listed notes yourself if you use them. A board edit starts a fresh hint analysis.</p>}
-      <button type="button" className="primary-button" disabled={current.applied} onClick={apply}>{current.applied ? 'Step applied' : 'Apply this step'}</button>
-    </div>}
-  </section>
+  return <div className="hint-control">
+    <button ref={trigger} type="button" className="icon-button hint-button" aria-label="Hint" title="Hint" aria-expanded={open&&Boolean(current)} onClick={()=>{if(open&&current)close();else{request();setOpen(true)}}}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="square" aria-hidden="true"><path d="M9 18h6M9 21h6M8 14c-2-1.6-3-3.5-3-5.5a7 7 0 0 1 14 0c0 2-1 3.9-3 5.5l-1 2H9l-1-2Z"/></svg>
+    </button>
+    {open&&current&&<section className="hint-result" aria-label="Hint details"><button type="button" className="icon-button hint-close" aria-label="Close hint" title="Close hint" onClick={close}>×</button>
+      {current?.message&&<p role="status">{current.message}</p>}
+      {current?.deduction&&<div className="hint-explanation" role="status"><p className="eyebrow">{current.deduction.technique.replaceAll('-', ' ')}</p><p>{current.deduction.explanation}</p>
+        {current.deduction.eliminations.length>0&&<ul>{current.deduction.eliminations.map(({cell,digit})=><li key={`${cell}-${digit}`}>Remove {digit} from {coordinate(cell)}.</li>)}</ul>}
+        <button type="button" className="primary-button" disabled={current.applied} onClick={apply}>{current.applied?'Applied':'Apply this step'}</button>
+        {current.applied&&<button type="button" onClick={request}>Next hint</button>}
+      </div>}
+    </section>}
+  </div>
 }
