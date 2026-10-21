@@ -68,7 +68,9 @@ describe('Sudoku board', () => {
     const html=renderToStaticMarkup(createElement(Board,{values:Array(81).fill(0),givens:Array(81).fill(0),notes:Array.from({length:81},()=>[]),selected:0,onSelect:()=>{},label:'Killer Sudoku',variant:'killer',cages:[{cells:[0,1],sum:3}]}))
     expect(html).toContain('class="cage-total"')
     expect(html).toContain('cage sum 3')
-    expect((html.match(/data-cage="0"/g)||[])).toHaveLength(2)
+    expect((html.match(/class="[^"]* caged"[^>]*data-cage="0"/g)||[])).toHaveLength(2)
+    expect(html).toContain('class="cage-outlines"')
+    expect(html).not.toContain('class="cage-edge')
   })
   it('separates visible candidate digits to match the spoken label', () => {
     const html=renderToStaticMarkup(createElement(Board,{values:Array(81).fill(0),givens:Array(81).fill(0),notes:Array.from({length:81},()=>[1,2,3]),selected:0,onSelect:()=>{},label:'Candidates',candidates:true}))
