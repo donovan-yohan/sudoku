@@ -1,6 +1,14 @@
 import data from './practical-lesson-data.json'
 import type { Board, Deduction, Difficulty, Technique } from './types'
 
+/** Rectangle coordinates are zero-based, matching board and candidate indices. */
+export interface XWingPattern {
+  digit: number
+  orientation: 'rows' | 'columns'
+  rows: [number, number]
+  columns: [number, number]
+}
+
 /** A complete, replayable Sudoku position, never an isolated candidate diagram. */
 export interface PracticalScenario {
   id: string
@@ -10,7 +18,7 @@ export interface PracticalScenario {
   board: Board
   candidates: number[][]
   evidence: number[]
-  steps: (Deduction & { board: Board; candidates: number[][] })[]
+  steps: (Deduction & { board: Board; candidates: number[][]; xWing?: XWingPattern })[]
   target: number
   digit: number
   prompt: string

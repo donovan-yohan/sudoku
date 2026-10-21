@@ -77,10 +77,21 @@ function assertPattern(step: Deduction, notes: number[][]) {
   if (!placements.length) expect(eliminations.length).toBeGreaterThan(0)
 }
 
-function assertSound(step: Deduction, solution: Board, board: Board, notes: number[][]) {
-  expect(findDeduction(board, notes)).toEqual(expect.objectContaining({
-    technique: step.technique, cells: step.cells, placements: step.placements, eliminations: step.eliminations,
+function assertSound(step: Deduction, solution: Board, board: Board, notes: number[][], alternateSwordfishPremise = false) {
+  const detected = findDeduction(board, notes)
+  expect(detected).toEqual(expect.objectContaining({
+    technique: step.technique, digit: step.digit, placements: step.placements, eliminations: step.eliminations,
   }))
+  if (alternateSwordfishPremise) {
+    // Only the second walkthrough may choose this independently valid column
+    // premise. Keep strict detector order for every prior deduction and action.
+    expect(step.technique).toBe('swordfish')
+    expect(step.cells).toEqual([19, 28, 21, 39, 34, 43])
+    expect(detected!.cells).toEqual([0, 5, 45, 49, 50, 76, 77])
+    assertPattern(detected!, notes)
+  } else {
+    expect(detected!.cells).toEqual(step.cells)
+  }
   assertPattern(step, notes)
   for (const { cell, digit } of step.placements) expect(solution[cell]).toBe(digit)
   for (const { cell, digit } of step.eliminations) expect(solution[cell]).not.toBe(digit)
@@ -100,10 +111,12 @@ function assertReplay(scenario: PracticalScenario) {
   expect(board).toEqual(scenario.board)
   expect(notes).toEqual(scenario.candidates)
   expect(enumerate(board, notes).count).toBe(1)
-  for (const step of scenario.steps) {
+  for (const [index, step] of scenario.steps.entries()) {
     expect(step.board).toEqual(board)
     expect(step.candidates).toEqual(notes)
-    assertSound(step, solution, board, notes)
+    const alternatePremise = scenario.id === 'swordfish-2' && index === 0
+    if (alternatePremise) expect(provenance.puzzleId).toBe('practical-search-v1:16379108:2495:transpose:digit-shift-1')
+    assertSound(step, solution, board, notes, alternatePremise)
     notes = apply(board, notes, step)
   }
   expect(board[scenario.target]).toBe(scenario.digit)
@@ -111,10 +124,10 @@ function assertReplay(scenario: PracticalScenario) {
 }
 
 describe('practical puzzle walkthroughs', () => {
-  it('gives every general technique two real positions ending in an actual placement', () => {
+  it('gives X-Wing four real positions and every other technique two, all ending in a placement', () => {
     expect(lessons.map(lesson => lesson.id)).toEqual(TECHNIQUES)
     for (const lesson of lessons) {
-      expect(lesson.scenarios).toHaveLength(2)
+      expect(lesson.scenarios).toHaveLength(lesson.id === 'x-wing' ? 4 : 2)
       expect(lesson.generalTechnique).toBe(lesson.id)
       expect(lesson.summary.length).toBeGreaterThan(20)
       for (const scenario of lesson.scenarios) {
@@ -132,7 +145,7 @@ describe('practical puzzle walkthroughs', () => {
   it('uses different original clue positions and elimination-created direct singles', () => {
     expect(lessons).toHaveLength(8)
     for (const lesson of lessons) {
-      expect(new Set(lesson.scenarios.map(scenario => scenario.provenance.originalPuzzle.join(''))).size).toBe(2)
+      expect(new Set(lesson.scenarios.map(scenario => scenario.provenance.originalPuzzle.join(''))).size).toBe(lesson.scenarios.length)
       for (const scenario of lesson.scenarios) {
         if (lesson.id === 'naked-single' || lesson.id === 'hidden-single') continue
         expect(scenario.steps).toHaveLength(2)
@@ -148,7 +161,7 @@ describe('practical puzzle walkthroughs', () => {
   for (const technique of TECHNIQUES) it(`replays ${technique} from original givens with independent uniqueness and pattern checks`, () => {
     const lesson = lessons.find(item => item.id === technique)
     expect(lesson).toBeDefined()
-    expect(lesson?.scenarios).toHaveLength(2)
+    expect(lesson?.scenarios).toHaveLength(technique === 'x-wing' ? 4 : 2)
     for (const scenario of lesson!.scenarios) assertReplay(scenario)
   })
 
@@ -166,7 +179,7 @@ describe('practical puzzle walkthroughs', () => {
     }
   })
 
-  it('retains verifiable original-source provenance for transformed Swordfish', () => {
+  it('retains verifiable original-source provenance for transformed examples', () => {
     const transformed = lessons.flatMap(lesson => lesson.scenarios).filter(scenario => scenario.provenance.transformation)
     expect(transformed.length).toBeGreaterThan(0)
     for (const { provenance } of transformed) {

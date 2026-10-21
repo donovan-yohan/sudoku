@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react'
 import Board from './Board'
 import type {Deduction} from '../types'
+import type {XWingPattern} from '../practical-lessons'
 import {peers} from '../engine'
 import '../walkthrough.css'
 
@@ -9,11 +10,20 @@ export interface WalkthroughScenario {
  board:number[]
  candidates:number[][]
  evidence?:number[]
- steps:(Omit<Deduction,'technique'>&{technique:string})[]
+ steps:(Omit<Deduction,'technique'>&{technique:string;xWing?:XWingPattern})[]
  target:number
  digit:number
  variant?:'classic'|'x'|'killer'
  cages?:{cells:number[];sum:number}[]
+}
+
+function XWingPossibilities({pattern}:{pattern:XWingPattern}){
+ const {digit,rows,columns}=pattern
+ return <div className="x-wing-possibilities">{[0,1].map(possibility=><table key={possibility}>
+  <caption>Possibility {possibility+1}</caption>
+  <thead><tr><td/><th scope="col">Column {columns[0]+1}</th><th scope="col">Column {columns[1]+1}</th></tr></thead>
+  <tbody>{rows.map((row,r)=><tr key={row}><th scope="row">Row {row+1}</th>{columns.map((column,c)=><td data-cell={row*9+column} key={column}>{(possibility===0?r===c:r!==c)?digit:''}</td>)}</tr>)}</tbody>
+ </table>)}</div>
 }
 
 export default function Walkthrough({title,scenario,onComplete}:{title:string;scenario:WalkthroughScenario;onComplete:()=>void}){
@@ -57,7 +67,7 @@ export default function Walkthrough({title,scenario,onComplete}:{title:string;sc
    <button ref={show} type="button" disabled={!step||revealed} onClick={()=>setRevealed(true)}>Show next step</button>
    <button ref={reset} type="button" className="text-link" onClick={()=>{setApplied(0);setRevealed(false);setSelected(null)}}>Reset</button>
   </div>
-  {revealed&&step&&<div className="lesson-step" role="status"><h3>{placement?applyLabel:step.technique.replaceAll('-',' ')}</h3><p>{step.explanation}</p><button type="button" className="primary-button" onClick={apply}>{applyLabel}</button></div>}
+  {revealed&&step&&<div className="lesson-step" role="status"><h3>{placement?applyLabel:step.technique.replaceAll('-',' ')}</h3><div className="step-explanation">{step.explanation.split('\n\n').map((paragraph,index)=><p key={index}>{index>0?'\n\n':''}{paragraph}</p>)}</div>{step.xWing&&<XWingPossibilities pattern={step.xWing}/>}<button type="button" className="primary-button" onClick={apply}>{applyLabel}</button></div>}
   {!step&&<p className="walkthrough-result" role="status">{`r${Math.floor(scenario.target/9)+1}c${scenario.target%9+1} = ${scenario.digit}`}</p>}
  </section>
 }
