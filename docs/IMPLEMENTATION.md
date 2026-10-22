@@ -12,24 +12,24 @@ Types live in src/types.ts. Arrays use zero-based row-major cell indices 0..80; 
 - solve(board:Board): Board|null
 - countSolutions(board:Board,limit=2): number
 - isValidBoard(board:unknown): board is Board (shape/range/givens consistent)
-- findDeduction(board:Board,candidatesOverride?:number[][]): Deduction|null
-- ratePuzzle(board:Board): {difficulty:Difficulty;techniques:Technique[];solved:boolean}
+- findDeduction(board:Board,candidatesOverride?:number[][],options?:LogicalOptions): Deduction|null
 
-findDeduction checks techniques in increasing order. Use full candidate state; override permits retained proven eliminations. Explanations name actual coordinates/evidence. Honest null if unsupported; no solution reveal disguised as hint.
+findDeduction checks techniques in increasing tier order using the shared policy in `src/solver-policy.ts`. Use full candidate state; override permits retained proven eliminations, never player notes. All scans charge the caller's work ledger. Explanations name actual coordinates/evidence. Honest null if unsupported; budget exhaustion is separate and never a difficulty label. `src/expert-patterns.ts` implements additional subsets, wings and fish. `src/inference-chains.ts` provides bounded coloring and X-/XY-/AIC endpoint proofs, initially qualified for Classic. `rateVariant` is the sole public logical rating implementation; the divergent legacy rater has been removed.
 
-## Puzzle exports (src/puzzles.ts)
+## Original authoring sources (src/puzzles.ts)
 
 - DIFFICULTIES: Difficulty[]
-- getDailyPuzzle(date:string,difficulty:Difficulty): Puzzle
-- getPracticePuzzle(difficulty:Difficulty,seed:string): Puzzle
+- CATALOG: original clue strings grouped by historical authoring labels
 
-These unchanged v1 helpers preserve existing saved puzzles and supply a certified Classic fallback. Sudoku symmetries preserve uniqueness, but transformed boards are rerated because detector order can change the operational tier.
+This module contains provenance data, not a runtime daily/practice selector. The legacy selector and save probes have been removed. Runtime fallbacks come only from the independently checked, re-rated variant bank. Sudoku symmetries preserve uniqueness, but transformed boards are rerated because detector order can change the operational tier.
 
-New play uses `generatedDailyRequest(date,variant,difficulty)` or `generatedPracticeRequest(seed,variant,difficulty)` from `src/generated-puzzles.ts`. IDs include v2, daily/practice, UTC date or nonce, variant and difficulty. `src/generation-client.ts` creates a worker for the selected request and terminates it on cancellation. App checks request serials before adopting a result. A saved v1 puzzle remains reachable under its original identity.
+Play uses `generatedDailyRequest(date,variant,difficulty)` or `generatedPracticeRequest(seed,variant,difficulty)` from `src/generated-puzzles.ts`. IDs include v3, daily/practice, UTC date or nonce, variant and difficulty. `src/generation-client.ts` creates a worker for the selected request and terminates it on cancellation. App checks request serials before adopting a result. Games and navigation use `sudoku-game-v2:` and `sudoku-session-v2`; historical records are ignored without migration or clearing unrelated storage. Loading placeholders are never persisted.
 
 `src/variant-engine.ts` owns validated rules, variant peers/candidates, bounded exact search, logical deductions and ratings. Killer cages form a complete connected partition, with distinct digits and exact sums. Search exhaustion is never uniqueness. `src/variant-generator.ts` creates original randomized MRV completions and generous Beginner positions. Classic/X Beginner has 45 givens, several immediate singles and a complete naked-single path. Killer Beginner has no numeric givens, small cages and singleton-sum entry points.
 
 Harder Classic/X generation has a fixed operation budget, then uses independently certified, rerated templates if needed. Harder Killer currently uses a finite certified template bank with spatial symmetries, not digit permutations that could invalidate cage sums. Random practice is not a promise of infinitely distinct hard structures. Generator metadata retains origin/fallback information; no wall-clock deadline changes daily content. The independent grouped-assignment oracle is `scripts/variant-oracle.mjs`.
+
+`scripts/search-expert-puzzles.mjs` constructs original full puzzles offline using randomized complete grids and uniqueness-preserving clue removal. `scripts/recertify-variant-seeds.mjs` independently checks their unique solutions and updates the bank's actual current tier, trace-family list and workload profile. Old labels may fall when newly available easier deductions solve a source. The profile records operations, not elapsed time or an empirical human score. Offline editorial scheduling and a separate Master admission tier remain follow-on work.
 
 ## Game exports (src/game.ts, parent-owned)
 
@@ -67,4 +67,4 @@ Learning separates General, X Sudoku and Killer Sudoku catalogs. General techniq
 
 X-Wing has four examples, two per orientation. Optional typed rectangle metadata supports two read-only possibility tables alongside the revealed case-by-case explanation. Hypotheses never become board entries; only the recorded eliminations and final placement advance the walkthrough. The additional examples replay transformed original clues, not hand-transformed candidate snapshots. Sharing metadata uses `Daily Sudoku` and one approved 1200×630 PNG.
 
-Naked triple, Swordfish and XY-Wing explanations name full relevant candidate lists, the causal argument and the target's before/after domains. Swordfish covers row- and column-based reasoning. Its second example chooses an independently validated alternative premise at the identical recorded state without changing detector actions or prior history. Tests keep that exception local to the displayed teaching step.
+Naked triple, Swordfish and XY-Wing explanations name full relevant candidate lists, the causal argument and the target's before/after domains. Swordfish covers row- and column-based reasoning. Authored proof paths are checked independently for rule premises, retained domains, uniqueness and forced actions. They need not be the new greedy selector's preferred path. A different available deduction does not invalidate a mathematically sound teaching example.

@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /** Offline, deterministic extraction of real engine walkthroughs.
- * node scripts/generate-practical-lessons.mjs [--attempts 3000] [--output path]
+ * node scripts/generate-practical-lessons.mjs [--attempts 3000] [--output path] [--fresh]
+ * By default re-certify retained authoring proofs; --fresh searches new traces.
  * Never invent candidate domains: every state starts at original givens and is
- * reached by findDeduction, preserving all earlier placements and eliminations.
+ * reached by valid deductions, preserving all earlier placements/eliminations.
  */
 import { registerHooks } from 'node:module'
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { deepStrictEqual } from 'node:assert'
 
 // Node strips TypeScript but its ESM resolver needs source extensions.
 registerHooks({
@@ -17,14 +19,13 @@ registerHooks({
     }
   },
 })
-const { CATALOG, getPracticePuzzle } = await import('../src/puzzles.ts')
+const { CATALOG } = await import('../src/puzzles.ts')
 const { candidates, countSolutions, findDeduction, UNITS } = await import('../src/engine.ts')
 const { enumerate } = await import('./independent-oracle.mjs')
 const args = process.argv.slice(2)
 const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name) + 1] : fallback
 const output = option('--output', new URL('../src/practical-lesson-data.json', import.meta.url))
 const attempts = Number(option('--attempts', '3000'))
-const practiceAttempts = Number(option('--practice-attempts', '48'))
 const seed = Number(option('--seed', '16379108')) >>> 0
 let state = seed
 const random = () => { state += 0x6D2B79F5; let t = state; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296 }
@@ -212,10 +213,11 @@ function inspect(originalPuzzle, provenance, { onlyTechnique, limit = 2 } = {}) 
     const nextBoard = board.slice(), nextNotes = apply(nextBoard, clone(notes), deduction)
     const next = findDeduction(nextBoard, nextNotes)
     const placement = deduction.placements[0] ?? (next?.technique === 'naked-single' ? next.placements[0] : undefined)
-    const repeatedSource = found[deduction.technique].some(scenario => scenario.provenance.originalPuzzle.join('') === originalPuzzle.join(''))
+    const examples = found[deduction.technique]
+    const repeatedSource = examples?.some(scenario => scenario.provenance.originalPuzzle.join('') === originalPuzzle.join(''))
     // Prefer a direct single created by the elimination, not an unrelated
     // advanced bridge. Two examples must come from different clue positions.
-    if (placement && (!onlyTechnique || deduction.technique === onlyTechnique) && !repeatedSource && found[deduction.technique].length < limit && board.filter(Boolean).length >= 22) {
+    if (examples && placement && (!onlyTechnique || deduction.technique === onlyTechnique) && !repeatedSource && examples.length < limit && board.filter(Boolean).length >= 22) {
       const steps = [{ ...clone(deduction), board: board.slice(), candidates: clone(notes) }]
       if (!deduction.placements.length) steps.push({ ...clone(next), board: nextBoard.slice(), candidates: clone(nextNotes) })
       if (deduction.technique === 'x-wing') {
@@ -253,7 +255,84 @@ function inspect(originalPuzzle, provenance, { onlyTechnique, limit = 2 } = {}) 
     board = nextBoard; notes = nextNotes; priorSteps.push(clone(deduction))
   }
 }
-const complete = () => Object.values(found).every(list => list.length === 2)
+const complete = () => metadata.every(([id]) => found[id].length === (id === 'x-wing' ? 4 : 2))
+// A stronger detector may choose an easier valid rule before an authored lesson.
+// Re-certify existing proofs from their original clues instead of inventing late
+// domains or retaining an obsolete selector just to reproduce its greedy order.
+const authored = JSON.parse(readFileSync(new URL('../src/practical-lesson-data.json', import.meta.url), 'utf8'))
+const sameCells = (a, b) => a.length === b.length && a.every(cell => b.includes(cell))
+const allCells = Array.from({ length: 81 }, (_, cell) => cell)
+const sees = (a, b) => a !== b && UNITS.some(unit => unit.includes(a) && unit.includes(b))
+function certifyAuthored(scenario) {
+  const original = scenario.provenance.originalPuzzle, oracle = enumerate(original)
+  if (oracle.count !== 1) throw new Error(`Nonunique authored source ${scenario.id}`)
+  let board = original.slice(), notes = candidates(board)
+  function check(step) {
+    const { technique, cells, digit, placements, eliminations } = step
+    const fail = () => { throw new Error(`Invalid authored ${technique} premise in ${scenario.id}`) }
+    if (!cells.length || new Set(cells).size !== cells.length) fail()
+    for (const { cell, digit: value } of [...placements, ...eliminations]) if (board[cell] || !notes[cell].includes(value)) fail()
+    if (technique === 'naked-single' || technique === 'hidden-single') {
+      if (placements.length !== 1 || eliminations.length || !sameCells(cells, [placements[0].cell]) || digit !== placements[0].digit) fail()
+      if (technique === 'naked-single' ? !sameCells(notes[cells[0]], [digit]) : !UNITS.some(unit => sameCells(unit.filter(cell => notes[cell].includes(digit)), cells))) fail()
+    } else {
+      if (placements.length || !eliminations.length) fail()
+      if (technique === 'naked-pair' || technique === 'naked-triple') {
+        const size = technique === 'naked-pair' ? 2 : 3, digits = [...new Set(cells.flatMap(cell => notes[cell]))]
+        if (cells.length !== size || digits.length !== size || cells.some(cell => notes[cell].length < 2 || notes[cell].length > size) || !UNITS.some(unit => cells.every(cell => unit.includes(cell)) && eliminations.every(action => unit.includes(action.cell) && !cells.includes(action.cell) && digits.includes(action.digit)))) fail()
+      } else if (technique === 'locked-candidates') {
+        if (!UNITS.some((source, i) => sameCells(source.filter(cell => notes[cell].includes(digit)), cells) && UNITS.some((target, j) => (i >= 18) !== (j >= 18) && cells.every(cell => target.includes(cell)) && eliminations.every(action => action.digit === digit && target.includes(action.cell) && !source.includes(action.cell))))) fail()
+      } else if (technique === 'x-wing' || technique === 'swordfish') {
+        const size = technique === 'x-wing' ? 2 : 3
+        if (![false, true].some(transpose => {
+          const base = cell => transpose ? cell % 9 : Math.floor(cell / 9), cover = cell => transpose ? Math.floor(cell / 9) : cell % 9
+          const bases = [...new Set(cells.map(base))], covers = [...new Set(cells.map(cover))]
+          return bases.length === size && covers.length === size && bases.every(line => {
+            const actual = allCells.filter(cell => base(cell) === line && notes[cell].includes(digit))
+            return actual.length >= 2 && actual.length <= size && sameCells(actual, cells.filter(cell => base(cell) === line))
+          }) && eliminations.every(action => action.digit === digit && covers.includes(cover(action.cell)) && !bases.includes(base(action.cell)))
+        })) fail()
+      } else if (technique === 'xy-wing') {
+        const [pivot, a, b] = cells, [x, y] = notes[pivot], z = digit
+        if (cells.length !== 3 || cells.some(cell => notes[cell].length !== 2) || new Set([x, y, z]).size !== 3 || !sameCells(notes[a], [x, z]) || !sameCells(notes[b], [y, z]) || !sees(pivot, a) || !sees(pivot, b) || !eliminations.every(action => action.digit === z && sees(a, action.cell) && sees(b, action.cell))) fail()
+      } else fail()
+    }
+    const current = enumerate(board, notes)
+    if (current.count !== 1) fail()
+    deepStrictEqual(current.first, oracle.first)
+    for (const { cell, digit: value } of placements) {
+      if (enumerate(board, notes.map((list, index) => index === cell ? list.filter(d => d !== value) : list)).count !== 0) fail()
+    }
+    for (const { cell, digit: value } of eliminations) {
+      if (enumerate(board, notes.map((list, index) => index === cell ? [value] : list)).count !== 0) fail()
+    }
+    notes = apply(board, notes, step)
+  }
+  for (const step of scenario.provenance.priorSteps) check(step)
+  deepStrictEqual(board, scenario.board)
+  deepStrictEqual(notes, scenario.candidates)
+  const first = scenario.steps[0]
+  if (first.technique === 'hidden-single') {
+    if (!UNITS.some(unit => sameCells(unit, scenario.evidence) && sameCells(unit.filter(cell => notes[cell].includes(first.digit)), [scenario.target]))) throw new Error(`Invalid authored evidence ${scenario.id}`)
+  } else deepStrictEqual(scenario.evidence, first.cells)
+  if (first.eliminations.length) {
+    if (scenario.steps.length !== 2 || scenario.steps[1].technique !== 'naked-single' || notes[scenario.target].length < 2 || !first.eliminations.some(action => action.cell === scenario.target)) throw new Error(`Noncausal authored finish ${scenario.id}`)
+  }
+  for (const step of scenario.steps) {
+    deepStrictEqual(board, step.board)
+    deepStrictEqual(notes, step.candidates)
+    check(step)
+  }
+  if (board[scenario.target] !== scenario.digit || oracle.first[scenario.target] !== scenario.digit) throw new Error(`Invalid authored target ${scenario.id}`)
+  return clone(scenario)
+}
+if (!args.includes('--fresh')) {
+  for (const lesson of authored) found[lesson.id] = lesson.scenarios.map(certifyAuthored)
+  if (!complete()) throw new Error('Incomplete original authoring proofs')
+  writeFileSync(output, `${JSON.stringify(authored, null, 2)}\n`)
+  console.log(JSON.stringify({ certified: authored.flatMap(lesson => lesson.scenarios).length, counts: Object.fromEntries(Object.entries(found).map(([id, list]) => [id, list.length])) }, null, 2))
+  process.exit(0)
+}
 for (const [tier, bank] of Object.entries(CATALOG)) for (const [index, text] of bank.entries()) {
   stats.catalog++
   inspect([...text].map(Number), { source: 'catalog', puzzleId: `catalog:${tier}:${index}` })
@@ -272,10 +351,21 @@ inspect(swordfishTransformed, {
   seed: '16379108', attempt: 2495, sourcePuzzle: swordfishSource,
   transformation: { transpose: true, digitShift: 1 },
 })
-for (let attempt = 0; attempt < practiceAttempts && !complete(); attempt++) for (const tier of ['intermediate', 'advanced', 'expert']) {
-  const practiceSeed = `practical-${attempt}`, puzzle = getPracticePuzzle(tier, practiceSeed)
+// Exact original authoring outputs. The retired v1 daily/practice resolver is
+// not a regeneration dependency; these clues still start a complete legal replay.
+const originalPracticeSources = [
+  {
+    clues: '060000802000104000950000000070000003000800560000091040210080030700030200006000000',
+    puzzleId: 'v1:practice:practical-1:intermediate:1:0', seed: 'practical-1', tier: 'intermediate',
+  },
+  {
+    clues: '000000100500000000017080400000040006608300000030017090000472000000000600900100530',
+    puzzleId: 'v1:practice:practical-2:advanced:3:0', seed: 'practical-2', tier: 'advanced',
+  },
+]
+for (const { clues, ...provenance } of originalPracticeSources) {
   stats.practice++
-  inspect(puzzle.givens, { source: 'practice', puzzleId: puzzle.id, seed: practiceSeed, tier })
+  inspect([...clues].map(Number), { source: 'practice', ...provenance })
 }
 function fullGrid() {
   const board = Array(81).fill(0), digits = [1,2,3,4,5,6,7,8,9]

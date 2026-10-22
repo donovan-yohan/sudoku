@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { UNITS, peers, candidates, isValidBoard, solve, countSolutions, findDeduction, ratePuzzle } from './engine'
+import { UNITS, peers, candidates, isValidBoard, solve, countSolutions, findDeduction } from './engine'
+import { rateVariant } from './variant-engine'
 
 import type { Technique } from './types'
 const blank = () => Array(81).fill(0)
@@ -75,14 +76,14 @@ describe('single deductions', () => {
 describe('logical rating', () => {
   it('rates singles as beginner independently of clue count and preserves input', () => {
     const puzzle = complete.slice(); puzzle[0] = 0
-    expect(ratePuzzle(puzzle)).toEqual({ difficulty: 'beginner', techniques: ['naked-single'], solved: true })
+    expect(rateVariant(puzzle, { variant: 'classic' })).toMatchObject({ logicalDifficulty: 'beginner', techniques: ['naked-single'], solved: true })
     expect(puzzle[0]).toBe(0)
-    expect(ratePuzzle(complete)).toEqual({ difficulty: 'beginner', techniques: [], solved: true })
+    expect(rateVariant(complete, { variant: 'classic' })).toMatchObject({ logicalDifficulty: 'beginner', techniques: [], solved: true })
   })
   it('honestly marks unsupported and invalid puzzles unsolved', () => {
-    expect(ratePuzzle(blank()).solved).toBe(false)
-    expect(ratePuzzle([1]).solved).toBe(false)
-    expect(ratePuzzle(blank()).techniques).toEqual([])
+    expect(rateVariant(blank(), { variant: 'classic' }).solved).toBe(false)
+    expect(rateVariant([1], { variant: 'classic' }).solved).toBe(false)
+    expect(rateVariant(blank(), { variant: 'classic' }).techniques).toEqual([])
   })
 })
 

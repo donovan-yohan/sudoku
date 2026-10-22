@@ -1,6 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
 import { getDailyPuzzle, generateRequestedPuzzle, generatedPracticeRequest, waitForBoard, waitForSavedGame } from './puzzle-fixture'
-import { getDailyPuzzle as getLegacyDailyPuzzle } from '../src/puzzles'
 import { createGame } from '../src/game'
 import type { Difficulty } from '../src/types'
 import type { GameVariant } from '../src/variant-engine'
@@ -26,18 +25,18 @@ for (const variant of variants) test(`actual worker preserves distinct daily and
   await page.clock.install({ time: new Date('2026-10-21T12:00:00Z') })
   const workers: string[] = []
   page.on('worker', worker => workers.push(worker.url()))
-  await page.goto('/'); await waitForBoard(page, 'v2:daily:2026-10-21:classic:beginner')
+  await page.goto('/'); await waitForBoard(page, 'v3:daily:2026-10-21:classic:beginner')
   await page.getByLabel('Game mode', { exact: true }).selectOption(variant)
-  await waitForBoard(page, `v2:daily:2026-10-21:${variant}:beginner`)
+  await waitForBoard(page, `v3:daily:2026-10-21:${variant}:beginner`)
   await page.getByLabel('Puzzle date', { exact: true }).fill(date)
-  await waitForBoard(page, `v2:daily:${date}:${variant}:beginner`)
+  await waitForBoard(page, `v3:daily:${date}:${variant}:beginner`)
   await expect(page.getByRole('group', { name: 'Difficulty', exact: true }).getByRole('button')).toHaveCount(levels(variant).length)
   if (variant !== 'classic') await expect(page.getByRole('button', { name: 'Expert', exact: true })).toHaveCount(0)
   const daily = new Map<Difficulty, Awaited<ReturnType<typeof snapshot>>>()
   const practice = new Map<Difficulty, { id: string; position: Awaited<ReturnType<typeof snapshot>> }>()
   for (const level of levels(variant)) {
     await page.getByRole('button', { name: title(level), exact: true }).click()
-    await waitForBoard(page, `v2:daily:${date}:${variant}:${level}`)
+    await waitForBoard(page, `v3:daily:${date}:${variant}:${level}`)
     await expectGivens(page, getDailyPuzzle(date, level, variant).givens)
     const cell = page.getByRole('gridcell', { name: /empty/ }).first()
     await cell.click(); await cell.press('n'); await cell.press('3')
@@ -46,12 +45,12 @@ for (const variant of variants) test(`actual worker preserves distinct daily and
     daily.set(level, await snapshot(page))
   }
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
-  await waitForBoard(page, new RegExp(`^v2:practice:.*:${variant}:${levels(variant).at(-1)}$`))
+  await waitForBoard(page, new RegExp(`^v3:practice:.*:${variant}:${levels(variant).at(-1)}$`))
   for (const level of levels(variant)) {
     await page.getByRole('button', { name: title(level), exact: true }).click()
-    await waitForBoard(page, new RegExp(`^v2:practice:.*:${variant}:${level}$`))
+    await waitForBoard(page, new RegExp(`^v3:practice:.*:${variant}:${level}$`))
     const id = (await page.locator('.board-column').getAttribute('data-puzzle-id'))!
-    const seed = id.slice('v2:practice:'.length, -`:${variant}:${level}`.length)
+    const seed = id.slice('v3:practice:'.length, -`:${variant}:${level}`.length)
     await expectGivens(page, generateRequestedPuzzle(generatedPracticeRequest(seed, variant, level)).givens)
     const cell = page.getByRole('gridcell', { name: /empty/ }).first()
     await cell.click(); await cell.press('n'); await cell.press('6')
@@ -67,10 +66,10 @@ for (const variant of variants) test(`actual worker preserves distinct daily and
     expect(await snapshot(page)).toEqual(practice.get(level)!.position)
   }
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
-  await waitForBoard(page, `v2:daily:${date}:${variant}:${levels(variant).at(-1)}`)
+  await waitForBoard(page, `v3:daily:${date}:${variant}:${levels(variant).at(-1)}`)
   for (const level of levels(variant)) {
     await page.getByRole('button', { name: title(level), exact: true }).click()
-    await waitForBoard(page, `v2:daily:${date}:${variant}:${level}`)
+    await waitForBoard(page, `v3:daily:${date}:${variant}:${level}`)
     expect(await snapshot(page)).toEqual(daily.get(level))
   }
   expect(workers.some(url => url.includes('generation.worker'))).toBe(true)
@@ -79,37 +78,37 @@ for (const variant of variants) test(`actual worker preserves distinct daily and
 test('switching variants keeps each practice seed and daily edit isolated in one session', async ({ page }) => {
   test.setTimeout(90_000)
   await page.clock.install({ time: new Date('2026-10-21T12:00:00Z') })
-  await page.goto('/'); await waitForBoard(page, 'v2:daily:2026-10-21:classic:beginner')
+  await page.goto('/'); await waitForBoard(page, 'v3:daily:2026-10-21:classic:beginner')
   const saved = new Map<GameVariant, { daily: Awaited<ReturnType<typeof snapshot>>; practice: Awaited<ReturnType<typeof snapshot>>; id: string }>()
   for (const variant of variants) {
     await page.getByLabel('Game mode', { exact: true }).selectOption(variant)
-    await waitForBoard(page, `v2:daily:2026-10-21:${variant}:beginner`)
+    await waitForBoard(page, `v3:daily:2026-10-21:${variant}:beginner`)
     const dailyCell = page.getByRole('gridcell', { name: /empty/ }).first()
     await dailyCell.click(); await dailyCell.press('n'); await dailyCell.press('2')
     await expect(dailyCell).toHaveAccessibleName(/notes 2/)
     await waitForSavedGame(page)
     const daily = await snapshot(page)
     await page.getByRole('button', { name: 'Practice', exact: true }).click()
-    await waitForBoard(page, new RegExp(`^v2:practice:.*:${variant}:beginner$`))
+    await waitForBoard(page, new RegExp(`^v3:practice:.*:${variant}:beginner$`))
     const practiceCell = page.getByRole('gridcell', { name: /empty/ }).first()
     await practiceCell.click(); await practiceCell.press('n'); await practiceCell.press('8')
     await expect(practiceCell).toHaveAccessibleName(/notes 8/)
     await waitForSavedGame(page)
     saved.set(variant, { daily, practice: await snapshot(page), id: (await page.locator('.board-column').getAttribute('data-puzzle-id'))! })
     await page.getByRole('button', { name: 'Daily', exact: true }).click()
-    await waitForBoard(page, `v2:daily:2026-10-21:${variant}:beginner`)
+    await waitForBoard(page, `v3:daily:2026-10-21:${variant}:beginner`)
     expect(await snapshot(page)).toEqual(daily)
   }
-  await waitForSavedGame(page); await page.reload(); await waitForBoard(page, 'v2:daily:2026-10-21:killer:beginner')
+  await waitForSavedGame(page); await page.reload(); await waitForBoard(page, 'v3:daily:2026-10-21:killer:beginner')
   for (const variant of variants) {
     await page.getByLabel('Game mode', { exact: true }).selectOption(variant)
-    await waitForBoard(page, `v2:daily:2026-10-21:${variant}:beginner`)
+    await waitForBoard(page, `v3:daily:2026-10-21:${variant}:beginner`)
     expect(await snapshot(page)).toEqual(saved.get(variant)!.daily)
     await page.getByRole('button', { name: 'Practice', exact: true }).click()
     await waitForBoard(page, saved.get(variant)!.id)
     expect(await snapshot(page)).toEqual(saved.get(variant)!.practice)
     await page.getByRole('button', { name: 'Daily', exact: true }).click()
-    await waitForBoard(page, `v2:daily:2026-10-21:${variant}:beginner`)
+    await waitForBoard(page, `v3:daily:2026-10-21:${variant}:beginner`)
   }
 })
 
@@ -117,14 +116,14 @@ for (const variant of variants) test(`fresh ${variant} beginner uses the real wo
   await page.goto('/'); await waitForBoard(page)
   const today = await page.locator('time').getAttribute('datetime')
   await page.getByLabel('Game mode', { exact: true }).selectOption(variant)
-  await waitForBoard(page, `v2:daily:${today}:${variant}:beginner`)
+  await waitForBoard(page, `v3:daily:${today}:${variant}:beginner`)
   await expect(page.locator('.cell.given')).toHaveCount(variant === 'killer' ? 0 : 45)
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
-  await waitForBoard(page, new RegExp(`^v2:practice:.*:${variant}:beginner$`))
+  await waitForBoard(page, new RegExp(`^v3:practice:.*:${variant}:beginner$`))
   const beforeId = await page.locator('.board-column').getAttribute('data-puzzle-id')
   const before = await snapshot(page)
   await page.getByRole('button', { name: 'New practice puzzle', exact: true }).click()
-  await waitForBoard(page, new RegExp(`^v2:practice:.*:${variant}:beginner$`))
+  await waitForBoard(page, new RegExp(`^v3:practice:.*:${variant}:beginner$`))
   await expect(page.locator('.board-column')).not.toHaveAttribute('data-puzzle-id', beforeId!)
   await expect(page.locator('.cell.given')).toHaveCount(variant === 'killer' ? 0 : 45)
   expect(await snapshot(page)).not.toEqual(before)
@@ -144,12 +143,12 @@ test('same UTC seed produces exactly matching worker boards across isolated time
     const pages = await Promise.all(contexts.map(context => context.newPage()))
     await Promise.all(pages.map(async page => {
       await page.clock.install({ time: new Date('2026-10-21T00:30:00Z') })
-      await page.goto('/'); await waitForBoard(page, 'v2:daily:2026-10-21:classic:beginner')
+      await page.goto('/'); await waitForBoard(page, 'v3:daily:2026-10-21:classic:beginner')
     }))
     for (const variant of variants) {
       await Promise.all(pages.map(async page => {
         await page.getByLabel('Game mode', { exact: true }).selectOption(variant)
-        await waitForBoard(page, `v2:daily:2026-10-21:${variant}:beginner`)
+        await waitForBoard(page, `v3:daily:2026-10-21:${variant}:beginner`)
         await expect(page.getByLabel('Puzzle date', { exact: true })).toHaveValue('2026-10-21')
         await expectGivens(page, getDailyPuzzle('2026-10-21', 'beginner', variant).givens)
       }))
@@ -184,7 +183,7 @@ test('rapid mode date and difficulty navigation cancels actual workers and the l
   await page.getByLabel('Game mode', { exact: true }).selectOption('killer')
   await page.getByLabel('Game mode', { exact: true }).selectOption('classic')
   await page.getByRole('button', { name: 'Beginner', exact: true }).click()
-  const id = 'v2:daily:2026-01-12:classic:beginner'
+  const id = 'v3:daily:2026-01-12:classic:beginner'
   await waitForBoard(page, id)
   await expectGivens(page, getDailyPuzzle('2026-01-12', 'beginner').givens)
   await expect.poll(() => page.evaluate(() => (window as unknown as { generationRecords: { terminated: boolean }[] }).generationRecords.every(record => record.terminated))).toBe(true)
@@ -200,29 +199,49 @@ test('rapid mode date and difficulty navigation cancels actual workers and the l
   expect(await snapshot(page)).toEqual(settled)
 })
 
-test('valid legacy v1 daily progress remains accessible through navigation and reload', async ({ page }) => {
-  const legacy = getLegacyDailyPuzzle(date, 'beginner')
-  const state = createGame(legacy)
-  const target = legacy.givens.indexOf(0)
-  state.notes[target] = [2, 6]; state.selected = target; state.noteMode = true
-  await page.clock.install({ time: new Date('2026-10-21T12:00:00Z') })
-  await page.addInitScript(({ state, date }) => {
-    if (localStorage.getItem('legacy-fixture-installed')) return
-    localStorage.setItem('sudoku-session-v1', JSON.stringify({ version: 1, mode: 'daily', dailyDate: date, difficulty: 'beginner', practiceSeeds: {} }))
-    localStorage.setItem(`sudoku-game-v1:${state.puzzleId}`, JSON.stringify(state))
-    localStorage.setItem('legacy-fixture-installed', 'yes')
-  }, { state, date })
-  await page.goto('/'); await waitForBoard(page, legacy.id)
-  await expect(page.locator(`[data-cell="${target}"]`)).toHaveAccessibleName(/notes 2, 6/)
+test('obsolete saves are ignored and current progress survives navigation and reload', async ({ page }) => {
+  const today = '2026-10-21'
+  const current = getDailyPuzzle(today, 'beginner')
+  // A matching content id under an obsolete storage key must not bypass generation.
+  const obsolete = createGame(current)
+  const target = current.givens.indexOf(0)
+  obsolete.notes[target] = [2, 6]; obsolete.selected = target; obsolete.noteMode = true
+  const oldSession = JSON.stringify({ version: 1, mode: 'daily', dailyDate: date, difficulty: 'expert', practiceSeeds: {}, generator: 'v2' })
+  const oldGame = JSON.stringify(obsolete)
+  const workers: string[] = []
+  page.on('worker', worker => workers.push(worker.url()))
+  await page.clock.install({ time: new Date(`${today}T12:00:00Z`) })
+  await page.addInitScript(({ oldSession, oldGame, id }) => {
+    if (localStorage.getItem('obsolete-fixture-installed')) return
+    localStorage.setItem('sudoku-session-v1', oldSession)
+    localStorage.setItem(`sudoku-game-v1:${id}`, oldGame)
+    localStorage.setItem('sudoku-theme', 'dark')
+    localStorage.setItem('sudoku-effects', 'off')
+    localStorage.setItem('sudoku-show-mistakes', 'on')
+    localStorage.setItem('obsolete-fixture-installed', 'yes')
+  }, { oldSession, oldGame, id: current.id })
+  await page.goto('/'); await waitForBoard(page, current.id)
+  await expectGivens(page, current.givens)
+  await expect(page.locator(`[data-cell="${target}"]`)).toHaveAccessibleName(/empty/)
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await page.getByRole('button', { name: 'Settings', exact: true }).click()
+  await expect(page.getByLabel('Completion effects', { exact: true })).not.toBeChecked()
+  await expect(page.getByLabel('Show mistakes', { exact: true })).toBeChecked()
+  await page.getByRole('button', { name: 'Close', exact: true }).click()
+  const cell = page.locator(`[data-cell="${target}"]`)
+  await cell.click(); await cell.press('n'); await cell.press('3')
+  await expect(cell).toHaveAccessibleName(/notes 3/)
+  await waitForSavedGame(page)
   const before = await snapshot(page)
-  await page.getByRole('button', { name: 'Next day', exact: true }).click(); await waitForBoard(page, 'v2:daily:2026-01-16:classic:beginner')
-  await page.getByRole('button', { name: 'Previous day', exact: true }).click(); await waitForBoard(page, legacy.id)
+  await page.getByRole('button', { name: 'Previous day', exact: true }).click(); await waitForBoard(page, 'v3:daily:2026-10-20:classic:beginner')
+  await page.getByRole('button', { name: 'Next day', exact: true }).click(); await waitForBoard(page, current.id)
   expect(await snapshot(page)).toEqual(before)
   await page.getByRole('button', { name: 'Learn', exact: true }).click()
-  await page.getByRole('button', { name: 'Daily', exact: true }).click(); await waitForBoard(page, legacy.id)
+  await page.getByRole('button', { name: 'Daily', exact: true }).click(); await waitForBoard(page, current.id)
   expect(await snapshot(page)).toEqual(before)
-  // Legacy resumes can be stored in a v2 navigation session without rewriting the save itself.
-  await page.reload(); await waitForBoard(page, legacy.id)
+  await waitForSavedGame(page)
+  await page.reload(); await waitForBoard(page, current.id)
   expect(await snapshot(page)).toEqual(before)
-  expect(await page.evaluate(id => JSON.parse(localStorage.getItem(`sudoku-game-v1:${id}`)!).notes, legacy.id)).toEqual(state.notes)
+  expect(workers.some(url => url.includes('generation.worker'))).toBe(true)
+  expect(await page.evaluate(id => ({ session: localStorage.getItem('sudoku-session-v1'), game: localStorage.getItem(`sudoku-game-v1:${id}`) }), current.id)).toEqual({ session: oldSession, game: oldGame })
 })

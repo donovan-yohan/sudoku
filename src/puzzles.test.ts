@@ -1,76 +1,71 @@
 import { describe, expect, it } from 'vitest'
-import { CATALOG, DIFFICULTIES, getDailyPuzzle, getPracticePuzzle } from './puzzles'
-import { candidates, countSolutions, findDeduction, isValidBoard, ratePuzzle, solve } from './engine'
-import type { Puzzle } from './types'
+import * as historicalSources from './puzzles'
+import { CATALOG, DIFFICULTIES } from './puzzles'
+import { candidates, countSolutions, isValidBoard, solve } from './engine'
+import { rateVariant, type VariantRating } from './variant-engine'
+import type { Board } from './types'
+// @ts-expect-error standalone .mjs test oracle has no declaration file
+import { enumerate } from '../scripts/independent-oracle.mjs'
 
-function proveLogicalSolve(puzzle: Puzzle) {
-  const values = puzzle.givens.slice()
+function proveLogicalSolve(givens: Board, solution: Board, rating: VariantRating) {
+  const values = givens.slice()
   let notes = candidates(values)
-  let steps = 0
-  while (values.includes(0) && steps++ < 810) {
-    const deduction = findDeduction(values, notes)
-    expect(deduction, `stalled at step ${steps} for ${puzzle.id}`).not.toBeNull()
-    if (!deduction) break
+  expect(rating.trace.length).toBeGreaterThan(0)
+  expect(rating.trace.length).toBeLessThan(810)
+  for (const deduction of rating.trace) {
+    expect(deduction.placements.length + deduction.eliminations.length).toBeGreaterThan(0)
     for (const { cell, digit } of deduction.placements) {
-      expect(puzzle.solution[cell]).toBe(digit)
+      expect(values[cell]).toBe(0)
+      expect(notes[cell]).toContain(digit)
+      expect(solution[cell]).toBe(digit)
       values[cell] = digit
     }
     for (const { cell, digit } of deduction.eliminations) {
-      expect(puzzle.solution[cell], `${deduction.technique} removed solution at ${cell}`).not.toBe(digit)
+      expect(solution[cell], `${deduction.technique} removed solution at ${cell}`).not.toBe(digit)
       expect(notes[cell]).toContain(digit)
       notes[cell] = notes[cell].filter(d => d !== digit)
     }
     const legal = candidates(values)
     notes = notes.map((list, cell) => list.filter(d => legal[cell].includes(d)))
+    expect(isValidBoard(values)).toBe(true)
   }
-  expect(values).toEqual(puzzle.solution)
+  expect(values).toEqual(solution)
+  expect(rating.techniques).toEqual([...new Set(rating.trace.map(step => step.technique))])
 }
 
-describe('original offline catalog', () => {
-  it('has four structurally different original bases per tier with exact logical ratings and uniqueness', () => {
+describe('original offline authoring catalog', () => {
+  it('exports historical authoring data without a second runtime selection path', () => {
+    expect(Object.keys(historicalSources).sort()).toEqual(['CATALOG', 'DIFFICULTIES'])
+  })
+
+  it('retains all sixteen distinct original sources with unique solutions and current logical completion', () => {
     expect(DIFFICULTIES).toEqual(['beginner', 'intermediate', 'advanced', 'expert'])
-    for (const difficulty of DIFFICULTIES) {
-      expect(CATALOG[difficulty].length).toBeGreaterThanOrEqual(4)
+    const sources = Object.values(CATALOG).flat()
+    expect(sources).toHaveLength(16)
+    expect(new Set(sources).size).toBe(16)
+    for (const originalGroup of DIFFICULTIES) {
+      expect(CATALOG[originalGroup]).toHaveLength(4)
       const patterns = new Set<string>()
-      for (const text of CATALOG[difficulty]) {
+      for (const text of CATALOG[originalGroup]) {
         expect(text).toMatch(/^[0-9]{81}$/)
         patterns.add(text.replace(/[1-9]/g, '1'))
         const givens = [...text].map(Number)
         expect(isValidBoard(givens)).toBe(true)
         expect(countSolutions(givens)).toBe(1)
-        const rating = ratePuzzle(givens)
+        const oracle = enumerate(givens)
+        expect(oracle.count).toBe(1)
+        expect(solve(givens)).toEqual(oracle.first)
+        const rating = rateVariant(givens, { variant: 'classic' })
+        expect(rating.status, `${originalGroup}: ${text}`).toBe('solved')
         expect(rating.solved).toBe(true)
-        expect(rating.difficulty).toBe(difficulty)
-        proveLogicalSolve({ id: text, givens, solution: solve(givens)!, difficulty, techniques: rating.techniques })
+        expect(DIFFICULTIES).toContain(rating.logicalDifficulty)
+        // The source group is historical, not a current difficulty assertion.
+        // Sparse singles-only sources may solve logically yet fail accessibility.
+        expect(rating.difficulty).toBe(rating.logicalDifficulty === 'beginner' && !rating.approachability.accepted ? null : rating.logicalDifficulty)
+        expect(rating.lowerTierStalled).toBe(rating.logicalDifficulty !== 'beginner')
+        proveLogicalSolve(givens, oracle.first, rating)
       }
-      expect(patterns.size).toBe(CATALOG[difficulty].length)
+      expect(patterns.size).toBe(4)
     }
   }, 30000)
-})
-
-describe('seeded daily and practice selection', () => {
-  it('is reproducible across calls, modes, UTC dates and far-future dates', () => {
-    for (const difficulty of DIFFICULTIES) {
-      const identities = new Set<string>()
-      for (const date of ['2026-10-20','2026-10-21','2028-02-29','2040-12-31','2099-01-01']) {
-        const puzzle = getDailyPuzzle(date, difficulty)
-        expect(getDailyPuzzle(date, difficulty)).toEqual(puzzle)
-        expect(puzzle.id).toContain(date)
-        expect(puzzle.id).not.toBe(getPracticePuzzle(difficulty, date).id)
-        expect(countSolutions(puzzle.givens)).toBe(1)
-        expect(solve(puzzle.givens)).toEqual(puzzle.solution)
-        expect(ratePuzzle(puzzle.givens)).toEqual({ difficulty, solved: true, techniques: puzzle.techniques })
-        identities.add(puzzle.givens.join(''))
-      }
-      expect(identities.size).toBeGreaterThan(1)
-      expect(getPracticePuzzle(difficulty, 'repeatable')).toEqual(getPracticePuzzle(difficulty, 'repeatable'))
-    }
-  }, 30000)
-  it('returns defensive copies and validates date and difficulty input', () => {
-    const puzzle = getDailyPuzzle('2026-10-20', 'beginner')
-    puzzle.givens.fill(9); puzzle.solution.fill(0); puzzle.techniques.length = 0
-    expect(isValidBoard(getDailyPuzzle('2026-10-20', 'beginner').givens)).toBe(true)
-    for (const invalid of ['2026-2-02','2026-02-30','not-a-date','2026-10-20T00:00:00Z']) expect(() => getDailyPuzzle(invalid, 'beginner')).toThrow()
-    expect(() => getPracticePuzzle('impossible' as never, 'seed')).toThrow()
-  })
 })

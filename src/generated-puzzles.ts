@@ -8,7 +8,7 @@ const levels=['beginner','intermediate','advanced','expert']
 function request(mode:'daily'|'practice',seed:string,variant:GameVariant,difficulty:Difficulty):PuzzleRequest{
  if(!['classic','x','killer'].includes(variant)||!levels.includes(difficulty))throw new TypeError('Unknown puzzle selection')
  if(typeof seed!=='string'||seed.length<1||seed.length>120)throw new TypeError('Invalid puzzle seed')
- const id=`v2:${mode}:${seed}:${variant}:${difficulty}`
+ const id=`v3:${mode}:${seed}:${variant}:${difficulty}`
  return {id,seed:id,variant,difficulty}
 }
 export function generatedDailyRequest(date:string,variant:GameVariant,difficulty:Difficulty):PuzzleRequest{

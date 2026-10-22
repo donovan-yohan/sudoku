@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { findDeduction } from './engine'
-import { CATALOG, getPracticePuzzle } from './puzzles'
+import { describe, expect, it, vi } from 'vitest'
+import * as detector from './engine'
+import { CATALOG } from './puzzles'
 import type { Board, Deduction, Technique } from './types'
 import type { PracticalLesson, PracticalScenario } from './practical-lessons'
 // @ts-expect-error standalone .mjs test oracle has no declaration file
@@ -12,6 +12,17 @@ const lessons = practical?.PRACTICAL_LESSONS ?? []
 const TECHNIQUES: Technique[] = ['naked-single', 'hidden-single', 'locked-candidates', 'naked-pair', 'naked-triple', 'x-wing', 'swordfish', 'xy-wing']
 const CELLS = Array.from({ length: 81 }, (_, cell) => cell)
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+// Frozen original v1 authoring output, retained without its runtime resolver.
+const ORIGINAL_PRACTICE_SOURCES: Record<string, { clues: string; tier: string; seed: string }> = {
+  'v1:practice:practical-1:intermediate:1:0': {
+    clues: '060000802000104000950000000070000003000800560000091040210080030700030200006000000',
+    tier: 'intermediate', seed: 'practical-1',
+  },
+  'v1:practice:practical-2:advanced:3:0': {
+    clues: '000000100500000000017080400000040006608300000030017090000472000000000600900100530',
+    tier: 'advanced', seed: 'practical-2',
+  },
+}
 const rows = Array.from({ length: 9 }, (_, row) => CELLS.filter(cell => Math.floor(cell / 9) === row))
 const columns = Array.from({ length: 9 }, (_, col) => CELLS.filter(cell => cell % 9 === col))
 const box = (cell: number) => Math.floor(cell / 27) * 3 + Math.floor(cell % 9 / 3)
@@ -32,7 +43,21 @@ function apply(board: Board, notes: number[][], step: Deduction) {
 function assertPattern(step: Deduction, notes: number[][]) {
   const { cells, digit, technique, eliminations, placements } = step
   expect(new Set(cells).size).toBe(cells.length)
-  for (const action of [...placements, ...eliminations]) expect(notes[action.cell]).toContain(action.digit)
+  expect(cells.length).toBeGreaterThan(0)
+  expect(cells.every(cell => Number.isInteger(cell) && cell >= 0 && cell < 81)).toBe(true)
+  expect(DIGITS).toContain(digit)
+  for (const actions of [placements, eliminations]) {
+    expect(new Set(actions.map(action => `${action.cell}:${action.digit}`)).size).toBe(actions.length)
+    for (const action of actions) expect(notes[action.cell]).toContain(action.digit)
+  }
+  if (technique === 'naked-single' || technique === 'hidden-single') {
+    expect(eliminations).toHaveLength(0)
+    expect(placements).toHaveLength(1)
+    expect(cells).toEqual([placements[0].cell])
+    expect(digit).toBe(placements[0].digit)
+  } else {
+    expect(placements).toHaveLength(0)
+  }
   if (technique === 'naked-single') {
     expect(placements).toHaveLength(1)
     expect(notes[placements[0].cell]).toEqual([placements[0].digit])
@@ -44,6 +69,7 @@ function assertPattern(step: Deduction, notes: number[][]) {
     const digits = [...new Set(cells.flatMap(cell => notes[cell]))]
     expect(cells).toHaveLength(size)
     expect(digits).toHaveLength(size)
+    expect(digits).toContain(digit)
     expect(cells.every(cell => notes[cell].length >= 2 && notes[cell].length <= size)).toBe(true)
     expect(units.some(unit => cells.every(cell => unit.includes(cell)) && eliminations.every(action => unit.includes(action.cell) && !cells.includes(action.cell) && digits.includes(action.digit)))).toBe(true)
   } else if (technique === 'locked-candidates') {
@@ -67,7 +93,8 @@ function assertPattern(step: Deduction, notes: number[][]) {
     expect(notes[pivot]).toHaveLength(2)
     expect(notes[a]).toHaveLength(2)
     expect(notes[b]).toHaveLength(2)
-    expect(z).not.toBe(y)
+    expect(new Set([x, y, z]).size).toBe(3)
+    expect(digit).toBe(z)
     expect(notes[a]).toContain(x)
     expect(notes[b]).toContain(y)
     expect(notes[b]).toContain(z)
@@ -77,24 +104,25 @@ function assertPattern(step: Deduction, notes: number[][]) {
   if (!placements.length) expect(eliminations.length).toBeGreaterThan(0)
 }
 
-function assertSound(step: Deduction, solution: Board, board: Board, notes: number[][], alternateSwordfishPremise = false) {
-  const detected = findDeduction(board, notes)
-  expect(detected).toEqual(expect.objectContaining({
-    technique: step.technique, digit: step.digit, placements: step.placements, eliminations: step.eliminations,
-  }))
-  if (alternateSwordfishPremise) {
-    // Only the second walkthrough may choose this independently valid column
-    // premise. Keep strict detector order for every prior deduction and action.
-    expect(step.technique).toBe('swordfish')
-    expect(step.cells).toEqual([19, 28, 21, 39, 34, 43])
-    expect(detected!.cells).toEqual([0, 5, 45, 49, 50, 76, 77])
-    assertPattern(detected!, notes)
-  } else {
-    expect(detected!.cells).toEqual(step.cells)
-  }
+function assertSound(step: Deduction, solution: Board, board: Board, notes: number[][]) {
   assertPattern(step, notes)
-  for (const { cell, digit } of step.placements) expect(solution[cell]).toBe(digit)
-  for (const { cell, digit } of step.eliminations) expect(solution[cell]).not.toBe(digit)
+  const state = enumerate(board, notes)
+  expect(state.count).toBe(1)
+  expect(state.first).toEqual(solution)
+  for (const { cell, digit } of step.placements) {
+    expect(board[cell]).toBe(0)
+    expect(solution[cell]).toBe(digit)
+    // A forced placement admits no completion when its digit is excluded.
+    const without = notes.map((list, index) => index === cell ? list.filter(value => value !== digit) : list)
+    expect(enumerate(board, without).count).toBe(0)
+  }
+  for (const { cell, digit } of step.eliminations) {
+    expect(board[cell]).toBe(0)
+    expect(solution[cell]).not.toBe(digit)
+    // Independently refute the eliminated candidate, not just compare a solution.
+    const forced = notes.map((list, index) => index === cell ? [digit] : list)
+    expect(enumerate(board, forced).count).toBe(0)
+  }
 }
 
 function assertReplay(scenario: PracticalScenario) {
@@ -111,12 +139,18 @@ function assertReplay(scenario: PracticalScenario) {
   expect(board).toEqual(scenario.board)
   expect(notes).toEqual(scenario.candidates)
   expect(enumerate(board, notes).count).toBe(1)
-  for (const [index, step] of scenario.steps.entries()) {
+  const first = scenario.steps[0]
+  expect(new Set(scenario.evidence).size).toBe(scenario.evidence.length)
+  if (first.technique === 'hidden-single') {
+    // Show the whole supporting unit, including cells that exclude the digit.
+    expect(units.some(unit => same(unit, scenario.evidence) && same(unit.filter(cell => notes[cell].includes(first.digit)), [scenario.target]))).toBe(true)
+  } else {
+    expect(scenario.evidence).toEqual(first.cells)
+  }
+  for (const step of scenario.steps) {
     expect(step.board).toEqual(board)
     expect(step.candidates).toEqual(notes)
-    const alternatePremise = scenario.id === 'swordfish-2' && index === 0
-    if (alternatePremise) expect(provenance.puzzleId).toBe('practical-search-v1:16379108:2495:transpose:digit-shift-1')
-    assertSound(step, solution, board, notes, alternatePremise)
+    assertSound(step, solution, board, notes)
     notes = apply(board, notes, step)
   }
   expect(board[scenario.target]).toBe(scenario.digit)
@@ -124,6 +158,28 @@ function assertReplay(scenario: PracticalScenario) {
 }
 
 describe('practical puzzle walkthroughs', () => {
+  it('rejects unrelated evidence even when the full-domain proof remains valid', () => {
+    const corrupted = structuredClone(lessons.find(lesson => lesson.id === 'x-wing')!.scenarios[0])
+    corrupted.evidence = CELLS
+    expect(() => assertReplay(corrupted)).toThrow()
+  })
+
+  it('rejects a proof with a correct forced action but a false named premise', () => {
+    const corrupted = structuredClone(lessons.find(lesson => lesson.id === 'naked-single')!.scenarios[0])
+    const step = corrupted.steps[0]
+    step.cells = [(step.placements[0].cell + 1) % 81]
+    expect(() => assertReplay(corrupted)).toThrow()
+  })
+
+  it('certifies a stored proof even when the current greedy detector selects no step', () => {
+    const greedy = vi.spyOn(detector, 'findDeduction').mockReturnValue(null)
+    try {
+      assertReplay(lessons.find(lesson => lesson.id === 'swordfish')!.scenarios[1])
+      expect(greedy).not.toHaveBeenCalled()
+    } finally {
+      greedy.mockRestore()
+    }
+  })
   it('gives X-Wing four real positions and every other technique two, all ending in a placement', () => {
     expect(lessons.map(lesson => lesson.id)).toEqual(TECHNIQUES)
     for (const lesson of lessons) {
@@ -172,9 +228,13 @@ describe('practical puzzle walkthroughs', () => {
         const bank = CATALOG[tier as keyof typeof CATALOG]
         expect(provenance.originalPuzzle.join('')).toBe(bank[Number(index)])
       } else if (provenance.source === 'practice') {
-        const puzzle = getPracticePuzzle(provenance.tier!, provenance.seed!)
-        expect(puzzle.id).toBe(provenance.puzzleId)
-        expect(puzzle.givens).toEqual(provenance.originalPuzzle)
+        // Exact original clues are authoring evidence, not a request to the
+        // retired v1 runtime selector (whose policy no longer exists).
+        const source = ORIGINAL_PRACTICE_SOURCES[provenance.puzzleId]
+        expect(source).toBeDefined()
+        expect(provenance.originalPuzzle.join('')).toBe(source.clues)
+        expect(provenance.tier).toBe(source.tier)
+        expect(provenance.seed).toBe(source.seed)
       }
     }
   })

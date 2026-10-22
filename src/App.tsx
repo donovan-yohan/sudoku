@@ -6,12 +6,11 @@ import HintPanel from './components/HintPanel'
 import RewardEffects from './components/RewardEffects'
 import Calendar from './components/Calendar'
 import './digit-rewards.css'
-import { readGame, reduceGame, saveGame } from './game'
+import { createGame, readGame, reduceGame, saveGame } from './game'
 import { loadSession, saveSession } from './session'
-import { getDailyPuzzle, getPracticePuzzle } from './puzzles'
-import {availableDifficulties} from './variant-generator'
 import {generatedDailyRequest,generatedPracticeRequest} from './generated-puzzles'
 import {requestGeneratedPuzzle} from './generation-client'
+import {availableDifficulties} from './solver-policy'
 import type {GameVariant,VariantDeduction} from './variant-engine'
 import type { Difficulty, GameAction, GameState, Puzzle } from './types'
 
@@ -22,8 +21,9 @@ const descriptions: Record<Difficulty, string> = {
   beginner: 'Build confidence with naked and hidden singles.',
   intermediate: 'Look for locked candidates and naked pairs.',
   advanced: 'Work with triples and X-Wing patterns.',
-  expert: 'Connect candidates with Swordfish and XY-Wing.',
+  expert: 'Explore wings, coloring and candidate chains.',
 }
+
 const coordinate = (cell: number) => `Row ${Math.floor(cell / 9) + 1}, column ${cell % 9 + 1}`
 function initialTheme(): Theme {
   try { const value = localStorage.getItem('sudoku-theme'); return value === 'light' || value === 'dark' ? value : 'device' } catch { return 'device' }
@@ -33,16 +33,8 @@ function formatTime(seconds: number) { return `${Math.floor(seconds / 60)}:${Str
 export default function App() {
   const [today, setToday] = useState(() => new Date().toISOString().slice(0, 10))
   const [session] = useState(() => loadSession(today))
-  const [legacy] = useState(()=>{
-    try{
-      if(session.generator==='v2'||session.variant&&session.variant!=='classic')return false
-      const initial=session.mode==='daily'?getDailyPuzzle(session.dailyDate,session.difficulty):getPracticePuzzle(session.difficulty,session.practiceSeeds[session.difficulty]!)
-      return Boolean(localStorage.getItem(`sudoku-game-v1:${initial.id}`))&&readGame(initial).warning===null
-    }catch{return false}
-  })
   const [variant,setVariant]=useState<GameVariant>(session.variant??'classic')
-  const [generated,setGenerated]=useState(!legacy)
-  const [loading,setLoading]=useState(!legacy)
+  const [loading,setLoading]=useState(true)
   const [generationError,setGenerationError]=useState('')
   const generation=useRef<AbortController|null>(null)
   const generationSerial=useRef(0)
@@ -51,11 +43,11 @@ export default function App() {
   const [page, setPage] = useState<Page>(session.mode)
   const [mode, setMode] = useState<'daily' | 'practice'>(session.mode)
   const [difficulty, setDifficulty] = useState<Difficulty>(session.difficulty)
-  const [puzzle, setPuzzle] = useState<Puzzle>(() => legacy&&session.mode==='practice'?getPracticePuzzle(session.difficulty,session.practiceSeeds[session.difficulty]!):getDailyPuzzle(session.dailyDate,session.difficulty))
-  const [restored] = useState(() => readGame(puzzle))
-  const [state, setState] = useState<GameState>(restored.state)
+  // Hidden until generation succeeds; never read or persist a placeholder game.
+  const [puzzle, setPuzzle] = useState<Puzzle>(() => ({id:'loading',givens:Array(81).fill(0),solution:[],difficulty:session.difficulty,techniques:[]}))
+  const [state, setState] = useState<GameState>(()=>createGame(puzzle))
   const stateRef = useRef(state); stateRef.current = state
-  const [saveWarning, setSaveWarning] = useState<string | null>(restored.warning)
+  const [saveWarning, setSaveWarning] = useState<string | null>(null)
   const [theme, setTheme] = useState<Theme>(initialTheme)
   const [effects, setEffects] = useState(() => { try { return localStorage.getItem('sudoku-effects') !== 'off' } catch { return true } })
   const [showMistakes, setShowMistakes] = useState(() => { try { return localStorage.getItem('sudoku-show-mistakes') === 'on' } catch { return false } })
@@ -77,13 +69,13 @@ export default function App() {
   const variantPracticeSeeds=useRef(session.variantPracticeSeeds??{})
   useEffect(() => {
     if(loading||generationError)return
-    saveSession({version:1,mode,difficulty,dailyDate,practiceSeeds:practiceSeeds.current,...(generated?{generator:'v2' as const,variant,variantPracticeSeeds:variantPracticeSeeds.current}:{})})
-  }, [mode,difficulty,dailyDate,puzzle.id,variant,generated,loading,generationError])
+    saveSession({version:1,mode,difficulty,dailyDate,practiceSeeds:practiceSeeds.current,generator:'v3',variant,variantPracticeSeeds:variantPracticeSeeds.current})
+  }, [mode,difficulty,dailyDate,puzzle.id,variant,loading,generationError])
   useEffect(()=>{
-    if(!legacy)void load(session.mode,session.difficulty,false,session.dailyDate,session.variant??'classic')
+    void load(session.mode,session.difficulty,false,session.dailyDate,session.variant??'classic')
     return ()=>generation.current?.abort()
   },[])
-  const complete = state.values.every((value, index) => value === puzzle.solution[index])
+  const complete = !loading&&!generationError&&state.values.every((value, index) => value === puzzle.solution[index])
   const digitCounts=Array.from({length:10},()=>0)
   state.values.forEach(value=>{if(value)digitCounts[value]++})
   const mistakes = showMistakes ? state.values.flatMap((value, cell) => !puzzle.givens[cell] && value && value !== puzzle.solution[cell] ? [cell] : []) : []
@@ -161,17 +153,12 @@ export default function App() {
     generation.current?.abort()
     const controller=new AbortController();generation.current=controller
     const serial=++generationSerial.current
-    setLoading(true);setGenerationError('');setGenerated(true)
+    setLoading(true);setGenerationError('')
     setDifficulty(level);setMode(nextMode);setPage(nextMode);setVariant(nextVariant);setDailyDate(date)
     let nextPuzzle:Puzzle
     try{
       const request=nextMode==='daily'?generatedDailyRequest(date,nextVariant,level):generatedPracticeRequest(seeds[level]!,nextVariant,level)
-      let savedLegacy:Puzzle|undefined
-      if(nextVariant==='classic'&&!fresh){
-        const old=nextMode==='daily'?getDailyPuzzle(date,level):getPracticePuzzle(level,seeds[level]!)
-        try{if(localStorage.getItem(`sudoku-game-v1:${old.id}`)&&readGame(old).warning===null)savedLegacy=old}catch{ /* Storage denial must not prevent generation. */ }
-      }
-      nextPuzzle=savedLegacy??generatedCache.current.get(request.id)??await requestGeneratedPuzzle(request,controller.signal)
+      nextPuzzle=generatedCache.current.get(request.id)??await requestGeneratedPuzzle(request,controller.signal)
       if(controller.signal.aborted||serial!==generationSerial.current)return
       generatedCache.current.set(request.id,nextPuzzle)
     }catch(error){

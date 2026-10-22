@@ -200,7 +200,7 @@ try {
   await cell.click()
   await cell.press('n')
   await cell.press('1')
-  await page.waitForFunction(() => Object.keys(localStorage).some(key => key.startsWith('sudoku-game-v1:') && JSON.parse(localStorage.getItem(key)).notes.some(notes => notes.includes(1))))
+  await page.waitForFunction(() => Object.keys(localStorage).some(key => key.startsWith('sudoku-game-v2:') && JSON.parse(localStorage.getItem(key)).notes.some(notes => notes.includes(1))))
   const prior = await page.evaluate(() => Object.fromEntries(Object.entries(localStorage).filter(([key]) => key.startsWith('sudoku-'))))
   await cdp.send('Network.clearBrowserCache')
   await context.setOffline(true)
@@ -219,7 +219,7 @@ try {
   assert.match(await page.locator(`[data-cell="${cellIndex}"]`).getAttribute('aria-label'), /notes 1/)
   const after = await page.evaluate(() => Object.fromEntries(Object.entries(localStorage).filter(([key]) => key.startsWith('sudoku-'))))
   for (const [key, value] of Object.entries(prior)) {
-    if (key.startsWith('sudoku-game-v1:')) {
+    if (key.startsWith('sudoku-game-v2:')) {
       const beforeGame = JSON.parse(value), afterGame = JSON.parse(after[key])
       assert.deepEqual(afterGame.values, beforeGame.values)
       assert.deepEqual(afterGame.notes, beforeGame.notes)

@@ -173,11 +173,23 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 18495,
+        "steps": 52,
+        "placements": 52,
+        "eliminations": 0,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 51,
+          "hidden-single": 1
+        }
+      }
     }
   },
   {
@@ -354,13 +366,27 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "locked-candidates",
         "xy-wing"
-      ]
+      ],
+      "profile": {
+        "work": 324256,
+        "steps": 59,
+        "placements": 52,
+        "eliminations": 13,
+        "hardestTier": 3,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 34,
+          "hidden-single": 18,
+          "locked-candidates": 6,
+          "xy-wing": 1
+        }
+      }
     }
   },
   {
@@ -537,11 +563,23 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 25419,
+        "steps": 48,
+        "placements": 48,
+        "eliminations": 0,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 42,
+          "hidden-single": 6
+        }
+      }
     }
   },
   {
@@ -718,14 +756,29 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "naked-single",
         "locked-candidates",
         "naked-pair",
         "xy-wing"
-      ]
+      ],
+      "profile": {
+        "work": 284962,
+        "steps": 63,
+        "placements": 57,
+        "eliminations": 16,
+        "hardestTier": 3,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 15,
+          "naked-single": 42,
+          "locked-candidates": 4,
+          "naked-pair": 1,
+          "xy-wing": 1
+        }
+      }
     }
   },
   {
@@ -902,11 +955,23 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 18561,
+        "steps": 50,
+        "placements": 50,
+        "eliminations": 0,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 47,
+          "hidden-single": 3
+        }
+      }
     }
   },
   {
@@ -1083,13 +1148,27 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "locked-candidates",
         "diagonal-single"
-      ]
+      ],
+      "profile": {
+        "work": 86203,
+        "steps": 57,
+        "placements": 52,
+        "eliminations": 7,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 34,
+          "hidden-single": 15,
+          "locked-candidates": 5,
+          "diagonal-single": 3
+        }
+      }
     }
   },
   {
@@ -1266,14 +1345,31 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "locked-candidates",
+        "diagonal-single",
         "naked-triple",
-        "diagonal-single"
-      ]
+        "hidden-pair"
+      ],
+      "profile": {
+        "work": 203747,
+        "steps": 66,
+        "placements": 57,
+        "eliminations": 30,
+        "hardestTier": 2,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 46,
+          "hidden-single": 9,
+          "locked-candidates": 6,
+          "diagonal-single": 2,
+          "naked-triple": 2,
+          "hidden-pair": 1
+        }
+      }
     }
   },
   {
@@ -1450,11 +1546,23 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 22750,
+        "steps": 54,
+        "placements": 54,
+        "eliminations": 0,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 47,
+          "hidden-single": 7
+        }
+      }
     }
   },
   {
@@ -1631,7 +1739,7 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
@@ -1639,7 +1747,23 @@
         "diagonal-single",
         "x-wing",
         "naked-pair"
-      ]
+      ],
+      "profile": {
+        "work": 193041,
+        "steps": 65,
+        "placements": 59,
+        "eliminations": 11,
+        "hardestTier": 2,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 39,
+          "hidden-single": 16,
+          "locked-candidates": 4,
+          "diagonal-single": 4,
+          "x-wing": 1,
+          "naked-pair": 1
+        }
+      }
     }
   },
   {
@@ -1816,11 +1940,23 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 28004,
+        "steps": 54,
+        "placements": 54,
+        "eliminations": 0,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 49,
+          "hidden-single": 5
+        }
+      }
     }
   },
   {
@@ -2275,15 +2411,27 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "cage-sum-single",
         "cage-pair-sum",
-        "locked-candidates",
         "naked-single",
-        "hidden-single",
-        "naked-pair"
-      ]
+        "hidden-single"
+      ],
+      "profile": {
+        "work": 355356,
+        "steps": 98,
+        "placements": 81,
+        "eliminations": 64,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "cage-sum-single": 18,
+          "cage-pair-sum": 17,
+          "naked-single": 62,
+          "hidden-single": 1
+        }
+      }
     }
   },
   {
@@ -2703,17 +2851,37 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "cage-sum-single",
         "cage-pair-sum",
         "naked-single",
         "locked-candidates",
         "naked-pair",
+        "hidden-pair",
         "cage-combinations",
         "naked-triple",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 1657723,
+        "steps": 133,
+        "placements": 81,
+        "eliminations": 201,
+        "hardestTier": 2,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "cage-sum-single": 12,
+          "cage-pair-sum": 17,
+          "naked-single": 65,
+          "locked-candidates": 13,
+          "naked-pair": 2,
+          "hidden-pair": 2,
+          "cage-combinations": 17,
+          "naked-triple": 1,
+          "hidden-single": 4
+        }
+      }
     }
   },
   {
@@ -3218,14 +3386,27 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "cage-sum-single",
-        "locked-candidates",
         "naked-single",
-        "naked-pair",
+        "cage-pair-sum",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 395806,
+        "steps": 86,
+        "placements": 81,
+        "eliminations": 11,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "cage-sum-single": 34,
+          "naked-single": 43,
+          "cage-pair-sum": 5,
+          "hidden-single": 4
+        }
+      }
     }
   },
   {
@@ -3650,18 +3831,37 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "cage-sum-single",
         "cage-pair-sum",
         "naked-single",
         "hidden-single",
-        "naked-pair",
         "locked-candidates",
+        "naked-pair",
         "cage-combinations",
-        "naked-triple",
+        "hidden-pair",
         "unit-sum-45"
-      ]
+      ],
+      "profile": {
+        "work": 1344963,
+        "steps": 125,
+        "placements": 81,
+        "eliminations": 160,
+        "hardestTier": 2,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "cage-sum-single": 12,
+          "cage-pair-sum": 17,
+          "naked-single": 59,
+          "hidden-single": 9,
+          "locked-candidates": 8,
+          "naked-pair": 6,
+          "cage-combinations": 12,
+          "hidden-pair": 1,
+          "unit-sum-45": 1
+        }
+      }
     }
   },
   {
@@ -4126,21 +4326,33 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "cage-sum-single",
         "cage-pair-sum",
         "naked-single",
-        "locked-candidates",
-        "naked-pair",
         "hidden-single"
-      ]
+      ],
+      "profile": {
+        "work": 422496,
+        "steps": 95,
+        "placements": 81,
+        "eliminations": 61,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "cage-sum-single": 20,
+          "cage-pair-sum": 14,
+          "naked-single": 58,
+          "hidden-single": 3
+        }
+      }
     }
   },
   {
     "id": "spike:killer:advanced:feasibility-2:advanced",
     "variant": "killer",
-    "difficulty": "advanced",
+    "difficulty": "intermediate",
     "givens": [
       0,
       0,
@@ -4554,17 +4766,35 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "cage-sum-single",
         "cage-pair-sum",
         "locked-candidates",
         "naked-pair",
         "cage-combinations",
-        "naked-triple",
         "hidden-single",
+        "hidden-pair",
         "naked-single"
-      ]
+      ],
+      "profile": {
+        "work": 1141436,
+        "steps": 155,
+        "placements": 81,
+        "eliminations": 269,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "cage-sum-single": 12,
+          "cage-pair-sum": 24,
+          "locked-candidates": 29,
+          "naked-pair": 4,
+          "cage-combinations": 14,
+          "hidden-single": 8,
+          "hidden-pair": 3,
+          "naked-single": 61
+        }
+      }
     }
   },
   {
@@ -4741,12 +4971,25 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "naked-single",
         "locked-candidates"
-      ]
+      ],
+      "profile": {
+        "work": 40738,
+        "steps": 59,
+        "placements": 56,
+        "eliminations": 8,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 11,
+          "naked-single": 45,
+          "locked-candidates": 3
+        }
+      }
     }
   },
   {
@@ -4923,13 +5166,27 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "locked-candidates",
         "naked-pair"
-      ]
+      ],
+      "profile": {
+        "work": 46435,
+        "steps": 62,
+        "placements": 58,
+        "eliminations": 8,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 44,
+          "hidden-single": 14,
+          "locked-candidates": 3,
+          "naked-pair": 1
+        }
+      }
     }
   },
   {
@@ -5106,12 +5363,25 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "locked-candidates"
-      ]
+      ],
+      "profile": {
+        "work": 42359,
+        "steps": 59,
+        "placements": 56,
+        "eliminations": 5,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 42,
+          "hidden-single": 14,
+          "locked-candidates": 3
+        }
+      }
     }
   },
   {
@@ -5288,12 +5558,25 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "locked-candidates",
         "naked-single"
-      ]
+      ],
+      "profile": {
+        "work": 31053,
+        "steps": 57,
+        "placements": 56,
+        "eliminations": 1,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 12,
+          "locked-candidates": 1,
+          "naked-single": 44
+        }
+      }
     }
   },
   {
@@ -5470,14 +5753,29 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "naked-single",
         "naked-pair",
-        "naked-triple",
+        "hidden-pair",
         "x-wing"
-      ]
+      ],
+      "profile": {
+        "work": 146606,
+        "steps": 61,
+        "placements": 58,
+        "eliminations": 12,
+        "hardestTier": 2,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 22,
+          "naked-single": 36,
+          "naked-pair": 1,
+          "hidden-pair": 1,
+          "x-wing": 1
+        }
+      }
     }
   },
   {
@@ -5654,19 +5952,33 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "naked-single",
         "locked-candidates",
         "x-wing"
-      ]
+      ],
+      "profile": {
+        "work": 96134,
+        "steps": 60,
+        "placements": 56,
+        "eliminations": 11,
+        "hardestTier": 2,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 12,
+          "naked-single": 44,
+          "locked-candidates": 3,
+          "x-wing": 1
+        }
+      }
     }
   },
   {
     "id": "original-catalog-v1:advanced:2",
     "variant": "classic",
-    "difficulty": "advanced",
+    "difficulty": "intermediate",
     "givens": [
       6,
       1,
@@ -5837,19 +6149,33 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "locked-candidates",
-        "naked-triple",
+        "hidden-pair",
         "naked-single"
-      ]
+      ],
+      "profile": {
+        "work": 70557,
+        "steps": 65,
+        "placements": 58,
+        "eliminations": 15,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 20,
+          "locked-candidates": 6,
+          "hidden-pair": 1,
+          "naked-single": 38
+        }
+      }
     }
   },
   {
     "id": "original-catalog-v1:advanced:3",
     "variant": "classic",
-    "difficulty": "advanced",
+    "difficulty": "intermediate",
     "givens": [
       0,
       0,
@@ -6020,14 +6346,29 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "locked-candidates",
         "naked-pair",
-        "naked-triple"
-      ]
+        "hidden-pair"
+      ],
+      "profile": {
+        "work": 64298,
+        "steps": 64,
+        "placements": 58,
+        "eliminations": 16,
+        "hardestTier": 1,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 49,
+          "hidden-single": 9,
+          "locked-candidates": 4,
+          "naked-pair": 1,
+          "hidden-pair": 1
+        }
+      }
     }
   },
   {
@@ -6204,13 +6545,27 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "naked-pair",
         "xy-wing"
-      ]
+      ],
+      "profile": {
+        "work": 226589,
+        "steps": 58,
+        "placements": 56,
+        "eliminations": 4,
+        "hardestTier": 3,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 37,
+          "hidden-single": 19,
+          "naked-pair": 1,
+          "xy-wing": 1
+        }
+      }
     }
   },
   {
@@ -6387,15 +6742,31 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "naked-single",
         "hidden-single",
         "locked-candidates",
         "naked-pair",
-        "naked-triple",
+        "hidden-pair",
         "xy-wing"
-      ]
+      ],
+      "profile": {
+        "work": 373814,
+        "steps": 65,
+        "placements": 57,
+        "eliminations": 26,
+        "hardestTier": 3,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 48,
+          "hidden-single": 9,
+          "locked-candidates": 5,
+          "naked-pair": 1,
+          "hidden-pair": 1,
+          "xy-wing": 1
+        }
+      }
     }
   },
   {
@@ -6572,13 +6943,27 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "naked-single",
         "locked-candidates",
         "xy-wing"
-      ]
+      ],
+      "profile": {
+        "work": 231095,
+        "steps": 60,
+        "placements": 57,
+        "eliminations": 6,
+        "hardestTier": 3,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 20,
+          "naked-single": 37,
+          "locked-candidates": 2,
+          "xy-wing": 1
+        }
+      }
     }
   },
   {
@@ -6755,12 +7140,859 @@
       "oracle": "grouped-exact-cover-v1",
       "count": 1,
       "exhausted": false,
-      "rubric": "variant-logical-v1",
+      "rubric": "logical-expert-v2",
       "techniques": [
         "hidden-single",
         "naked-single",
+        "hidden-triple",
         "xy-wing"
-      ]
+      ],
+      "profile": {
+        "work": 334850,
+        "steps": 60,
+        "placements": 58,
+        "eliminations": 5,
+        "hardestTier": 3,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "hidden-single": 16,
+          "naked-single": 42,
+          "hidden-triple": 1,
+          "xy-wing": 1
+        }
+      }
+    }
+  },
+  {
+    "id": "original-expert-search:23841:2",
+    "variant": "classic",
+    "difficulty": "expert",
+    "givens": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9,
+      6,
+      0,
+      0,
+      0,
+      4,
+      7,
+      6,
+      0,
+      0,
+      2,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      4,
+      0,
+      0,
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      6,
+      4,
+      5,
+      0,
+      0,
+      9,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3
+    ],
+    "solution": [
+      7,
+      8,
+      1,
+      5,
+      9,
+      4,
+      2,
+      3,
+      6,
+      5,
+      2,
+      9,
+      6,
+      8,
+      3,
+      1,
+      4,
+      7,
+      6,
+      4,
+      3,
+      2,
+      7,
+      1,
+      9,
+      8,
+      5,
+      8,
+      1,
+      4,
+      7,
+      2,
+      5,
+      3,
+      6,
+      9,
+      3,
+      6,
+      2,
+      1,
+      4,
+      9,
+      5,
+      7,
+      8,
+      9,
+      5,
+      7,
+      8,
+      3,
+      6,
+      4,
+      1,
+      2,
+      2,
+      3,
+      6,
+      4,
+      5,
+      7,
+      8,
+      9,
+      1,
+      1,
+      9,
+      8,
+      3,
+      6,
+      2,
+      7,
+      5,
+      4,
+      4,
+      7,
+      5,
+      9,
+      1,
+      8,
+      6,
+      2,
+      3
+    ],
+    "provenance": {
+      "seed": 23841,
+      "attempt": 2,
+      "method": "randomized-MRV/unique-clue-removal-v1"
+    },
+    "certification": {
+      "oracle": "grouped-exact-cover-v1",
+      "count": 1,
+      "exhausted": false,
+      "rubric": "logical-expert-v2",
+      "techniques": [
+        "naked-single",
+        "hidden-single",
+        "locked-candidates",
+        "hidden-pair",
+        "aic",
+        "naked-pair"
+      ],
+      "profile": {
+        "work": 724764,
+        "steps": 70,
+        "placements": 59,
+        "eliminations": 26,
+        "hardestTier": 3,
+        "maxChainLinks": 7,
+        "techniqueCounts": {
+          "naked-single": 51,
+          "hidden-single": 8,
+          "locked-candidates": 6,
+          "hidden-pair": 3,
+          "aic": 1,
+          "naked-pair": 1
+        }
+      }
+    }
+  },
+  {
+    "id": "original-expert-search:23841:5",
+    "variant": "classic",
+    "difficulty": "expert",
+    "givens": [
+      0,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0,
+      0,
+      0,
+      1,
+      6,
+      0,
+      0,
+      8,
+      0,
+      4,
+      2,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      2,
+      0,
+      0,
+      0,
+      0,
+      4,
+      0,
+      8,
+      0,
+      0,
+      0,
+      0,
+      6,
+      0,
+      5,
+      3,
+      0,
+      0,
+      7,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      0,
+      0,
+      8,
+      9,
+      1,
+      0,
+      0,
+      5,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0
+    ],
+    "solution": [
+      9,
+      4,
+      3,
+      2,
+      7,
+      6,
+      8,
+      5,
+      1,
+      1,
+      6,
+      7,
+      5,
+      8,
+      3,
+      4,
+      2,
+      9,
+      5,
+      2,
+      8,
+      1,
+      4,
+      9,
+      7,
+      6,
+      3,
+      2,
+      1,
+      5,
+      7,
+      3,
+      4,
+      9,
+      8,
+      6,
+      8,
+      9,
+      4,
+      6,
+      2,
+      5,
+      3,
+      1,
+      7,
+      7,
+      3,
+      6,
+      9,
+      1,
+      8,
+      5,
+      4,
+      2,
+      4,
+      7,
+      2,
+      8,
+      9,
+      1,
+      6,
+      3,
+      5,
+      3,
+      5,
+      1,
+      4,
+      6,
+      7,
+      2,
+      9,
+      8,
+      6,
+      8,
+      9,
+      3,
+      5,
+      2,
+      1,
+      7,
+      4
+    ],
+    "provenance": {
+      "seed": 23841,
+      "attempt": 5,
+      "method": "randomized-MRV/unique-clue-removal-v1"
+    },
+    "certification": {
+      "oracle": "grouped-exact-cover-v1",
+      "count": 1,
+      "exhausted": false,
+      "rubric": "logical-expert-v2",
+      "techniques": [
+        "hidden-single",
+        "naked-single",
+        "locked-candidates",
+        "hidden-pair",
+        "aic",
+        "xy-wing",
+        "w-wing",
+        "xy-chain"
+      ],
+      "profile": {
+        "work": 951874,
+        "steps": 67,
+        "placements": 57,
+        "eliminations": 20,
+        "hardestTier": 3,
+        "maxChainLinks": 9,
+        "techniqueCounts": {
+          "hidden-single": 12,
+          "naked-single": 45,
+          "locked-candidates": 4,
+          "hidden-pair": 1,
+          "aic": 2,
+          "xy-wing": 1,
+          "w-wing": 1,
+          "xy-chain": 1
+        }
+      }
+    }
+  },
+  {
+    "id": "original-expert-search:23841:6",
+    "variant": "classic",
+    "difficulty": "expert",
+    "givens": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      6,
+      5,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      0,
+      0,
+      0,
+      9,
+      2,
+      0,
+      1,
+      0,
+      0,
+      3,
+      0,
+      0,
+      2,
+      5,
+      8,
+      0,
+      0,
+      0,
+      0,
+      9,
+      0,
+      0,
+      7,
+      0,
+      0,
+      0,
+      0,
+      8,
+      0,
+      4,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      7,
+      0,
+      0,
+      4,
+      0,
+      1,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      0,
+      0,
+      3,
+      4,
+      0,
+      0,
+      0,
+      0
+    ],
+    "solution": [
+      2,
+      1,
+      9,
+      8,
+      3,
+      4,
+      6,
+      5,
+      7,
+      7,
+      3,
+      8,
+      5,
+      1,
+      6,
+      2,
+      9,
+      4,
+      4,
+      6,
+      5,
+      9,
+      2,
+      7,
+      1,
+      3,
+      8,
+      3,
+      7,
+      1,
+      2,
+      5,
+      8,
+      9,
+      4,
+      6,
+      5,
+      9,
+      6,
+      4,
+      7,
+      3,
+      8,
+      1,
+      2,
+      8,
+      2,
+      4,
+      1,
+      6,
+      9,
+      5,
+      7,
+      3,
+      6,
+      5,
+      3,
+      7,
+      9,
+      2,
+      4,
+      8,
+      1,
+      9,
+      4,
+      7,
+      6,
+      8,
+      1,
+      3,
+      2,
+      5,
+      1,
+      8,
+      2,
+      3,
+      4,
+      5,
+      7,
+      6,
+      9
+    ],
+    "provenance": {
+      "seed": 23841,
+      "attempt": 6,
+      "method": "randomized-MRV/unique-clue-removal-v1"
+    },
+    "certification": {
+      "oracle": "grouped-exact-cover-v1",
+      "count": 1,
+      "exhausted": false,
+      "rubric": "logical-expert-v2",
+      "techniques": [
+        "naked-single",
+        "hidden-single",
+        "w-wing",
+        "locked-candidates",
+        "aic",
+        "simple-coloring",
+        "xy-wing",
+        "x-chain",
+        "naked-pair",
+        "xy-chain"
+      ],
+      "profile": {
+        "work": 1405320,
+        "steps": 69,
+        "placements": 57,
+        "eliminations": 17,
+        "hardestTier": 3,
+        "maxChainLinks": 9,
+        "techniqueCounts": {
+          "naked-single": 46,
+          "hidden-single": 11,
+          "w-wing": 2,
+          "locked-candidates": 2,
+          "aic": 2,
+          "simple-coloring": 1,
+          "xy-wing": 1,
+          "x-chain": 1,
+          "naked-pair": 1,
+          "xy-chain": 2
+        }
+      }
+    }
+  },
+  {
+    "id": "original-expert-search:23841:10",
+    "variant": "classic",
+    "difficulty": "expert",
+    "givens": [
+      0,
+      0,
+      0,
+      9,
+      5,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      0,
+      6,
+      3,
+      2,
+      5,
+      0,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0,
+      7,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      9,
+      0,
+      2,
+      5,
+      7,
+      0,
+      0,
+      4,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      4,
+      0,
+      9,
+      0,
+      0,
+      1,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "solution": [
+      1,
+      3,
+      8,
+      9,
+      5,
+      2,
+      6,
+      7,
+      4,
+      2,
+      5,
+      6,
+      4,
+      7,
+      8,
+      9,
+      1,
+      3,
+      7,
+      9,
+      4,
+      1,
+      6,
+      3,
+      2,
+      5,
+      8,
+      5,
+      4,
+      1,
+      8,
+      3,
+      9,
+      7,
+      6,
+      2,
+      3,
+      7,
+      9,
+      2,
+      4,
+      6,
+      1,
+      8,
+      5,
+      6,
+      8,
+      2,
+      5,
+      1,
+      7,
+      3,
+      4,
+      9,
+      9,
+      2,
+      5,
+      7,
+      8,
+      1,
+      4,
+      3,
+      6,
+      8,
+      6,
+      7,
+      3,
+      2,
+      4,
+      5,
+      9,
+      1,
+      4,
+      1,
+      3,
+      6,
+      9,
+      5,
+      8,
+      2,
+      7
+    ],
+    "provenance": {
+      "seed": 23841,
+      "attempt": 10,
+      "method": "randomized-MRV/unique-clue-removal-v1"
+    },
+    "certification": {
+      "oracle": "grouped-exact-cover-v1",
+      "count": 1,
+      "exhausted": false,
+      "rubric": "logical-expert-v2",
+      "techniques": [
+        "naked-single",
+        "hidden-single",
+        "xyz-wing",
+        "w-wing"
+      ],
+      "profile": {
+        "work": 330531,
+        "steps": 60,
+        "placements": 57,
+        "eliminations": 3,
+        "hardestTier": 3,
+        "maxChainLinks": 0,
+        "techniqueCounts": {
+          "naked-single": 36,
+          "hidden-single": 21,
+          "xyz-wing": 1,
+          "w-wing": 2
+        }
+      }
     }
   }
 ]

@@ -1,8 +1,8 @@
 import type {Difficulty} from './types'
 import {isArchiveDate} from './archive'
-export interface Session {version:1;mode:'daily'|'practice';difficulty:Difficulty;dailyDate:string;practiceSeeds:Partial<Record<Difficulty,string>>;variant?:'classic'|'x'|'killer';variantPracticeSeeds?:Partial<Record<'x'|'killer',Partial<Record<Difficulty,string>>>>;generator?:'v2'}
+export interface Session {version:1;mode:'daily'|'practice';difficulty:Difficulty;dailyDate:string;practiceSeeds:Partial<Record<Difficulty,string>>;variant?:'classic'|'x'|'killer';variantPracticeSeeds?:Partial<Record<'x'|'killer',Partial<Record<Difficulty,string>>>>;generator?:'v3'}
 const LEVELS:Difficulty[]=['beginner','intermediate','advanced','expert']
-const KEY='sudoku-session-v1'
+const KEY='sudoku-session-v2'
 const fallback=(today:string):Session=>({version:1,mode:'daily',difficulty:'beginner',dailyDate:today,practiceSeeds:{}})
 export function parseSession(text:string|null,today:string):Session{
  const fresh=fallback(today)
@@ -12,7 +12,7 @@ export function parseSession(text:string|null,today:string):Session{
   if(!raw||raw.version!==1||!['daily','practice'].includes(raw.mode)||!LEVELS.includes(raw.difficulty)||typeof raw.dailyDate!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(raw.dailyDate))return fresh
   if(!isArchiveDate(raw.dailyDate,today))return fresh
   if(raw.variant!==undefined&&!['classic','x','killer'].includes(raw.variant))return fresh
-  if(raw.generator!==undefined&&raw.generator!=='v2')return fresh
+  if(raw.generator!==undefined&&raw.generator!=='v3')return fresh
   const seeds:Session['practiceSeeds']={}
   if(!raw.practiceSeeds||typeof raw.practiceSeeds!=='object'||Array.isArray(raw.practiceSeeds))return fresh
   for(const level of LEVELS){

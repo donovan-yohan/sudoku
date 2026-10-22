@@ -2,10 +2,23 @@
 /** Offline original puzzle search. No downloaded puzzle data or runtime generation.
  * node scripts/generate-puzzles.mjs --output /absolute/path/catalog.json --attempts 3000
  * The fixed PRNG seed makes this search reproducible; checkpoints survive interruption.
- * Output is reviewed/tested before embedding into src/puzzles.ts.
+ * Output uses current playable ratings, not the historical src/puzzles.ts groups.
+ * Sparse singles-only boards without beginner accessibility have no playable label.
  */
 import { writeFileSync } from 'node:fs'
-import { countSolutions, ratePuzzle } from '../src/engine.ts'
+import { registerHooks } from 'node:module'
+// Node strips TypeScript; resolve extensionless imports within those sources.
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    try { return nextResolve(specifier, context) }
+    catch (error) {
+      if (specifier.startsWith('.') && !/\.[a-z]+$/i.test(specifier)) return nextResolve(`${specifier}.ts`, context)
+      throw error
+    }
+  },
+})
+const { countSolutions } = await import('../src/engine.ts')
+const { rateVariant } = await import('../src/variant-engine.ts')
 const args = process.argv.slice(2)
 const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name) + 1] : fallback
 const output = option('--output', null)
@@ -41,22 +54,28 @@ function fullGrid() {
 }
 const catalog = { beginner: [], intermediate: [], advanced: [], expert: [] }
 const stats = { generated: 0, unsupported: 0 }
+function record(values, attempt) {
+  const rating = rateVariant(values, { variant: 'classic' })
+  if (!rating.solved || rating.difficulty === null) return false
+  const list = catalog[rating.difficulty], text = values.join('')
+  if (list.length < 4 && !list.includes(text)) {
+    list.push(text)
+    writeFileSync(output, JSON.stringify({ seed: option('--seed', '1637910'), stats, catalog }, null, 2))
+    console.log(`attempt ${attempt + 1}: ${rating.difficulty} ${list.length}/4, ${rating.techniques.join(', ')}`)
+  }
+  return true
+}
 for (let attempt = 0; attempt < attempts; attempt++) {
   const values = fullGrid()
   for (const cell of shuffle(Array.from({ length: 81 }, (_, i) => i))) {
     const digit = values[cell]; values[cell] = 0
     if (countSolutions(values) !== 1) values[cell] = digit
+    // A minimal-clue final board cannot satisfy the current beginner policy.
+    // Certify one generous checkpoint during original clue removal instead.
+    if (values.filter(Boolean).length === 45 && catalog.beginner.length < 4) record(values, attempt)
   }
-  const rating = ratePuzzle(values)
   stats.generated++
-  if (rating.solved) {
-    const list = catalog[rating.difficulty], text = values.join('')
-    if (list.length < 4 && !list.includes(text)) {
-      list.push(text)
-      writeFileSync(output, JSON.stringify({ seed: option('--seed', '1637910'), stats, catalog }, null, 2))
-      console.log(`attempt ${attempt + 1}: ${rating.difficulty} ${list.length}/4, ${rating.techniques.join(', ')}`)
-    }
-  } else stats.unsupported++
+  if (!record(values, attempt)) stats.unsupported++
   if (Object.values(catalog).every(list => list.length >= 4)) break
   if (attempt % 100 === 99) console.log(JSON.stringify(stats))
 }

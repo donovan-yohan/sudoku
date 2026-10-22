@@ -7,19 +7,19 @@ const PRACTICAL_LESSONS=JSON.parse(readFileSync(new URL('../src/practical-lesson
 
 test('practice identity and edits survive reload',async({page})=>{
  await page.goto('/'); await waitForBoard(page)
- await page.getByRole('button',{name:'Practice',exact:true}).click(); await waitForBoard(page,/^v2:practice:.*:classic:beginner$/)
- await page.getByRole('button',{name:'Expert',exact:true}).click(); await waitForBoard(page,/^v2:practice:.*:classic:expert$/)
+ await page.getByRole('button',{name:'Practice',exact:true}).click(); await waitForBoard(page,/^v3:practice:.*:classic:beginner$/)
+ await page.getByRole('button',{name:'Expert',exact:true}).click(); await waitForBoard(page,/^v3:practice:.*:classic:expert$/)
  const board=page.getByRole('grid',{name:'Practice Sudoku'})
  const cell=board.getByRole('gridcell',{name:/empty/}).first()
  const id=await cell.getAttribute('data-cell')
  await cell.click();await cell.press('n');await cell.press('3')
  await waitForSavedGame(page)
- const before=await page.evaluate(()=>localStorage.getItem('sudoku-session-v1'))
+ const before=await page.evaluate(()=>localStorage.getItem('sudoku-session-v2'))
  await page.reload(); await waitForBoard(page)
  await expect(page.getByRole('grid',{name:'Practice Sudoku'})).toBeVisible()
  await expect(page.getByRole('button',{name:'Expert',exact:true})).toHaveAttribute('aria-pressed','true')
  await expect(page.locator(`[data-cell="${id}"]`)).toHaveAccessibleName(/notes 3/)
- expect(await page.evaluate(()=>localStorage.getItem('sudoku-session-v1'))).toBe(before)
+ expect(await page.evaluate(()=>localStorage.getItem('sudoku-session-v2'))).toBe(before)
 })
 
 test('UTC rollover retains unfinished daily after reload and offers new day',async({page})=>{
@@ -35,7 +35,7 @@ test('UTC rollover retains unfinished daily after reload and offers new day',asy
  await waitForSavedGame(page); await page.reload(); await waitForBoard(page)
  await expect(page.locator('time')).toHaveAttribute('datetime','2026-10-20')
  await expect(page.locator(`[data-cell="${id}"]`)).toHaveAccessibleName(/notes 6/)
- await page.getByRole('button',{name:"Open today's puzzle"}).click(); await waitForBoard(page,'v2:daily:2026-10-21:classic:beginner')
+ await page.getByRole('button',{name:"Open today's puzzle"}).click(); await waitForBoard(page,'v3:daily:2026-10-21:classic:beginner')
  await expect(page.locator('time')).toHaveAttribute('datetime','2026-10-21')
 })
 

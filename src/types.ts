@@ -1,7 +1,21 @@
 export type Digit = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 export type Board = number[]
 export type Difficulty = 'beginner' | 'intermediate' | 'advanced' | 'expert'
-export type Technique = 'naked-single' | 'hidden-single' | 'locked-candidates' | 'naked-pair' | 'naked-triple' | 'x-wing' | 'swordfish' | 'xy-wing'
+export type Technique = 'naked-single' | 'hidden-single' | 'locked-candidates' | 'naked-pair' | 'naked-triple' | 'x-wing' | 'swordfish' | 'xy-wing' | 'hidden-pair' | 'hidden-triple' | 'hidden-quad' | 'naked-quad' | 'xyz-wing' | 'w-wing' | 'jellyfish' | 'finned-x-wing' | 'simple-coloring' | 'x-chain' | 'xy-chain' | 'aic'
+export interface CandidateRef { cell: number; digit: number }
+export interface InferenceLink {
+  from: CandidateRef
+  to: CandidateRef
+  kind: 'strong' | 'weak'
+  /** A full row/column/box index, or a bivalue cell. */
+  house?: number
+  cell?: number
+}
+export interface ChainProof {
+  kind: 'chain'
+  links: InferenceLink[]
+  conclusion: 'endpoint-disjunction'
+}
 export interface Deduction {
   technique: Technique
   cells: number[]
@@ -9,6 +23,7 @@ export interface Deduction {
   placements: { cell: number; digit: number }[]
   eliminations: { cell: number; digit: number }[]
   explanation: string
+  proof?: ChainProof
 }
 export interface Puzzle {
   id: string

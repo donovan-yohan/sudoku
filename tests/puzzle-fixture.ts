@@ -14,13 +14,13 @@ export async function installGameOnNextLoad(page: Page, state: GameState) {
   await page.addInitScript(state => {
     const marker = `test-fixture-installed:${state.puzzleId}`
     if (localStorage.getItem(marker)) return
-    localStorage.setItem(`sudoku-game-v1:${state.puzzleId}`, JSON.stringify(state))
+    localStorage.setItem(`sudoku-game-v2:${state.puzzleId}`, JSON.stringify(state))
     localStorage.setItem(marker, 'yes')
   }, state)
 }
 
 /** Loading unmounts the board: an empty locator snapshot is not a puzzle. */
-export async function waitForBoard(page: Page, identity: string | RegExp = /^v2:/) {
+export async function waitForBoard(page: Page, identity: string | RegExp = /^v3:/) {
   const column = page.locator('.board-column')
   await expect(column).toHaveAttribute('data-puzzle-id', identity, { timeout: 20_000 })
   await expect(column.getByRole('gridcell')).toHaveCount(81)
@@ -32,13 +32,13 @@ export async function waitForBoard(page: Page, identity: string | RegExp = /^v2:
 export async function waitForSavedSession(page: Page) {
   const id = await page.locator('.board-column').getAttribute('data-puzzle-id')
   await expect.poll(() => page.evaluate(() => {
-    const session = JSON.parse(localStorage.getItem('sudoku-session-v1') || 'null')
+    const session = JSON.parse(localStorage.getItem('sudoku-session-v2') || 'null')
     if (!session) return null
     const variant = session.variant || 'classic'
-    if (session.generator !== 'v2') return 'legacy'
+    if (session.generator !== 'v3') return null
     const seed = variant === 'classic' ? session.practiceSeeds[session.difficulty] : session.variantPracticeSeeds?.[variant]?.[session.difficulty]
-    return `v2:${session.mode}:${session.mode === 'daily' ? session.dailyDate : seed}:${variant}:${session.difficulty}`
-  })).toBe(id?.startsWith('v2:') ? id : 'legacy')
+    return `v3:${session.mode}:${session.mode === 'daily' ? session.dailyDate : seed}:${variant}:${session.difficulty}`
+  })).toBe(id)
 }
 
 export async function waitForSavedGame(page: Page) {
@@ -49,7 +49,7 @@ export async function waitForSavedGame(page: Page) {
   })))
   expect(cells).toHaveLength(81)
   await expect.poll(() => page.evaluate(id => {
-    const game = JSON.parse(localStorage.getItem(`sudoku-game-v1:${id}`) || 'null')
+    const game = JSON.parse(localStorage.getItem(`sudoku-game-v2:${id}`) || 'null')
     return game ? game.values.map((value: number, cell: number) => ({ value, notes: game.notes[cell] })) : null
   }, id)).toEqual(cells)
   await waitForSavedSession(page)
