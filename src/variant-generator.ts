@@ -1,10 +1,11 @@
 import { countVariantSolutions, rateVariant, solveVariant, variantCandidates, VariantBudgetError } from './variant-engine'
 import type { Cage, GameVariant, Rules, VariantRating } from './variant-engine'
 import type { Difficulty } from './types'
-import { getPracticePuzzle } from './puzzles'
+import { availableDifficulties } from './solver-policy'
+export { availableDifficulties } from './solver-policy'
 import certifiedSeeds from './variant-seeds.json' with { type: 'json' }
 
-export const VARIANT_GENERATOR_VERSION = 'seeded-variants-v1'
+export const VARIANT_GENERATOR_VERSION = 'seeded-variants-v2'
 export interface GeneratedVariant {
   givens: number[]
   solution: number[]
@@ -26,10 +27,7 @@ export class VariantGenerationError extends Error {
   readonly code = 'generation-budget-exhausted'
   constructor(message = 'Variant generation operation budget exhausted') { super(message); this.name = 'VariantGenerationError' }
 }
-export function availableDifficulties(variant: GameVariant): Difficulty[] {
-  if (!['classic', 'x', 'killer'].includes(variant)) throw new TypeError('Unknown Sudoku variant')
-  return variant === 'classic' ? ['beginner', 'intermediate', 'advanced', 'expert'] : ['beginner', 'intermediate', 'advanced']
-}
+
 /** Pinned FNV-1a + Mulberry32, UTF-16 code units; not cryptographic. */
 function randomFor(seed: string): () => number {
   let state = 2166136261
@@ -131,17 +129,6 @@ function transformIndex(cell: number, symmetry: number): number {
   return row * 9 + col
 }
 function fallback(seed: string, variant: GameVariant, difficulty: Difficulty, random: () => number, reason: string): GeneratedVariant {
-  if (variant === 'classic') {
-    // Reuse the unchanged v1 public helper. Variant rubric is stricter about
-    // hidden singles, so re-rate rather than carrying the old label blindly.
-    for (let attempt = 0; attempt < 4; attempt++) {
-      const source = getPracticePuzzle(difficulty, `${VARIANT_GENERATOR_VERSION}:${seed}:fallback:${attempt}`)
-      const result = finish(seed, variant, difficulty, source.givens, source.solution, { variant }, {
-        kind: 'certified-template', seed, templateId: `original-catalog-v1:helper:${source.id}`, fallbackReason: reason,
-      })
-      if (result) return result
-    }
-  }
   const bank = certifiedSeeds.filter(p => p.variant === variant && p.difficulty === difficulty)
   const ordered = shuffled(bank, random)
   for (const template of ordered) {

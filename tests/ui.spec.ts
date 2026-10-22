@@ -138,10 +138,10 @@ test('unit rewards do not replay after leaving for lessons', async ({ page }) =>
 
 test('practice levels, notes, walkthrough reset and unavailable storage stay usable', async ({ page }) => {
   await page.goto('/'); await waitForBoard(page)
-  await page.getByRole('button', { name: 'Practice', exact: true }).click(); await waitForBoard(page, /^v2:practice:.*:classic:beginner$/)
+  await page.getByRole('button', { name: 'Practice', exact: true }).click(); await waitForBoard(page, /^v3:practice:.*:classic:beginner$/)
   await expect(page.getByRole('grid', { name: 'Practice Sudoku' })).toBeVisible()
   for (const level of ['Intermediate', 'Advanced', 'Expert', 'Beginner']) {
-    await page.getByRole('button', { name: level, exact: true }).click(); await waitForBoard(page, new RegExp(`^v2:practice:.*:classic:${level.toLowerCase()}$`))
+    await page.getByRole('button', { name: level, exact: true }).click(); await waitForBoard(page, new RegExp(`^v3:practice:.*:classic:${level.toLowerCase()}$`))
     await expect(page.getByRole('button', { name: level, exact: true })).toHaveAttribute('aria-pressed', 'true')
   }
   await page.getByRole('grid').getByRole('gridcell',{name:/empty/}).first().click()

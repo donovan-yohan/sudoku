@@ -43,7 +43,7 @@ export function reduceGame(s:GameState,a:GameAction,puzzle:Puzzle):GameState {
   if(JSON.stringify(next)===JSON.stringify(snapshot(s)))return s
   return {...s,...next,past:[...s.past,snapshot(s)].slice(-100),future:[],rewarded:[...new Set([...s.rewarded,...completeUnits(next.values,puzzle.solution)])],rewardedDigits:[...new Set([...s.rewardedDigits,...completeDigits(next.values,puzzle.solution)])]}
 }
-const key=(puzzleId:string)=>`sudoku-game-v1:${puzzleId}`
+const key=(puzzleId:string)=>`sudoku-game-v2:${puzzleId}`
 function validSnapshot(raw:unknown,puzzle:Puzzle):raw is GameSnapshot {
   if(!raw||typeof raw!=='object')return false
   const o=raw as GameSnapshot
@@ -58,9 +58,9 @@ export function readGame(puzzle:Puzzle):{state:GameState;warning:string|null} {
     const data=JSON.parse(text)
     if(!validSnapshot(data,puzzle))throw new Error('Invalid save')
     const raw=data as GameState
-    if(raw.rewardedDigits!==undefined&&(!Array.isArray(raw.rewardedDigits)||raw.rewardedDigits.length>9||new Set(raw.rewardedDigits).size!==raw.rewardedDigits.length||!raw.rewardedDigits.every((n:unknown)=>typeof n==='number'&&Number.isInteger(n)&&n>=1&&n<=9)))throw new Error('Invalid digit rewards')
+    if(!Array.isArray(raw.rewardedDigits)||raw.rewardedDigits.length>9||new Set(raw.rewardedDigits).size!==raw.rewardedDigits.length||!raw.rewardedDigits.every((n:unknown)=>typeof n==='number'&&Number.isInteger(n)&&n>=1&&n<=9))throw new Error('Invalid digit rewards')
     if(raw.version!==1||raw.puzzleId!==puzzle.id||!Number.isInteger(raw.selected)||raw.selected<0||raw.selected>80||typeof raw.noteMode!=='boolean'||!Number.isInteger(raw.elapsed)||raw.elapsed<0||raw.elapsed>315360000||!Number.isInteger(raw.hintsUsed)||raw.hintsUsed<0||raw.hintsUsed>100000||!Array.isArray(raw.rewarded)||raw.rewarded.length>27||!raw.rewarded.every((n:unknown)=>typeof n==='number'&&Number.isInteger(n)&&n>=0&&n<27))throw new Error('Invalid save')
-    return {state:{...fresh,...snapshot(raw),selected:raw.selected,noteMode:raw.noteMode,elapsed:raw.elapsed,hintsUsed:raw.hintsUsed,rewarded:[...new Set<number>([...raw.rewarded,...completeUnits(raw.values,puzzle.solution)])],rewardedDigits:[...new Set<number>([...(raw.rewardedDigits??[]),...completeDigits(raw.values,puzzle.solution)])]},warning:null}
+    return {state:{...fresh,...snapshot(raw),selected:raw.selected,noteMode:raw.noteMode,elapsed:raw.elapsed,hintsUsed:raw.hintsUsed,rewarded:[...new Set<number>([...raw.rewarded,...completeUnits(raw.values,puzzle.solution)])],rewardedDigits:[...new Set<number>([...raw.rewardedDigits,...completeDigits(raw.values,puzzle.solution)])]},warning:null}
   }catch{return {state:fresh,warning:'Saved progress could not be read. This puzzle started fresh; your other puzzles are unchanged.'}}
 }
 export function saveGame(state:GameState):boolean {

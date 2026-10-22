@@ -1,4 +1,7 @@
-import type { Board, Deduction, Difficulty, Technique } from './types'
+import type { Board, Deduction, Technique } from './types'
+import { DEFAULT_LOGICAL_WORK, LogicalBudgetError, type LogicalOptions } from './solver-policy'
+import { findExpertPattern } from './expert-patterns'
+import { findChainDeduction } from './inference-chains'
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 export const UNITS: number[][] = [
@@ -54,54 +57,42 @@ function search(board: Board, limit: number): { count: number; first: Board | nu
 export function solve(board: Board): Board | null { return search(board, 1).first }
 export function countSolutions(board: Board, limit = 2): number { return search(board, limit).count }
 
-/** Rubric v1: strongest technique used by this deterministic logical solve.
- * Unsolved boards are never accepted into the catalog, regardless of this label.
- */
-export function ratePuzzle(board: Board): { difficulty: Difficulty; techniques: Technique[]; solved: boolean } {
-  const techniques: Technique[] = []
-  const levels: Difficulty[] = ['beginner', 'intermediate', 'advanced', 'expert']
-  const tier: Record<Technique, number> = { 'naked-single': 0, 'hidden-single': 0, 'locked-candidates': 1, 'naked-pair': 1, 'naked-triple': 2, 'x-wing': 2, swordfish: 3, 'xy-wing': 3 }
-  if (!isValidBoard(board)) return { difficulty: 'beginner', techniques, solved: false }
-  const values = board.slice()
-  let notes = candidates(values), hardest = 0
-  // At most 729 candidate removals plus 81 placements; every deduction changes state.
-  for (let step = 0; step < 810 && values.includes(0); step++) {
-    const hint = findDeduction(values, notes)
-    if (!hint) break
-    if (!techniques.includes(hint.technique)) techniques.push(hint.technique)
-    hardest = Math.max(hardest, tier[hint.technique])
-    for (const { cell, digit } of hint.placements) values[cell] = digit
-    for (const { cell, digit } of hint.eliminations) notes[cell] = notes[cell].filter(value => value !== digit)
-    // Intersect, do not regenerate: logically proven eliminations must persist.
-    const legal = candidates(values)
-    notes = notes.map((list, cell) => list.filter(digit => legal[cell].includes(digit)))
-  }
-  return { difficulty: levels[hardest], techniques, solved: !values.includes(0) && isValidBoard(values) }
-}
-
 const coord = (cell: number) => `r${Math.floor(cell / 9) + 1}c${cell % 9 + 1}`
 const unitName = (index: number) => index < 9 ? `row ${index + 1}` : index < 18 ? `column ${index - 8}` : `box ${index - 17}`
 function placement(technique: Technique, cell: number, digit: number, explanation: string): Deduction {
   return { technique, cells: [cell], digit, placements: [{ cell, digit }], eliminations: [], explanation }
 }
 
-export function findDeduction(board: Board, candidatesOverride?: number[][]): Deduction | null {
+export function findDeduction(board: Board, candidatesOverride?: number[][], options: LogicalOptions = {}): Deduction | null {
+  const cap = options.maxTier ?? 3, maxWork = options.maxWork ?? DEFAULT_LOGICAL_WORK
+  if (!Number.isInteger(cap) || cap < 0 || cap > 3 || !Number.isSafeInteger(maxWork) || maxWork < 0) throw new TypeError('Invalid logical limits')
+  let work = 0
+  const spend = (amount = 1) => { work += amount; if (work > maxWork) throw new LogicalBudgetError(); options.spend?.(amount) }
+  spend(81)
   if (!isValidBoard(board)) return null
   const legal = candidates(board)
   if (candidatesOverride && (candidatesOverride.length !== 81 || Array.from(candidatesOverride).some(list => !Array.isArray(list) || Array.from(list).some(digit => !Number.isInteger(digit) || digit < 1 || digit > 9)))) return null
   const notes = candidatesOverride ? legal.map((list, cell) => list.filter(digit => candidatesOverride[cell].includes(digit))) : legal
   if (board.some((digit, cell) => !digit && !notes[cell].length)) return null
-  for (let cell = 0; cell < 81; cell++) if (notes[cell].length === 1) return placement('naked-single', cell, notes[cell][0], `Only ${notes[cell][0]} remains at ${coord(cell)} after excluding its row, column, box and proven eliminations.`)
+  for (let cell = 0; cell < 81; cell++) { spend(); if (notes[cell].length === 1) return placement('naked-single', cell, notes[cell][0], `Only ${notes[cell][0]} remains at ${coord(cell)} after excluding its row, column, box and proven eliminations.`) }
+  if (cap === 0) return null
   for (let u = 0; u < 27; u++) for (const digit of DIGITS) {
+    spend(9)
     const places = UNITS[u].filter(cell => notes[cell].includes(digit))
     if (places.length === 1) return placement('hidden-single', places[0], digit, `In ${unitName(u)}, only ${coord(places[0])} can contain ${digit}.`)
   }
-  return locked(notes) ?? nakedSubset(notes, 2) ?? nakedSubset(notes, 3) ?? fish(notes, 2) ?? fish(notes, 3) ?? xyWing(notes)
+  const basic = locked(notes, spend) ?? nakedSubset(notes, 2, spend) ?? findExpertPattern(notes, UNITS, PEERS, spend, 1)
+  if (basic || cap === 1) return basic
+  const advanced = nakedSubset(notes, 3, spend) ?? fish(notes, 2, spend) ?? findExpertPattern(notes, UNITS, PEERS, spend, 2)
+  if (advanced || cap === 2) return advanced
+  return fish(notes, 3, spend) ?? xyWing(notes, spend) ?? findExpertPattern(notes, UNITS, PEERS, spend, 3)
+    ?? (options.chains === false ? null : findChainDeduction(notes, UNITS, PEERS, spend))
 }
 
-function combinations<T>(items: T[], size: number): T[][] {
+function combinations<T>(items: T[], size: number, spend: (amount?: number) => void): T[][] {
   const result: T[][] = []
   function add(start: number, chosen: T[]): void {
+    spend()
     if (chosen.length === size) { result.push(chosen); return }
     for (let i = start; i <= items.length - (size - chosen.length); i++) add(i + 1, [...chosen, items[i]])
   }
@@ -111,11 +102,13 @@ function combinations<T>(items: T[], size: number): T[][] {
 function elimination(technique: Technique, cells: number[], removals: {cell: number; digit: number}[], explanation: string): Deduction | null {
   return removals.length ? { technique, cells, digit: removals[0].digit, placements: [], eliminations: removals, explanation } : null
 }
-function locked(notes: number[][]): Deduction | null {
+function locked(notes: number[][], spend: (amount?: number) => void): Deduction | null {
   for (let source = 0; source < 27; source++) for (const digit of DIGITS) {
+    spend(9)
     const evidence = UNITS[source].filter(cell => notes[cell].includes(digit))
     if (evidence.length < 2 || evidence.length > 3) continue
     for (let target = 0; target < 27; target++) {
+      spend()
       // Only row/column ↔ box intersections, not arbitrary overlapping units.
       if ((source >= 18) === (target >= 18) || !evidence.every(cell => UNITS[target].includes(cell))) continue
       const removals = UNITS[target].filter(cell => !UNITS[source].includes(cell) && notes[cell].includes(digit)).map(cell => ({ cell, digit }))
@@ -125,10 +118,12 @@ function locked(notes: number[][]): Deduction | null {
   }
   return null
 }
-function nakedSubset(notes: number[][], size: 2 | 3): Deduction | null {
+function nakedSubset(notes: number[][], size: 2 | 3, spend: (amount?: number) => void): Deduction | null {
   for (let u = 0; u < 27; u++) {
+    spend(9)
     const possible = UNITS[u].filter(cell => notes[cell].length >= 2 && notes[cell].length <= size)
-    for (const evidence of combinations(possible, size)) {
+    for (const evidence of combinations(possible, size, spend)) {
+      spend(81)
       const digits = [...new Set(evidence.flatMap(cell => notes[cell]))].sort()
       if (digits.length !== size) continue
       const removals = UNITS[u].filter(cell => !evidence.includes(cell)).flatMap(cell => digits.filter(digit => notes[cell].includes(digit)).map(digit => ({ cell, digit })))
@@ -138,12 +133,14 @@ function nakedSubset(notes: number[][], size: 2 | 3): Deduction | null {
   }
   return null
 }
-function fish(notes: number[][], size: 2 | 3): Deduction | null {
+function fish(notes: number[][], size: 2 | 3, spend: (amount?: number) => void): Deduction | null {
   for (const transposed of [false, true]) for (const digit of DIGITS) {
+    spend(81)
     const at = (base: number, cover: number) => transposed ? cover * 9 + base : base * 9 + cover
     const locations = DIGITS.map((_, base) => DIGITS.map((_, cover) => cover).filter(cover => notes[at(base, cover)].includes(digit)))
     const possible = DIGITS.map((_, base) => base).filter(base => locations[base].length >= 2 && locations[base].length <= size)
-    for (const bases of combinations(possible, size)) {
+    for (const bases of combinations(possible, size, spend)) {
+      spend(81)
       const covers = [...new Set(bases.flatMap(base => locations[base]))].sort()
       if (covers.length !== size) continue
       const evidence = bases.flatMap(base => locations[base].map(cover => at(base, cover)))
@@ -155,15 +152,18 @@ function fish(notes: number[][], size: 2 | 3): Deduction | null {
   }
   return null
 }
-function xyWing(notes: number[][]): Deduction | null {
+function xyWing(notes: number[][], spend: (amount?: number) => void): Deduction | null {
   for (let pivot = 0; pivot < 81; pivot++) {
+    spend()
     if (notes[pivot].length !== 2) continue
     const [x, y] = notes[pivot]
     const wings = PEERS[pivot].filter(cell => notes[cell].length === 2)
     for (const a of wings) {
+      spend()
       if (!notes[a].includes(x) || notes[a].includes(y)) continue
       const z = notes[a].find(digit => digit !== x)!
       for (const b of wings) {
+        spend(81)
         if (a === b || !notes[b].includes(y) || !notes[b].includes(z)) continue
         const removals = PEERS[a].filter(cell => cell !== pivot && cell !== b && PEERS[b].includes(cell) && notes[cell].includes(z)).map(cell => ({ cell, digit: z }))
         const hint = elimination('xy-wing', [pivot, a, b], removals, `${coord(pivot)} is ${x}/${y}; its wings ${coord(a)} (${x}/${z}) and ${coord(b)} (${y}/${z}) see the pivot. Either pivot value forces ${z} in a wing, so remove ${z} from cells seeing both wings.`)

@@ -1,5 +1,6 @@
 import { findDeduction, UNITS } from './engine'
-import type { Difficulty } from './types'
+import type { ChainProof, Difficulty } from './types'
+import { LogicalBudgetError, SOLVER_POLICY, TECHNIQUE_TIER } from './solver-policy'
 
 export type GameVariant = 'classic' | 'x' | 'killer'
 export interface Cage { readonly cells: readonly number[]; readonly sum: number }
@@ -11,6 +12,7 @@ export interface VariantDeduction {
   placements: { cell: number; digit: number }[]
   eliminations: { cell: number; digit: number }[]
   explanation: string
+  proof?: ChainProof
 }
 export interface SearchOptions {
   limit?: number
@@ -37,8 +39,7 @@ const ALL = 1022
 const BITS = Array.from({ length: 1024 }, (_, mask) => DIGITS.filter(d => mask & 1 << d))
 const LEVELS: Difficulty[] = ['beginner', 'intermediate', 'advanced', 'expert']
 const TIER: Record<string, number> = {
-  'naked-single': 0, 'hidden-single': 1, 'locked-candidates': 1, 'naked-pair': 1,
-  'naked-triple': 2, 'x-wing': 2, swordfish: 3, 'xy-wing': 3, 'diagonal-single': 1,
+  ...TECHNIQUE_TIER, 'diagonal-single': 1,
   'cage-sum-single': 0, 'cage-pair-sum': 0, 'cage-combinations': 1, 'unit-sum-45': 2,
 }
 const cells = Array.from({ length: 81 }, (_, c) => c)
@@ -219,13 +220,14 @@ function deduction(values: number[], rules: Rules, allowed: number[], maxTier: n
   if (!domains(values, rules, top, allowed, work)) return null
   const masks = domains(values, rules, top, allowed, work, false)!
   const notes = masks.map(m => BITS[m].slice())
-  const classic = findDeduction(values, notes)
+
   const cages = [...(rules.cages ?? [])].sort((a, b) => a.cells.filter(c => !values[c]).length - b.cells.filter(c => !values[c]).length || a.cells[0] - b.cells[0])
   // Rank across families, not just within classic techniques. Keep one validated,
   // exclusion-only domain state and one shared operation budget for every tier.
   for (let cap = 0; cap <= maxTier; cap++) {
+    const classic = findDeduction(values, notes, { maxTier: cap, chains: rules.variant === 'classic', spend: amount => tick(work, amount) })
     if (classic && TIER[classic.technique] <= cap) {
-      if (classic.technique === 'naked-single') return { ...classic, explanation: `Only ${classic.digit} remains at ${coord(classic.placements[0].cell)} after row, column, box${rules.variant === 'x' ? ', diagonal' : rules.variant === 'killer' ? ', cage no-repeat' : ''} exclusions and prior proven eliminations.` }
+      if (classic.technique === 'naked-single' && rules.variant !== 'classic') return { ...classic, explanation: `Only ${classic.digit} remains at ${coord(classic.placements[0].cell)} after row, column, box${rules.variant === 'x' ? ', diagonal' : ', cage no-repeat'} exclusions and prior proven eliminations.` }
       return classic
     }
     if (rules.variant === 'x' && cap >= 1) for (let u = 27; u < top.units.length; u++) for (const digit of DIGITS) {
@@ -264,7 +266,7 @@ export function nextVariantDeduction(values: readonly number[], rules: Rules, al
   return deduction(Array.from(values), rules, allowedMasks(allowed), cap, { used: 0, max: integerBudget(options.maxWork ?? 2_000_000, 'maxWork') })
 }
 export interface VariantRating {
-  rubric: 'variant-logical-v1'
+  rubric: typeof SOLVER_POLICY
   solved: boolean
   difficulty: Difficulty | null
   logicalDifficulty: Difficulty | null
@@ -273,6 +275,15 @@ export interface VariantRating {
   lowerTierStalled: boolean
   status: 'solved' | 'stalled' | 'invalid' | 'budget-exhausted'
   approachability: { accepted: boolean; givens: number; initialSingles: number; singletonCages: number; policy: string }
+  profile: {
+    work: number
+    steps: number
+    placements: number
+    eliminations: number
+    hardestTier: number
+    maxChainLinks: number
+    techniqueCounts: Record<string, number>
+  }
 }
 /** Lowest completing proof cap wins. Accessibility is separate from logical complexity. */
 export function rateVariant(values: readonly number[], rules: Rules, options: { maxWork?: number } = {}): VariantRating {
@@ -300,9 +311,19 @@ export function rateVariant(values: readonly number[], rules: Rules, options: { 
         if (solved) { logicalDifficulty = LEVELS[cap]; lowerTierStalled = cap > 0; status = 'solved'; break }
       }
     }
-  } catch (error) { if (!(error instanceof VariantBudgetError)) throw error; status = 'budget-exhausted' }
+  } catch (error) { if (!(error instanceof VariantBudgetError) && !(error instanceof LogicalBudgetError)) throw error; status = 'budget-exhausted' }
   approachability.accepted = solved && logicalDifficulty === 'beginner' && (rules.variant === 'killer'
     ? givens === 0 && singletonCages >= 20 && rules.cages!.every(c => c.cells.length <= 2)
     : givens >= 42 && givens <= 48 && approachability.initialSingles >= 3 && trace.every(s => s.technique === 'naked-single'))
-  return { rubric: 'variant-logical-v1', solved, logicalDifficulty, difficulty: logicalDifficulty === 'beginner' && !approachability.accepted ? null : logicalDifficulty, trace, techniques: [...new Set(trace.map(s => s.technique))], lowerTierStalled, status, approachability }
+  const techniqueCounts: Record<string, number> = {}
+  for (const step of trace) techniqueCounts[step.technique] = (techniqueCounts[step.technique] ?? 0) + 1
+  const profile = {
+    work: work.used, steps: trace.length,
+    placements: trace.reduce((n, step) => n + step.placements.length, 0),
+    eliminations: trace.reduce((n, step) => n + step.eliminations.length, 0),
+    hardestTier: trace.reduce((n, step) => Math.max(n, TIER[step.technique]), 0),
+    maxChainLinks: trace.reduce((n, step) => Math.max(n, step.proof?.links.length ?? 0), 0),
+    techniqueCounts,
+  }
+  return { rubric: SOLVER_POLICY, solved, logicalDifficulty, difficulty: logicalDifficulty === 'beginner' && !approachability.accepted ? null : logicalDifficulty, trace, techniques: [...new Set(trace.map(s => s.technique))], lowerTierStalled, status, approachability, profile }
 }

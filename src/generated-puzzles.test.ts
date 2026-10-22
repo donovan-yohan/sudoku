@@ -4,7 +4,9 @@ import {generatedDailyRequest,generatedPracticeRequest,generateRequestedPuzzle} 
 describe('generated puzzle identities',()=>{
  it('separates UTC date, variant, difficulty and daily/practice identities',()=>{
   const daily=generatedDailyRequest('2026-01-01','x','beginner')
-  expect(daily.id).toBe('v2:daily:2026-01-01:x:beginner')
+  expect(daily.id).toBe('v3:daily:2026-01-01:x:beginner')
+  expect(daily.seed).toBe(daily.id)
+  expect(generatedPracticeRequest('fresh','classic','expert')).toStrictEqual({id:'v3:practice:fresh:classic:expert',seed:'v3:practice:fresh:classic:expert',variant:'classic',difficulty:'expert'})
   expect(generatedPracticeRequest('2026-01-01','x','beginner').id).not.toBe(daily.id)
   expect(generatedDailyRequest('2026-01-01','classic','beginner').id).not.toBe(daily.id)
   expect(generatedDailyRequest('2026-01-01','x','intermediate').id).not.toBe(daily.id)

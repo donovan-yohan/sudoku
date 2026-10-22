@@ -70,10 +70,10 @@ describe('independent certification and logical replay', () => {
     }
     expect(fingerprints.size).toBe(12)
   }, 60_000)
-  it('uses the unchanged classic catalog helper for classic fallback and re-rates its result', () => {
+  it('uses the certified bank for classic fallback and re-rates its result', () => {
     const puzzle = generateVariant('benchmark:0', 'classic', 'advanced')
     expect(puzzle.origin.kind).toBe('certified-template')
-    expect(puzzle.origin.templateId).toMatch(/^original-catalog-v1:helper:/)
+    expect(certifiedSeeds.some(template => template.id === puzzle.origin.templateId)).toBe(true)
     expect(puzzle.rating).toMatchObject({ solved: true, difficulty: 'advanced', lowerTierStalled: true })
   })
   it('validates request shape without date or clock-dependent behavior', () => {

@@ -1,13 +1,12 @@
-import type { Board, Difficulty, Puzzle } from './types'
-import { ratePuzzle, solve } from './engine'
+import type { Difficulty } from './types'
 
 export const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced', 'expert']
 
-/** Finite structural bank: four independently generated original bases per tier.
+/** Historical original authoring sources, not a daily/practice runtime bank.
  * Generated offline by scripts/generate-puzzles.mjs, seed 1637910 (190 attempts).
- * No third-party puzzle corpus. All bases have one solution and a complete logical
- * solve at exactly their label under engine rubric v1; tests replay every step.
- * Dates/practice seeds select and transform these bases, not infinitely new patterns.
+ * No third-party puzzle corpus. The keys preserve the original authoring groups,
+ * not exact difficulty claims under the current solver/approachability policy.
+ * Retained for lesson provenance and independent uniqueness/logic verification.
  */
 export const CATALOG: Readonly<Record<Difficulty, readonly string[]>> = {
   beginner: [
@@ -35,68 +34,3 @@ export const CATALOG: Readonly<Record<Difficulty, readonly string[]>> = {
     '700090650910000000000206040000900207049002000000080000100670000800305000000000008',
   ],
 }
-
-function seeded(seed: string): () => number {
-  let state = 2166136261
-  for (let i = 0; i < seed.length; i++) state = Math.imul(state ^ seed.charCodeAt(i), 16777619)
-  return () => {
-    state = (state + 0x6D2B79F5) | 0
-    let t = state
-    t = Math.imul(t ^ t >>> 15, t | 1)
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61)
-    return ((t ^ t >>> 14) >>> 0) / 4294967296
-  }
-}
-function shuffle<T>(list: T[], random: () => number): T[] {
-  const result = list.slice()
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1))
-    ;[result[i], result[j]] = [result[j], result[i]]
-  }
-  return result
-}
-function transformation(random: () => number): (board: Board) => Board {
-  const axis = () => shuffle([0,1,2], random).flatMap(group => shuffle([0,1,2], random).map(i => group * 3 + i))
-  const rows = axis(), cols = axis(), digits = [0, ...shuffle([1,2,3,4,5,6,7,8,9], random)]
-  const transpose = random() < 0.5
-  return board => Array.from({ length: 81 }, (_, cell) => {
-    const r = rows[Math.floor(cell / 9)], c = cols[cell % 9]
-    return digits[board[transpose ? c * 9 + r : r * 9 + c]]
-  })
-}
-const baseSolutions = new Map<string, Board>()
-function select(mode: 'daily' | 'practice', seed: string, difficulty: Difficulty): Puzzle {
-  if (!DIFFICULTIES.includes(difficulty)) throw new Error('Unknown difficulty')
-  if (typeof seed !== 'string') throw new Error('Seed must be a string')
-  const random = seeded(`sudoku-v1:${mode}:${difficulty}:${seed}`)
-  const bank = CATALOG[difficulty]
-  const index = Math.floor(random() * bank.length)
-  const source = bank[index], givens = [...source].map(Number)
-  let solution = baseSolutions.get(source)
-  if (!solution) {
-    const result = solve(givens)
-    if (!result) throw new Error('Invalid catalog base')
-    solution = result
-    baseSolutions.set(source, result)
-  }
-  // Sudoku symmetries preserve uniqueness, but greedy solver order can change the
-  // strongest technique it uses. Re-rate transformed boards rather than assuming
-  // the operational rubric is invariant. Bounded retries end at the validated base.
-  for (let attempt = 0; attempt <= 24; attempt++) {
-    const transform = attempt < 24 ? transformation(random) : (board: Board) => board.slice()
-    const transformed = transform(givens)
-    const rating = ratePuzzle(transformed)
-    if (!rating.solved || rating.difficulty !== difficulty) continue
-    return { id: `v1:${mode}:${seed}:${difficulty}:${index}:${attempt}`, givens: transformed, solution: transform(solution), difficulty, techniques: rating.techniques.slice() }
-  }
-  throw new Error('Catalog base failed its declared rating')
-}
-
-/** A strict YYYY-MM-DD UTC civil date; no visitor timezone or clock dependency. */
-export function getDailyPuzzle(date: string, difficulty: Difficulty): Puzzle {
-  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Expected UTC date YYYY-MM-DD')
-  const parsed = new Date(`${date}T00:00:00.000Z`)
-  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) throw new Error('Invalid UTC date')
-  return select('daily', date, difficulty)
-}
-export function getPracticePuzzle(difficulty: Difficulty, seed: string): Puzzle { return select('practice', seed, difficulty) }

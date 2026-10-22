@@ -38,9 +38,11 @@ No visitor account or app analytics. Progress and preferences are kept in this b
 
 See [the implementation seam](docs/IMPLEMENTATION.md) for domain boundaries and [the motion brief](docs/MOTION.md) for animation requirements. Puzzle levels use the app's logical solver policy, not clue count or a universal difficulty standard. All displayed lessons use real clue positions, validated deductions and a resulting number placement.
 
-Daily identity includes generator version, UTC date from the device clock, game mode and difficulty. The calendar covers 2026-01-01 through today. Practice has separate saved random identities. Generation runs in a Web Worker and remains usable offline after installation. Existing v1 saves retain their original puzzles.
+Daily identity includes the publication namespace, UTC date from the device clock, game mode and difficulty. The calendar covers 2026-01-01 through today. Practice has separate saved random identities. Generation runs in a Web Worker and remains usable offline after installation. The solver rebuild starts a fresh `v3` puzzle namespace and ignores historical game/session records. Theme and effects preferences remain unchanged.
 
 Classic supports four difficulty levels; X and Killer currently support Beginner, Intermediate and Advanced. Beginner generates original approachable positions. Harder Classic/X generation falls back to certified templates when its fixed operation budget is exhausted; harder Killer uses a finite certified template bank. Practice does not promise endlessly distinct hard structures. The static bundle includes answers and deterministic selection logic, so it is not an anti-cheat system.
+
+The shared logical policy includes hidden subsets and naked quads, XYZ-/W-Wing, Jellyfish, ordinary finned X-Wing, and Classic coloring and bounded X-/XY-/alternating inference chains. Hints use the same deduction selector as ratings, with internal proven eliminations separate from player notes. Chains have explicit link certificates and search limits, never solution-search premises. Ratings record technique counts, candidate removals, placements, maximum chain length and deterministic operation work; these measurements are not human solve-time predictions. See [difficulty research and next publication steps](docs/DIFFICULTY-RESEARCH.md). A public Master tier and curated daily manifests are not included in this solver release.
 
 ## Contributions
 

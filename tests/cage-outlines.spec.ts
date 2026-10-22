@@ -73,7 +73,7 @@ test('real generated Killer puzzles keep adjacent outlines distinct at every sup
  await page.getByLabel('Game mode',{exact:true}).selectOption('killer')
  for(const difficulty of ['beginner','intermediate','advanced'] as const){
   await page.getByRole('button',{name:new RegExp(`^${difficulty}$`,'i')}).click()
-  await waitForBoard(page,`v2:daily:2026-10-21:killer:${difficulty}`)
+  await waitForBoard(page,`v3:daily:2026-10-21:killer:${difficulty}`)
   const puzzle=getDailyPuzzle('2026-10-21',difficulty,'killer')
   const paths=await page.locator('.cage-outlines path').evaluateAll(paths=>paths.map(path=>({cage:Number(path.getAttribute('data-cage')),pattern:Number(path.getAttribute('data-pattern')),path:path.getAttribute('d')})))
   expect(paths).toHaveLength(puzzle.cages!.length)

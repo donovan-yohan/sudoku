@@ -134,7 +134,7 @@ describe('digit reward storage',()=>{
   const earned=reduceGame(createGame(puzzle),{type:'digit',digit:1},puzzle)
   const undone=reduceGame(earned,{type:'undo'},puzzle)
   expect(saveGame(undone)).toBe(true)
-  const stored=JSON.parse(db.get(`sudoku-game-v1:${puzzle.id}`)!)
+  const stored=JSON.parse(db.get(`sudoku-game-v2:${puzzle.id}`)!)
   expect(stored.rewardedDigits).toEqual(earned.rewardedDigits)
   expect(stored.past).toEqual([])
   expect(stored.future).toEqual([])
@@ -161,17 +161,34 @@ describe('digit reward storage',()=>{
   expect(readGame(puzzle).warning).not.toBeNull()
   expect(readGame(puzzle).state.values).toEqual(puzzle.givens)
  })
- it('migrates a legacy save by acknowledging already complete digit sets',()=>{
-  const legacy:Record<string,unknown>={...createGame(puzzle),values:[...solution]}
-  delete legacy.rewardedDigits
-  vi.stubGlobal('localStorage',{getItem:()=>JSON.stringify(legacy)})
+ it('rejects an incomplete current save instead of migrating a retired reward shape',()=>{
+  const incomplete:Record<string,unknown>={...createGame(puzzle),values:[...solution]}
+  delete incomplete.rewardedDigits
+  vi.stubGlobal('localStorage',{getItem:()=>JSON.stringify(incomplete)})
   const restored=readGame(puzzle)
-  expect(restored.warning).toBeNull()
-  expect(restored.state.rewardedDigits).toEqual([1,2,3,4,5,6,7,8,9])
+  expect(restored.warning).not.toBeNull()
+  expect(restored.state).toStrictEqual(createGame(puzzle))
  })
 })
 
 describe('untrusted storage',()=>{
+ it('ignores obsolete progress and saves and restores only the current namespace',()=>{
+  const obsolete=JSON.stringify({...createGame(puzzle),values:[...solution],elapsed:120,hintsUsed:3})
+  const oldKey=`sudoku-game-v1:${puzzle.id}`
+  const currentKey=`sudoku-game-v2:${puzzle.id}`
+  const db=new Map([[oldKey,obsolete]])
+  const getItem=vi.fn((key:string)=>db.get(key)??null)
+  vi.stubGlobal('localStorage',{getItem,setItem:(key:string,value:string)=>db.set(key,value)})
+  expect(readGame(puzzle)).toStrictEqual({state:createGame(puzzle),warning:null})
+  expect(getItem.mock.calls).toStrictEqual([[currentKey]])
+  const current=reduceGame(createGame(puzzle),{type:'digit',digit:1},puzzle)
+  current.notes[1]=[2,6];current.elapsed=17;current.hintsUsed=1;current.noteMode=true
+  expect(saveGame(current)).toBe(true)
+  expect(JSON.parse(db.get(currentKey)!)).toStrictEqual({...current,past:[],future:[]})
+  expect(readGame(puzzle)).toStrictEqual({state:{...current,past:[],future:[]},warning:null})
+  expect(db.get(oldKey)).toBe(obsolete)
+  expect([...db.keys()].sort()).toStrictEqual([oldKey,currentKey])
+ })
  it('restores valid progress but no stale history',()=>{
   const db=new Map<string,string>()
   vi.stubGlobal('localStorage',{getItem:(k:string)=>db.get(k)??null,setItem:(k:string,v:string)=>db.set(k,v)})
