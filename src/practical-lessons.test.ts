@@ -168,6 +168,7 @@ describe('practical puzzle walkthroughs', () => {
     const corrupted = structuredClone(lessons.find(lesson => lesson.id === 'naked-single')!.scenarios[0])
     const step = corrupted.steps[0]
     step.cells = [(step.placements[0].cell + 1) % 81]
+    corrupted.evidence = step.cells.slice()
     expect(() => assertReplay(corrupted)).toThrow()
   })
 
