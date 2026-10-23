@@ -209,8 +209,8 @@ try {
   await page.waitForSelector('[role=gridcell]')
   assert.match(await page.locator(`[data-cell="${cellIndex}"]`).getAttribute('aria-label'), /notes 1/)
   async function checkTheme(theme) {
-    const actual = await page.evaluate(() => ({ theme: document.documentElement.dataset.theme, background: getComputedStyle(document.documentElement).backgroundColor, color: getComputedStyle(document.documentElement).color, stored: localStorage.getItem('sudoku-theme') }))
-    assert.deepEqual(actual, { theme, background: theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)', color: theme === 'light' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)', stored: theme })
+    const actual = await page.evaluate(() => ({ theme: document.documentElement.dataset.theme, background: getComputedStyle(document.documentElement).backgroundColor, color: getComputedStyle(document.documentElement).color, stored: localStorage.getItem('sudoku-theme'), themeColor: document.querySelector('meta[name="theme-color"]').content }))
+    assert.deepEqual(actual, { theme, background: theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)', color: theme === 'light' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)', stored: theme, themeColor: theme === 'light' ? '#ffffff' : '#000000' })
     return actual
   }
   results.lightOffline = await checkTheme('light')

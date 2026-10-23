@@ -5,6 +5,62 @@ const solution = Array.from({length:81},(_,i)=>(Math.floor(i/9)*3+Math.floor(Mat
 const puzzle: Puzzle={id:'test',givens:solution.map((n,i)=>i===0||i===1?0:n),solution,difficulty:'beginner',techniques:['naked-single']}
 afterEach(()=>vi.unstubAllGlobals())
 
+describe('first puzzle completion',()=>{
+ it.each([null,0,1,'true',[],{}].map(completed=>({completed})))('rejects a malformed present completion acknowledgement: $completed',({completed})=>{
+  vi.stubGlobal('localStorage',{getItem:()=>JSON.stringify({...createGame(puzzle),completed})})
+  expect(readGame(puzzle).warning).not.toBeNull()
+ })
+ it.each([false,true])('preserves current-schema saves without a completion field (solved: %s)',solved=>{
+  const raw:Record<string,unknown>={...createGame(puzzle),values:solved?[...solution]:[...puzzle.givens],elapsed:125}
+  delete raw.completed
+  vi.stubGlobal('localStorage',{getItem:()=>JSON.stringify(raw)})
+  const restored=readGame(puzzle)
+  expect(restored.warning).toBeNull()
+  expect(restored.state.values).toEqual(raw.values)
+  expect(restored.state.elapsed).toBe(125)
+  expect(restored.state.completed).toBe(solved)
+ })
+ it('keeps completion consumed through undo, redo and re-entry until restart',()=>{
+  let state=reduceGame(createGame(puzzle),{type:'digit',digit:solution[0]},puzzle)
+  state=reduceGame({...state,selected:1},{type:'digit',digit:solution[1]},puzzle)
+  expect(state.completed).toBe(true)
+  expect(state.past.every(entry=>!('completed' in entry))).toBe(true)
+  state=reduceGame(state,{type:'undo'},puzzle)
+  expect(state.completed).toBe(true)
+  expect(reduceGame(state,{type:'redo'},puzzle).completed).toBe(true)
+  expect(reduceGame(state,{type:'digit',digit:solution[1]},puzzle).completed).toBe(true)
+  expect(reduceGame(state,{type:'restart'},puzzle).completed).toBe(false)
+ })
+ it('persists completion after undo without replaying on reload and re-entry',()=>{
+  const db=new Map<string,string>()
+  vi.stubGlobal('localStorage',{getItem:(key:string)=>db.get(key)??null,setItem:(key:string,value:string)=>db.set(key,value)})
+  let state=reduceGame(createGame(puzzle),{type:'digit',digit:solution[0]},puzzle)
+  state=reduceGame({...state,selected:1},{type:'digit',digit:solution[1]},puzzle)
+  state=reduceGame(state,{type:'undo'},puzzle)
+  state.elapsed=125
+  expect(saveGame(state)).toBe(true)
+  const restored=readGame(puzzle)
+  expect(restored.warning).toBeNull()
+  expect(restored.state.values).toEqual(state.values)
+  expect(restored.state.elapsed).toBe(125)
+  expect(restored.state.completed).toBe(true)
+  expect(reduceGame({...restored.state,selected:1},{type:'digit',digit:solution[1]},puzzle).completed).toBe(true)
+ })
+ it('records the first solve even when every unit was rewarded before the board was solved',()=>{
+  const separated={...puzzle,givens:solution.map((digit,cell)=>cell===0||cell===40?0:digit)}
+  let state=createGame(separated)
+  expect(state.completed).toBe(false)
+  state=reduceGame({...state,selected:0},{type:'digit',digit:solution[0]},separated)
+  state=reduceGame(state,{type:'erase'},separated)
+  state=reduceGame({...state,selected:40},{type:'digit',digit:solution[40]},separated)
+  expect(state.rewarded).toHaveLength(27)
+  expect(state.completed).toBe(false)
+  const solved=reduceGame({...state,selected:0},{type:'digit',digit:solution[0]},separated)
+  expect(solved.rewarded).toEqual(state.rewarded)
+  expect(solved.completed).toBe(true)
+ })
+})
+
 describe('digit completion rewards',()=>{
  it('acknowledges already complete digit sets when a game starts',()=>{
   expect(createGame(puzzle).rewardedDigits).toEqual([3,4,5,6,7,8,9])

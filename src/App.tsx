@@ -11,11 +11,22 @@ import { loadSession, saveSession } from './session'
 import {generatedDailyRequest,generatedPracticeRequest} from './generated-puzzles'
 import {requestGeneratedPuzzle} from './generation-client'
 import {availableDifficulties} from './solver-policy'
+import { ARCHIVE_START, shiftArchiveDate } from './archive'
 import type {GameVariant,VariantDeduction} from './variant-engine'
 import type { Difficulty, GameAction, GameState, Puzzle } from './types'
 
 type Page = 'daily' | 'practice' | 'learn'
 type Theme = 'device' | 'light' | 'dark'
+type Completion = {
+  token: number
+  puzzleId: string
+  elapsed: number
+  difficulty: Difficulty
+  variant: GameVariant
+  dailyAnchor: string
+  phase: 'celebrating' | 'ready'
+}
+const variantTitles: Record<GameVariant, string> = { classic: 'Classic', x: 'X Sudoku', killer: 'Killer Sudoku' }
 const titles: Record<Difficulty, string> = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', expert: 'Expert' }
 const descriptions: Record<Difficulty, string> = {
   beginner: 'Build confidence with naked and hidden singles.',
@@ -58,6 +69,9 @@ export default function App() {
   const [restart, setRestart] = useState(false)
   const [announcement, setAnnouncement] = useState('')
   const [reward, setReward] = useState({ units: [] as number[], count: 0, complete: false, serial: 0 })
+  const [completion, setCompletion] = useState<Completion | null>(null)
+  const completionSerial = useRef(0)
+  const focusAfterLoad = useRef<number | null>(null)
   const [digitReward,setDigitReward]=useState<{digits:number[];serial:number}|null>(null)
   const digitSerial=useRef(0)
   useEffect(()=>{
@@ -83,7 +97,11 @@ export default function App() {
 
   useEffect(() => {
     const media = matchMedia('(prefers-color-scheme: dark)')
-    const apply = () => { document.documentElement.dataset.theme = theme === 'device' ? media.matches ? 'dark' : 'light' : theme }
+    const apply = () => {
+      const resolvedTheme = theme === 'device' ? media.matches ? 'dark' : 'light' : theme
+      document.documentElement.dataset.theme = resolvedTheme
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', resolvedTheme === 'dark' ? '#000000' : '#ffffff')
+    }
     apply(); media.addEventListener('change', apply)
     try { localStorage.setItem('sudoku-theme', theme) } catch { setSaveWarning('Preferences could not be saved in this browser. You can keep playing.') }
     return () => media.removeEventListener('change', apply)
@@ -103,21 +121,42 @@ export default function App() {
     return () => window.clearInterval(timer)
   }, [page, puzzle,loading,generationError])
 
+  useEffect(() => {
+    if (loading || focusAfterLoad.current !== generationSerial.current) return
+    focusAfterLoad.current = null
+    const target = document.querySelector<HTMLElement>('#main [role="gridcell"][tabindex="0"]') ?? document.getElementById('main')
+    target?.focus()
+  }, [loading, generationError, puzzle.id])
+
+  function cancelCompletion() {
+    setCompletion(null)
+    setReward(previous => previous.complete ? { units: [], count: previous.count, complete: false, serial: 0 } : previous)
+  }
+  function readyCompletion(token: number, puzzleId: string) {
+    setCompletion(current => current?.token === token && current.puzzleId === puzzleId && current.phase === 'celebrating' ? { ...current, phase: 'ready' } : current)
+  }
+
   function commit(previous:GameState,next:GameState) {
     stateRef.current=next;setState(next)
     const units=next.rewarded.filter(unit=>!previous.rewarded.includes(unit))
     const digits=next.rewardedDigits.filter(digit=>!previous.rewardedDigits.includes(digit))
+    const finished=next.values.every((value,index)=>value===puzzle.solution[index])
+    const firstCompletion=finished&&!previous.completed&&next.completed
+    if (!finished) cancelCompletion()
     if(digits.length&&effects)setDigitReward({digits,serial:++digitSerial.current})
-    if(units.length){
-      const finished=next.values.every((value,index)=>value===puzzle.solution[index])
-      setReward(old=>({units,count:next.rewarded.length,complete:finished,serial:old.serial+1}))
-      setAnnouncement(finished?'Puzzle complete.':`${units.length===1?'One unit':`${units.length} units`} complete.`)
+    if (firstCompletion) {
+      setCompletion({ token: ++completionSerial.current, puzzleId: puzzle.id, elapsed: next.elapsed, difficulty: puzzle.difficulty, variant, dailyAnchor: mode === 'daily' ? dailyDate : today, phase: effects ? 'celebrating' : 'ready' })
     }
-    return units.length>0
+    if(units.length||firstCompletion){
+      setReward(old=>({units:units.length?units:Array.from({length:27},(_,unit)=>unit),count:next.rewarded.length,complete:firstCompletion,serial:old.serial+1}))
+      setAnnouncement(firstCompletion?'Puzzle complete.':`${units.length===1?'One unit':`${units.length} units`} complete.`)
+    }
+    return units.length>0||firstCompletion
   }
   function dispatch(action: GameAction) {
     if(loading||generationError)return
     const previous = stateRef.current
+    if (action.type === 'undo' || action.type === 'restart') cancelCompletion()
     setDigitReward(null)
     const next = reduceGame(previous, action, puzzle)
     const cell = previous.selected
@@ -144,7 +183,8 @@ export default function App() {
     const earned=commit(stateRef.current,next)
     if(!earned)setAnnouncement(deduction.placements.length ? 'Explained placement applied. You can undo it.' : 'Logical eliminations recorded for the next hint. Manual notes were not changed.')
   }
-  async function load(nextMode: 'daily' | 'practice', nextDifficulty = difficulty, fresh = false, date = dailyDate,nextVariant=variant) {
+  async function load(nextMode: 'daily' | 'practice', nextDifficulty = difficulty, fresh = false, date = dailyDate,nextVariant=variant, focusPuzzle=false) {
+    cancelCompletion()
     setDigitReward(null)
     setMistakeEvent(null)
     const level=availableDifficulties(nextVariant).includes(nextDifficulty)?nextDifficulty:'beginner'
@@ -153,6 +193,7 @@ export default function App() {
     generation.current?.abort()
     const controller=new AbortController();generation.current=controller
     const serial=++generationSerial.current
+    focusAfterLoad.current = focusPuzzle ? serial : null
     setLoading(true);setGenerationError('')
     setDifficulty(level);setMode(nextMode);setPage(nextMode);setVariant(nextVariant);setDailyDate(date)
     let nextPuzzle:Puzzle
@@ -172,6 +213,7 @@ export default function App() {
     setAnnouncement('')
   }
   function navigate(next: Page) {
+    cancelCompletion()
     setDigitReward(null)
     setMistakeEvent(null)
     if (next === 'learn') { setReward(previous => ({ ...previous, units: [], complete: false, serial: 0 })); setPage(next); return }
@@ -193,6 +235,7 @@ export default function App() {
     setDigitReward(null)
     setEffects(next)
     setReward({ units: [], count: state.rewarded.length, complete: false, serial: 0 })
+    if (!next) setCompletion(current => current?.phase === 'celebrating' ? { ...current, phase: 'ready' } : current)
     try { localStorage.setItem('sudoku-effects', next ? 'on' : 'off') } catch { setSaveWarning('Effects preference could not be saved in this browser.') }
   }
   function changeShowMistakes(next: boolean) {
@@ -215,7 +258,7 @@ export default function App() {
         {mode === 'daily' && today !== dailyDate && <div className="notice"><button type="button" onClick={() => { setDailyDate(today); load('daily', difficulty, false, today) }}>Open today's puzzle</button></div>}
         <div className="difficulty-control" role="group" aria-label="Difficulty">{availableDifficulties(variant).map(level => <button type="button" aria-pressed={difficulty === level} title={descriptions[level]} className={difficulty === level ? 'active' : ''} key={level} onClick={() => load(mode, level)}>{titles[level]}</button>)}</div>
         {loading?<div className="generation-status" role="status">Generating puzzle…</div>:generationError?<div className="generation-status" role="status"><p>{generationError}</p><button type="button" onClick={()=>load(mode)}>Try again</button></div>:<div className="board-column" data-puzzle-id={puzzle.id}>
-          <div className="board-wrap" data-progress={state.rewarded.length}><Board values={state.values} givens={puzzle.givens} notes={state.notes} selected={state.selected} onSelect={cell => dispatch({ type: 'select', cell })} onKeyDown={handleBoardKey} variant={puzzle.variant} cages={puzzle.cages} digitReward={effects?digitReward:null} mistakes={mistakes} mistakeEvent={mistakeEvent} onMistakeEnd={event => setMistakeEvent(current => current && current.cell === event.cell && current.serial === event.serial ? null : current)} label={mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'} />{effects && <RewardEffects {...reward} />}</div>
+          <div className="board-wrap" data-progress={state.rewarded.length}><Board values={state.values} givens={puzzle.givens} notes={state.notes} selected={state.selected} onSelect={cell => dispatch({ type: 'select', cell })} onKeyDown={handleBoardKey} variant={puzzle.variant} cages={puzzle.cages} digitReward={effects?digitReward:null} mistakes={mistakes} mistakeEvent={mistakeEvent} onMistakeEnd={event => setMistakeEvent(current => current && current.cell === event.cell && current.serial === event.serial ? null : current)} label={mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'} />{effects && <RewardEffects {...reward} onComplete={completion?.phase === 'celebrating' ? () => readyCompletion(completion.token, completion.puzzleId) : undefined} />}</div>
           <p className="sr-only">{selectedDescription}</p>
           <p className={`game-status${complete ? ' complete-status' : ' sr-only'}`} role="status" aria-live="polite">{complete ? 'Puzzle complete.' : announcement}</p>
           <div className="number-pad" role="group" aria-label="Enter a number">{Array.from({ length: 9 }, (_, index) => <button type="button" key={index} disabled={digitCounts[index+1]>=9} aria-label={`${state.noteMode ? 'Toggle note' : 'Enter'} ${index + 1}`} onClick={() => dispatch({ type: 'digit', digit: index + 1 })}>{index + 1}</button>)}<button type="button" className="erase-button" aria-label="Erase" title="Erase" onClick={() => dispatch({ type: 'erase' })}>⌫</button></div>
@@ -225,6 +268,15 @@ export default function App() {
       </section>}
       {saveWarning && <div className="notice" role="status"><p>{saveWarning}</p><button type="button" onClick={() => setSaveWarning(null)}>Dismiss</button></div>}
     </main>
+    {completion?.phase === 'ready' && completion.puzzleId === puzzle.id && complete && page !== 'learn' && !settingsOpen && !help && !restart && <Dialog title="Puzzle complete" className="completion-dialog" onClose={cancelCompletion}>
+      <p className="completion-details">{titles[completion.difficulty]} · {variantTitles[completion.variant]}</p>
+      <p className="completion-result"><span>Time</span><strong className="completion-time">{formatTime(completion.elapsed)}</strong></p>
+      <div className="completion-actions">
+        <button type="button" className="primary" autoFocus onClick={() => { void load('practice', completion.difficulty, true, dailyDate, completion.variant, true) }}>New practice puzzle</button>
+        <button type="button" disabled={completion.dailyAnchor <= ARCHIVE_START} onClick={() => { void load('daily', completion.difficulty, false, shiftArchiveDate(completion.dailyAnchor, -1, today), completion.variant, true) }}>Previous daily puzzle</button>
+        <button type="button" onClick={cancelCompletion}>Close</button>
+      </div>
+    </Dialog>}
     {settingsOpen && <Dialog title="Settings" className="settings-dialog" onClose={() => setSettingsOpen(false)}>
       <button type="button" className="settings-close" autoFocus onClick={() => setSettingsOpen(false)}>Close</button>
       <div className="setting-row"><label htmlFor="settings-theme">Theme</label><select id="settings-theme" value={theme} onChange={event => setTheme(event.target.value as Theme)}><option value="device">Device</option><option value="light">Light</option><option value="dark">Dark</option></select></div>

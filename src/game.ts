@@ -2,7 +2,7 @@ import type { Board, GameAction, GameSnapshot, GameState, Puzzle } from './types
 import {variantPeers} from './variant-engine'
 
 export function createGame(puzzle: Puzzle): GameState {
-  return { version: 1, puzzleId: puzzle.id, values: [...puzzle.givens], notes: Array.from({length:81},()=>[]), selected: puzzle.givens.indexOf(0) < 0 ? 0 : puzzle.givens.indexOf(0), noteMode: false, past: [], future: [], rewarded: completeUnits(puzzle.givens,puzzle.solution), rewardedDigits: completeDigits(puzzle.givens,puzzle.solution), elapsed: 0, hintsUsed: 0 }
+  return { version: 1, puzzleId: puzzle.id, values: [...puzzle.givens], notes: Array.from({length:81},()=>[]), selected: puzzle.givens.indexOf(0) < 0 ? 0 : puzzle.givens.indexOf(0), noteMode: false, past: [], future: [], rewarded: completeUnits(puzzle.givens,puzzle.solution), rewardedDigits: completeDigits(puzzle.givens,puzzle.solution), completed: puzzle.givens.every((value,cell)=>value===puzzle.solution[cell]), elapsed: 0, hintsUsed: 0 }
 }
 const snapshot=(s:GameSnapshot):GameSnapshot=>({values:[...s.values],notes:s.notes.map(n=>[...n])})
 const unitCells=(u:number)=>Array.from({length:9},(_,n)=>u<9?u*9+n:u<18?n*9+u-9:Math.floor((u-18)/3)*27+((u-18)%3)*3+Math.floor(n/3)*9+n%3)
@@ -41,7 +41,7 @@ export function reduceGame(s:GameState,a:GameAction,puzzle:Puzzle):GameState {
     }
   }
   if(JSON.stringify(next)===JSON.stringify(snapshot(s)))return s
-  return {...s,...next,past:[...s.past,snapshot(s)].slice(-100),future:[],rewarded:[...new Set([...s.rewarded,...completeUnits(next.values,puzzle.solution)])],rewardedDigits:[...new Set([...s.rewardedDigits,...completeDigits(next.values,puzzle.solution)])]}
+  return {...s,...next,past:[...s.past,snapshot(s)].slice(-100),future:[],rewarded:[...new Set([...s.rewarded,...completeUnits(next.values,puzzle.solution)])],rewardedDigits:[...new Set([...s.rewardedDigits,...completeDigits(next.values,puzzle.solution)])],completed:s.completed||next.values.every((value,cell)=>value===puzzle.solution[cell])}
 }
 const key=(puzzleId:string)=>`sudoku-game-v2:${puzzleId}`
 function validSnapshot(raw:unknown,puzzle:Puzzle):raw is GameSnapshot {
@@ -58,9 +58,10 @@ export function readGame(puzzle:Puzzle):{state:GameState;warning:string|null} {
     const data=JSON.parse(text)
     if(!validSnapshot(data,puzzle))throw new Error('Invalid save')
     const raw=data as GameState
+    if('completed' in raw&&typeof raw.completed!=='boolean')throw new Error('Invalid completion acknowledgement')
     if(!Array.isArray(raw.rewardedDigits)||raw.rewardedDigits.length>9||new Set(raw.rewardedDigits).size!==raw.rewardedDigits.length||!raw.rewardedDigits.every((n:unknown)=>typeof n==='number'&&Number.isInteger(n)&&n>=1&&n<=9))throw new Error('Invalid digit rewards')
     if(raw.version!==1||raw.puzzleId!==puzzle.id||!Number.isInteger(raw.selected)||raw.selected<0||raw.selected>80||typeof raw.noteMode!=='boolean'||!Number.isInteger(raw.elapsed)||raw.elapsed<0||raw.elapsed>315360000||!Number.isInteger(raw.hintsUsed)||raw.hintsUsed<0||raw.hintsUsed>100000||!Array.isArray(raw.rewarded)||raw.rewarded.length>27||!raw.rewarded.every((n:unknown)=>typeof n==='number'&&Number.isInteger(n)&&n>=0&&n<27))throw new Error('Invalid save')
-    return {state:{...fresh,...snapshot(raw),selected:raw.selected,noteMode:raw.noteMode,elapsed:raw.elapsed,hintsUsed:raw.hintsUsed,rewarded:[...new Set<number>([...raw.rewarded,...completeUnits(raw.values,puzzle.solution)])],rewardedDigits:[...new Set<number>([...raw.rewardedDigits,...completeDigits(raw.values,puzzle.solution)])]},warning:null}
+    return {state:{...fresh,...snapshot(raw),selected:raw.selected,noteMode:raw.noteMode,elapsed:raw.elapsed,hintsUsed:raw.hintsUsed,completed:raw.completed??raw.values.every((value,cell)=>value===puzzle.solution[cell]),rewarded:[...new Set<number>([...raw.rewarded,...completeUnits(raw.values,puzzle.solution)])],rewardedDigits:[...new Set<number>([...raw.rewardedDigits,...completeDigits(raw.values,puzzle.solution)])]},warning:null}
   }catch{return {state:fresh,warning:'Saved progress could not be read. This puzzle started fresh; your other puzzles are unchanged.'}}
 }
 export function saveGame(state:GameState):boolean {
