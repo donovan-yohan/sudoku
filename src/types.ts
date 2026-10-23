@@ -45,6 +45,8 @@ export interface GameState extends GameSnapshot {
   future: GameSnapshot[]
   rewarded: number[]
   rewardedDigits: number[]
+  /** Attempt-level acknowledgement; deliberately not part of undo snapshots. */
+  completed: boolean
   elapsed: number
   hintsUsed: number
 }
