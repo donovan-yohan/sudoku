@@ -1,7 +1,8 @@
-import {useState} from 'react'
+import {useId,useState} from 'react'
 import {PRACTICAL_LESSONS} from '../practical-lessons'
 import {PRACTICAL_VARIANT_LESSONS} from '../practical-variant-lessons'
 import Walkthrough,{type WalkthroughScenario} from './Walkthrough'
+import CellReferences from './CellReferences'
 import type {Difficulty} from '../types'
 
 const PROGRESS_KEY='sudoku-lessons-v1'
@@ -29,6 +30,7 @@ function readProgress(){
 }
 
 export default function Learning({onReturn}:{onReturn:()=>void}){
+ const cellIdPrefix=useId()
  const [initial]=useState(readProgress)
  const [passed,setPassed]=useState(initial.passed)
  const [warning,setWarning]=useState(initial.warning)
@@ -48,9 +50,9 @@ export default function Learning({onReturn}:{onReturn:()=>void}){
   {active?<>
    <button type="button" className="back-link" onClick={()=>setActive(null)}>← All lessons</button>
    <article className="active-lesson">
-    <div className="walkthrough-heading"><h2>{active.title}</h2><p>{active.rule}</p></div>
+    <div className="walkthrough-heading"><h2>{active.title}</h2><p><CellReferences text={active.rule} cellIdPrefix={cellIdPrefix}/></p></div>
     <div className="walkthrough-examples" role="group" aria-label="Examples">{active.scenarios.map((scenario,index)=><button type="button" key={scenario.id} aria-pressed={example===index} onClick={()=>setExample(index)}>Example {index+1}</button>)}</div>
-    <Walkthrough key={active.scenarios[example].id} title={`${active.title} example ${example+1}`} scenario={active.scenarios[example]} onComplete={()=>record(active.scenarios[example])} />
+    <Walkthrough key={active.scenarios[example].id} title={`${active.title} example ${example+1}`} scenario={active.scenarios[example]} cellIdPrefix={cellIdPrefix} onComplete={()=>record(active.scenarios[example])} />
    </article>
   </>:<div className="lesson-catalog">{tiers.map(tier=>{
    const catalog=lessons.filter(lesson=>lesson.tier===tier&&(lesson.scenarios[0].variant??'classic')===lessonType)
