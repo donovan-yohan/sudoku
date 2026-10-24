@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react'
 import Board from './Board'
+import CellReferences from './CellReferences'
 import type {Deduction} from '../types'
 import type {XWingPattern} from '../practical-lessons'
 import {peers} from '../engine'
@@ -26,7 +27,7 @@ function XWingPossibilities({pattern}:{pattern:XWingPattern}){
  </table>)}</div>
 }
 
-export default function Walkthrough({title,scenario,onComplete}:{title:string;scenario:WalkthroughScenario;onComplete:()=>void}){
+export default function Walkthrough({title,scenario,onComplete,cellIdPrefix}:{title:string;scenario:WalkthroughScenario;onComplete:()=>void;cellIdPrefix:string}){
  const [applied,setApplied]=useState(0)
  const [revealed,setRevealed]=useState(false)
  const [selected,setSelected]=useState<number|null>(null)
@@ -62,12 +63,12 @@ export default function Walkthrough({title,scenario,onComplete}:{title:string;sc
 
  }
  return <section className="walkthrough" aria-label={title}>
-  <Board values={values} givens={scenario.board} notes={notes} visibleNotes={visible} selected={selected??step?.cells[0]??scenario.target} onSelect={setSelected} label={title} variant={scenario.variant} cages={scenario.cages} evidence={highlighted} candidates />
+  <Board values={values} givens={scenario.board} notes={notes} visibleNotes={visible} selected={selected??step?.cells[0]??scenario.target} onSelect={setSelected} label={title} cellIdPrefix={cellIdPrefix} variant={scenario.variant} cages={scenario.cages} evidence={highlighted} candidates />
   <div className="walkthrough-controls">
    <button ref={show} type="button" disabled={!step||revealed} onClick={()=>setRevealed(true)}>Show next step</button>
    <button ref={reset} type="button" className="text-link" onClick={()=>{setApplied(0);setRevealed(false);setSelected(null)}}>Reset</button>
   </div>
-  {revealed&&step&&<div className="lesson-step" role="status"><h3>{placement?applyLabel:step.technique.replaceAll('-',' ')}</h3><div className="step-explanation">{step.explanation.split('\n\n').map((paragraph,index)=><p key={index}>{index>0?'\n\n':''}{paragraph}</p>)}</div>{step.xWing&&<XWingPossibilities pattern={step.xWing}/>}<button type="button" className="primary-button" onClick={apply}>{applyLabel}</button></div>}
-  {!step&&<p className="walkthrough-result" role="status">{`r${Math.floor(scenario.target/9)+1}c${scenario.target%9+1} = ${scenario.digit}`}</p>}
+  {revealed&&step&&<div className="lesson-step" role="status"><h3><CellReferences text={placement?applyLabel:step.technique.replaceAll('-',' ')} cellIdPrefix={cellIdPrefix}/></h3><div className="step-explanation">{step.explanation.split('\n\n').map((paragraph,index)=><p key={index}>{index>0?'\n\n':''}<CellReferences text={paragraph} cellIdPrefix={cellIdPrefix}/></p>)}</div>{step.xWing&&<XWingPossibilities pattern={step.xWing}/>}<button type="button" className="primary-button" onClick={apply}>{applyLabel}</button></div>}
+  {!step&&<p className="walkthrough-result" role="status"><CellReferences text={`r${Math.floor(scenario.target/9)+1}c${scenario.target%9+1} = ${scenario.digit}`} cellIdPrefix={cellIdPrefix}/></p>}
  </section>
 }

@@ -14,6 +14,7 @@ export interface BoardProps {
   onSelect: (cell: number) => void
   onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void
   label: string
+  cellIdPrefix?: string
   evidence?: number[]
   conflicts?: number[]
   mistakes?: number[]
@@ -26,7 +27,7 @@ export interface BoardProps {
   digitReward?: {digits:number[];serial:number}|null
 }
 
-export default function Board({ values, givens, notes, visibleNotes=notes, selected, onSelect, onKeyDown, label, evidence = [], conflicts = [], mistakes = [], mistakeEvent = null, onMistakeEnd, candidates = false, candidateFocus = null, variant='classic',cages=[],digitReward=null }: BoardProps) {
+export default function Board({ values, givens, notes, visibleNotes=notes, selected, onSelect, onKeyDown, label, cellIdPrefix, evidence = [], conflicts = [], mistakes = [], mistakeEvent = null, onMistakeEnd, candidates = false, candidateFocus = null, variant='classic',cages=[],digitReward=null }: BoardProps) {
   const cells = useRef<(HTMLButtonElement | null)[]>([])
   const selectedRow=Math.floor(selected/9),selectedColumn=selected%9
   function handleKey(event: KeyboardEvent<HTMLDivElement>) {
@@ -64,7 +65,7 @@ export default function Board({ values, givens, notes, visibleNotes=notes, selec
           || (mainDiagonal && selectedRow === selectedColumn) || (antiDiagonal && selectedRow + selectedColumn === 8)
         const description = `Row ${row + 1}, column ${column + 1}, ${value ? `${isGiven ? 'given' : 'entry'} ${value}` : `empty${marks.length ? `, ${candidates ? 'candidates' : 'notes'} ${marks.join(', ')}` : ''}`}${mistake ? ', incorrect' : conflict ? ', conflict' : ''}${evidence.includes(cell) ? ', evidence' : ''}${diagonal?', diagonal':''}${cage?`, cage sum ${cage.sum}, ${cage.cells.length} cells`:''}`
         const classes = ['cell', isGiven && 'given', selected === cell && 'selected', peer && 'peer', value && value === values[selected] && 'matching', conflict && 'conflict', mistake && 'mistake', evidence.includes(cell) && 'evidence', column === 2 || column === 5 ? 'box-right' : '', row === 2 || row === 5 ? 'box-bottom' : ''].filter(Boolean).join(' ')
-        return <button type="button" role="gridcell" aria-rowindex={row + 1} aria-colindex={column + 1} aria-label={description} aria-selected={selected === cell} aria-readonly={isGiven} aria-invalid={mistake || conflict || undefined} tabIndex={selected === cell ? 0 : -1} className={`${classes}${diagonal?' diagonal':''}${cage?' caged':''}`} data-cell={cell} data-cage={cage?cageIndex:undefined} key={cell} ref={element => { cells.current[cell] = element }} onClick={() => onSelect(cell)}>
+        return <button type="button" role="gridcell" id={cellIdPrefix?`${cellIdPrefix}-r${row+1}c${column+1}`:undefined} aria-rowindex={row + 1} aria-colindex={column + 1} aria-label={description} aria-selected={selected === cell} aria-readonly={isGiven} aria-invalid={mistake || conflict || undefined} tabIndex={selected === cell ? 0 : -1} className={`${classes}${diagonal?' diagonal':''}${cage?' caged':''}`} data-cell={cell} data-cage={cage?cageIndex:undefined} key={cell} ref={element => { cells.current[cell] = element }} onClick={() => onSelect(cell)} onFocus={cellIdPrefix?()=>onSelect(cell):undefined}>
           {diagonal&&<svg className="diagonal-marks" aria-hidden="true" focusable="false" viewBox="0 0 100 100" preserveAspectRatio="none">
             {mainDiagonal&&<line x1="0" y1="0" x2="100" y2="100" strokeWidth="1" vectorEffect="non-scaling-stroke"/>}
             {antiDiagonal&&<line x1="100" y1="0" x2="0" y2="100" strokeWidth="1" vectorEffect="non-scaling-stroke"/>}

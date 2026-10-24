@@ -1,4 +1,6 @@
 .walkthrough { width:min(100%,504px); margin:24px auto 0; }
+.cell-reference { color:inherit; font:inherit; text-decoration:underline; text-underline-offset:2px; }
+.cell-reference:focus-visible { outline:1px solid currentColor; outline-offset:2px; }
 .walkthrough-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; }
 .walkthrough-controls>button { font-size:12px; }
 .lesson-step { border-top:1px solid var(--line); margin-top:16px; padding-top:16px; font-size:14px; line-height:1.7; }
