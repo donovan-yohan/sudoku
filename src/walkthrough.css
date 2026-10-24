@@ -1,4 +1,6 @@
 .walkthrough { width:min(100%,504px); margin:24px auto 0; }
+.walkthrough .lesson-digit-focus { color:#166534; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:2px; }
+:root[data-theme=dark] .walkthrough .lesson-digit-focus { color:#86efac; }
 .cell-reference { color:inherit; font:inherit; text-decoration:underline; text-underline-offset:2px; }
 .cell-reference:focus-visible { outline:1px solid currentColor; outline-offset:2px; }
 .walkthrough-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; }

@@ -35,9 +35,13 @@ test('all X and Killer walkthroughs reach actual number placements',async({page}
    for(const step of scenario.steps){
     await page.getByRole('button',{name:'Show next step',exact:true}).click()
     await expect(page.locator('.lesson-step')).toContainText(step.explanation)
+    const emphasized=await page.getByRole('grid').locator('.lesson-digit-focus').allTextContents()
+    expect(emphasized.length).toBeGreaterThan(0)
+    expect(emphasized.every(text=>Number(text)===step.digit)).toBe(true)
     const placement=step.placements[0]
     const name=placement?`Place ${placement.digit} at r${Math.floor(placement.cell/9)+1}c${placement.cell%9+1}`:'Apply step'
     await page.getByRole('button',{name,exact:true}).click()
+    await expect(page.locator('.lesson-digit-focus')).toHaveCount(0)
    }
    await expect(page.locator(`[data-cell="${scenario.target}"] .cell-value`)).toHaveText(String(scenario.digit))
    await expect(page.getByRole('button',{name:'Reset',exact:true})).toBeFocused()
