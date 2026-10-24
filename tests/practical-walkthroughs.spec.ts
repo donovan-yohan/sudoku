@@ -12,6 +12,9 @@ test('all real-puzzle walkthroughs reach their placements with only relevant not
    const scenario=lesson.scenarios[index]
    await page.getByRole('button',{name:`Example ${index+1}`,exact:true}).click()
    const relevant=new Set([...scenario.evidence, ...scenario.steps.flatMap(step => [...step.cells, ...step.placements.map(item => item.cell), ...step.eliminations.map(item => item.cell)])])
+   for(const step of scenario.steps)if(step.xWing)for(let cell=0;cell<81;cell++){
+    if(step.xWing.rows.includes(Math.floor(cell/9))||step.xWing.columns.includes(cell%9))relevant.add(cell)
+   }
    const annotations=await page.getByRole('grid').getByRole('gridcell').evaluateAll(elements=>elements.filter(element=>element.querySelector('.cell-notes')).map(element=>Number(element.getAttribute('data-cell'))))
    expect(annotations.every(cell=>relevant.has(cell))).toBe(true)
    expect(await page.locator('.cell.given .cell-value').count()).toBeGreaterThanOrEqual(22)

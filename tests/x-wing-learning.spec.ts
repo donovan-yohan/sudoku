@@ -19,7 +19,7 @@ for(let example=0;example<4;example++)test(`X-Wing example ${example+1} explains
  await page.getByRole('button',{name:`Example ${example+1}`,exact:true}).click()
  const scenario=lesson.scenarios[example],step=scenario.steps[0]
  const board=page.getByRole('grid',{name:`X-Wing example ${example+1}`,exact:true})
- const before=await board.innerHTML()
+ const before=await board.getByRole('gridcell').allTextContents()
  const progress=await page.evaluate(()=>localStorage.getItem('sudoku-lessons-v1'))
  await expect(page.getByRole('table')).toHaveCount(0)
  await page.getByRole('button',{name:'Show next step',exact:true}).click()
@@ -38,7 +38,7 @@ for(let example=0;example<4;example++)test(`X-Wing example ${example+1} explains
   const digits=await table.locator('td[data-cell]').evaluateAll(cells=>cells.filter(cell=>cell.textContent?.trim()).map(cell=>Number(cell.getAttribute('data-cell'))))
   expect(digits).toEqual(index===0?[rows[0]*9+columns[0],rows[1]*9+columns[1]]:[rows[0]*9+columns[1],rows[1]*9+columns[0]])
  }
- expect(await board.innerHTML()).toBe(before)
+ expect(await board.getByRole('gridcell').allTextContents()).toEqual(before)
  expect(await page.evaluate(()=>localStorage.getItem('sudoku-lessons-v1'))).toBe(progress)
  for(const width of [320,390,768,1000]){
   await page.setViewportSize({width,height:1000})

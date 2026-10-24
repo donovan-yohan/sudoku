@@ -52,6 +52,11 @@ export default function Walkthrough({title,scenario,onComplete,cellIdPrefix}:{ti
  }
  const step=scenario.steps[applied]
  const relevant=new Set([...(scenario.evidence??[]),...scenario.steps.flatMap(step=>[...step.cells,...step.placements.map(item=>item.cell),...step.eliminations.map(item=>item.cell)])])
+ for(const {xWing} of scenario.steps){
+  if(!xWing)continue
+  for(const row of xWing.rows)for(let column=0;column<9;column++)relevant.add(row*9+column)
+  for(const column of xWing.columns)for(let row=0;row<9;row++)relevant.add(row*9+column)
+ }
  const visible=notes.map((list,cell)=>relevant.has(cell)?list:[])
  const placement=step?.placements[0]
  const applyLabel=placement?`Place ${placement.digit} at r${Math.floor(placement.cell/9)+1}c${placement.cell%9+1}`:'Apply step'
@@ -63,7 +68,7 @@ export default function Walkthrough({title,scenario,onComplete,cellIdPrefix}:{ti
 
  }
  return <section className="walkthrough" aria-label={title}>
-  <Board values={values} givens={scenario.board} notes={notes} visibleNotes={visible} selected={selected??step?.cells[0]??scenario.target} onSelect={setSelected} label={title} cellIdPrefix={cellIdPrefix} variant={scenario.variant} cages={scenario.cages} evidence={highlighted} candidates />
+  <Board values={values} givens={scenario.board} notes={notes} visibleNotes={visible} selected={selected??step?.cells[0]??scenario.target} onSelect={setSelected} label={title} cellIdPrefix={cellIdPrefix} variant={scenario.variant} cages={scenario.cages} evidence={highlighted} focusDigit={revealed&&step?step.digit:null} candidates />
   <div className="walkthrough-controls">
    <button ref={show} type="button" disabled={!step||revealed} onClick={()=>setRevealed(true)}>Show next step</button>
    <button ref={reset} type="button" className="text-link" onClick={()=>{setApplied(0);setRevealed(false);setSelected(null)}}>Reset</button>

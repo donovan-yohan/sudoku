@@ -14,6 +14,9 @@ test('every real example projects evidence candidates and retains full selected-
    await page.getByRole('button',{name:`Example ${example+1}`,exact:true}).click()
    const board=page.getByRole('grid',{name:`${lesson.title} example ${example+1}`})
    const relevant=new Set([...scenario.evidence, ...scenario.steps.flatMap(step => [...step.cells, ...step.placements.map(item => item.cell), ...step.eliminations.map(item => item.cell)])])
+   for(const step of scenario.steps)if(step.xWing)for(let cell=0;cell<81;cell++){
+    if(step.xWing.rows.includes(Math.floor(cell/9))||step.xWing.columns.includes(cell%9))relevant.add(cell)
+   }
    const notes=scenario.candidates.map(list=>[...list])
    const assertNotes=async()=>{
     const cells=await board.getByRole('gridcell').evaluateAll(elements=>elements.map(element=>({
@@ -28,9 +31,13 @@ test('every real example projects evidence candidates and retains full selected-
    for(const step of scenario.steps){
     await page.getByRole('button',{name:'Show next step',exact:true}).click()
     await assertNotes()
+    const emphasized=await board.locator('.lesson-digit-focus').allTextContents()
+    expect(emphasized.length).toBeGreaterThan(0)
+    expect(emphasized.every(text=>Number(text)===step.digit)).toBe(true)
     const placement=step.placements[0]
     const name=placement?`Place ${placement.digit} at r${Math.floor(placement.cell/9)+1}c${placement.cell%9+1}`:'Apply step'
     await page.getByRole('button',{name,exact:true}).click()
+    await expect(board.locator('.lesson-digit-focus')).toHaveCount(0)
     for(const {cell,digit} of step.placements){
      notes[cell]=[]
      notes.forEach((list,peer)=>{

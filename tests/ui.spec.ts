@@ -15,6 +15,9 @@ async function walkthroughPosition(board: Locator) {
 async function projectedPosition(board: Locator, position: { value: number; candidates: number[] }[], scenario: PracticalScenario) {
   const selected = Number(await board.locator('[aria-selected="true"]').getAttribute('data-cell'))
   const relevant = new Set([...scenario.evidence, ...scenario.steps.flatMap(step => [...step.cells, ...step.placements.map(item => item.cell), ...step.eliminations.map(item => item.cell)])])
+  for (const step of scenario.steps) if (step.xWing) for (let cell = 0; cell < 81; cell++) {
+    if (step.xWing.rows.includes(Math.floor(cell / 9)) || step.xWing.columns.includes(cell % 9)) relevant.add(cell)
+  }
   return position.map((entry, cell) => ({ value: entry.value, candidates: relevant.has(cell) || cell === selected ? entry.candidates : [] }))
 }
 

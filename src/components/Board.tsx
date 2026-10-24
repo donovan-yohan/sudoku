@@ -22,12 +22,13 @@ export interface BoardProps {
   onMistakeEnd?: (event: MistakeEvent) => void
   candidates?: boolean
   candidateFocus?: number | null
+  focusDigit?: number | null
   variant?: 'classic'|'x'|'killer'
   cages?: {cells:number[];sum:number}[]
   digitReward?: {digits:number[];serial:number}|null
 }
 
-export default function Board({ values, givens, notes, visibleNotes=notes, selected, onSelect, onKeyDown, label, cellIdPrefix, evidence = [], conflicts = [], mistakes = [], mistakeEvent = null, onMistakeEnd, candidates = false, candidateFocus = null, variant='classic',cages=[],digitReward=null }: BoardProps) {
+export default function Board({ values, givens, notes, visibleNotes=notes, selected, onSelect, onKeyDown, label, cellIdPrefix, evidence = [], conflicts = [], mistakes = [], mistakeEvent = null, onMistakeEnd, candidates = false, candidateFocus = null, focusDigit = null, variant='classic',cages=[],digitReward=null }: BoardProps) {
   const cells = useRef<(HTMLButtonElement | null)[]>([])
   const selectedRow=Math.floor(selected/9),selectedColumn=selected%9
   function handleKey(event: KeyboardEvent<HTMLDivElement>) {
@@ -71,7 +72,11 @@ export default function Board({ values, givens, notes, visibleNotes=notes, selec
             {antiDiagonal&&<line x1="100" y1="0" x2="0" y2="100" strokeWidth="1" vectorEffect="non-scaling-stroke"/>}
           </svg>}
           {cage&&cell===Math.min(...cage.cells)&&<span className="cage-total" aria-hidden="true">{cage.sum}</span>}
-          {value ? <span className={`cell-value${shaking ? ' mistake-shake' : ''}${celebrating?' digit-celebrate':''}`} style={celebrating?{'--digit-order':digitOrder} as CSSProperties:undefined} key={celebrating?`digit-${digitReward!.serial}`:shaking?.serial ?? 'value'} onAnimationEnd={() => { if (shaking) onMistakeEnd?.(shaking) }} aria-hidden="true">{value}</span> : visible.length > 0 ? <span className="cell-notes" aria-hidden="true">{Array.from({ length: 9 }, (_, digit) => <span key={digit}>{visible.includes(digit + 1) && (candidateFocus === null || candidateFocus === digit + 1) ? `${digit + 1} ` : ''}</span>)}</span> : null}
+          {value ? <span className={`cell-value${value===focusDigit?' lesson-digit-focus':''}${shaking ? ' mistake-shake' : ''}${celebrating?' digit-celebrate':''}`} style={celebrating?{'--digit-order':digitOrder} as CSSProperties:undefined} key={celebrating?`digit-${digitReward!.serial}`:shaking?.serial ?? 'value'} onAnimationEnd={() => { if (shaking) onMistakeEnd?.(shaking) }} aria-hidden="true">{value}</span> : visible.length > 0 ? <span className="cell-notes" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => {
+            const digit=index+1
+            const shown=visible.includes(digit)&&(candidateFocus===null||candidateFocus===digit)
+            return <span key={digit} className={shown&&focusDigit===digit?'lesson-digit-focus':undefined}>{shown?`${digit} `:''}</span>
+          })}</span> : null}
         </button>
       })}
     </div>)}
