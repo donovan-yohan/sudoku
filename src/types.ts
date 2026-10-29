@@ -52,7 +52,7 @@ export interface GameState extends GameSnapshot {
 }
 export type GameAction =
  | { type: 'select'; cell: number }
- | { type: 'digit'; digit: number }
+ | { type: 'digit'; digit: number; noteMode?: boolean }
  | { type: 'erase' | 'undo' | 'redo' | 'toggle-notes' | 'tick' | 'hint-used' | 'restart' }
 export interface LessonAction { cell: number; digit: number; kind: 'place' | 'eliminate' }
 export interface Scenario {

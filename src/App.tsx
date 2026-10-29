@@ -5,6 +5,7 @@ import Dialog from './components/Dialog'
 import HintPanel from './components/HintPanel'
 import RewardEffects from './components/RewardEffects'
 import Calendar from './components/Calendar'
+import NumberButton from './components/NumberButton'
 import './digit-rewards.css'
 import { createGame, readGame, reduceGame, saveGame } from './game'
 import { loadSession, saveSession } from './session'
@@ -160,7 +161,8 @@ export default function App() {
     setDigitReward(null)
     const next = reduceGame(previous, action, puzzle)
     const cell = previous.selected
-    const newMistake = action.type === 'digit' && showMistakes && !previous.noteMode && !puzzle.givens[cell] && next.values[cell] !== previous.values[cell] && next.values[cell] !== 0 && next.values[cell] !== puzzle.solution[cell]
+    const inputNoteMode = action.type === 'digit' ? action.noteMode ?? previous.noteMode : previous.noteMode
+    const newMistake = action.type === 'digit' && showMistakes && !inputNoteMode && !puzzle.givens[cell] && next.values[cell] !== previous.values[cell] && next.values[cell] !== 0 && next.values[cell] !== puzzle.solution[cell]
     setMistakeEvent(newMistake ? { cell, serial: ++mistakeSerial.current } : null)
     const earned=commit(previous,next)
     if (action.type === 'select') return
@@ -168,7 +170,7 @@ export default function App() {
     if (action.type === 'restart') { setReward({ units: [], count: 0, complete: false, serial: 0 }); setAnnouncement('Entries and notes cleared.'); return }
     if (!earned && action.type === 'digit') {
       const value = next.values[next.selected]
-      setAnnouncement(next.noteMode ? 'Notes updated.' : puzzle.givens[next.selected] ? 'This starting number cannot be changed.' : showMistakes && value && value !== puzzle.solution[next.selected] ? `${value} is incorrect.` : 'Entry updated.')
+      setAnnouncement(inputNoteMode ? 'Notes updated.' : puzzle.givens[next.selected] ? 'This starting number cannot be changed.' : showMistakes && value && value !== puzzle.solution[next.selected] ? `${value} is incorrect.` : 'Entry updated.')
     }
   }
   function applyHint(deduction: VariantDeduction) {
@@ -261,7 +263,7 @@ export default function App() {
           <div className="board-wrap" data-progress={state.rewarded.length}><Board values={state.values} givens={puzzle.givens} notes={state.notes} selected={state.selected} onSelect={cell => dispatch({ type: 'select', cell })} onKeyDown={handleBoardKey} variant={puzzle.variant} cages={puzzle.cages} digitReward={effects?digitReward:null} mistakes={mistakes} mistakeEvent={mistakeEvent} onMistakeEnd={event => setMistakeEvent(current => current && current.cell === event.cell && current.serial === event.serial ? null : current)} label={mode === 'daily' ? 'Daily Sudoku' : 'Practice Sudoku'} />{effects && <RewardEffects {...reward} onComplete={completion?.phase === 'celebrating' ? () => readyCompletion(completion.token, completion.puzzleId) : undefined} />}</div>
           <p className="sr-only">{selectedDescription}</p>
           <p className={`game-status${complete ? ' complete-status' : ' sr-only'}`} role="status" aria-live="polite">{complete ? 'Puzzle complete.' : announcement}</p>
-          <div className="number-pad" role="group" aria-label="Enter a number">{Array.from({ length: 9 }, (_, index) => <button type="button" key={index} disabled={digitCounts[index+1]>=9} aria-label={`${state.noteMode ? 'Toggle note' : 'Enter'} ${index + 1}`} onClick={() => dispatch({ type: 'digit', digit: index + 1 })}>{index + 1}</button>)}<button type="button" className="erase-button" aria-label="Erase" title="Erase" onClick={() => dispatch({ type: 'erase' })}>⌫</button></div>
+          <div className="number-pad" role="group" aria-label="Enter a number">{Array.from({ length: 9 }, (_, index) => <NumberButton key={`${puzzle.id}:${state.selected}:${index}`} digit={index + 1} noteMode={state.noteMode} disabled={digitCounts[index+1]>=9} onDigit={noteMode => dispatch({ type: 'digit', digit: index + 1, noteMode })} />)}<button type="button" className="erase-button" aria-label="Erase" title="Erase" onClick={() => dispatch({ type: 'erase' })}>⌫</button></div>
           <div className="game-toolbar" role="group" aria-label="Puzzle tools"><button type="button" disabled={!state.past.length} onClick={() => dispatch({ type: 'undo' })}>Undo</button><button type="button" disabled={!state.future.length} onClick={() => dispatch({ type: 'redo' })}>Redo</button><button type="button" className="notes-button" aria-pressed={state.noteMode} onClick={() => dispatch({ type: 'toggle-notes' })}><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true"><path d="m3 13 10-10 4 4L7 17H3Zm8-8 4 4M3 13l4 4"/></svg>Notes</button></div>
           <div className="play-actions"><HintPanel key={puzzle.id} values={state.values} rules={{variant:puzzle.variant??'classic',...(puzzle.cages?{cages:puzzle.cages}:{})}} onApply={applyHint} onHint={deduction => { if (deduction) dispatch({ type: 'hint-used' }) }} /><button type="button" className="icon-button" aria-label="Restart puzzle" title="Restart puzzle" onClick={() => setRestart(true)}>↻</button>{mode === 'practice' && <button type="button" className="icon-button" aria-label="New practice puzzle" title="New practice puzzle" onClick={() => load('practice', difficulty, true)}>+</button>}</div>
         </div>}

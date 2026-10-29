@@ -33,7 +33,7 @@ button[aria-pressed=true]:hover:not(:disabled),button[aria-pressed=true]:focus-v
 @keyframes mistake-shake { 0%,100% { transform:translateX(0); } 20%,60% { transform:translateX(-2px); } 40%,80% { transform:translateX(2px); } }
 @media(prefers-reduced-motion:reduce) { .mistake-shake { animation:none; } }
 .number-pad { margin:16px 0 10px; }
-.number-pad>button { border-color:var(--line); min-height:46px; }
+.number-pad>button { border-color:var(--line); min-height:46px; touch-action:manipulation; user-select:none; -webkit-touch-callout:none; }
 .number-pad>button:disabled { opacity:.35; }
 .number-pad .erase-button { font-size:21px; }
 .play-actions { position:relative; display:flex; align-items:flex-start; justify-content:center; gap:12px; margin-top:10px; }

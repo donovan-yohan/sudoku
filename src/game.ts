@@ -31,7 +31,7 @@ export function reduceGame(s:GameState,a:GameAction,puzzle:Puzzle):GameState {
   if(a.type==='erase'){next.values[cell]=0;next.notes[cell]=[]}
   else if(a.type==='digit'){
     if(!Number.isInteger(a.digit)||a.digit<1||a.digit>9)return s
-    if(s.noteMode){
+    if(a.noteMode??s.noteMode){
       if(next.values[cell])return s
       next.notes[cell]=next.notes[cell].includes(a.digit)?next.notes[cell].filter(d=>d!==a.digit):[...next.notes[cell],a.digit].sort()
     }else{
