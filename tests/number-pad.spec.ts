@@ -35,10 +35,18 @@ test('holding a number adds one note without changing the active mode', async ({
 for (const mode of ['daily', 'practice'] as const) for (const variant of ['classic', 'x', 'killer'] as const) {
   test(`${mode} ${variant}: every digit supports tap and inverted hold in both note modes`, async ({ page }) => {
     test.setTimeout(90_000)
+    await page.clock.install({ time: new Date('2026-10-29T12:00:00Z') })
+    await page.addInitScript(() => localStorage.setItem('sudoku-session-v2', JSON.stringify({
+      version: 1, generator: 'v3', mode: 'daily', difficulty: 'beginner', dailyDate: '2026-10-29', variant: 'classic',
+      practiceSeeds: { beginner: 'keypad-hold' },
+      variantPracticeSeeds: { x: { beginner: 'keypad-hold' }, killer: { beginner: 'keypad-hold' } },
+    })))
     await page.goto('/'); await waitForBoard(page)
     if (mode === 'practice') await page.getByRole('button', { name: 'Practice', exact: true }).click()
     await page.getByLabel('Game mode', { exact: true }).selectOption(variant)
     await waitForBoard(page, new RegExp(`^v3:${mode}:.*:${variant}:beginner$`))
+    const givens = await page.getByRole('gridcell').evaluateAll(cells => cells.map(cell => Number(cell.querySelector('.cell-value')?.textContent || 0)))
+    for (let digit = 1; digit <= 9; digit++) expect(givens.filter(value => value === digit).length).toBeLessThan(9)
     const empty = page.getByRole('gridcell', { name: /empty/ }).first()
     const index = await empty.getAttribute('data-cell')
     const target = page.locator(`[data-cell="${index}"]`)
@@ -89,6 +97,7 @@ test('a short pointer press and keyboard activation keep the normal mode', async
 test('holding past recognition never repeats and the following tap still works', async ({ page }) => {
   await page.goto('/'); await waitForBoard(page)
   await page.clock.install()
+  await page.clock.pauseAt(new Date())
   const index = await page.getByRole('gridcell', { name: /empty/ }).first().getAttribute('data-cell')
   const target = page.locator(`[data-cell="${index}"]`)
   await target.click()
@@ -109,6 +118,7 @@ for (const cancellation of ['movement', 'leave', 'pointercancel', 'blur', 'focus
   test(`an interrupted hold is discarded on ${cancellation}`, async ({ page }) => {
     await page.goto('/'); await waitForBoard(page)
     await page.clock.install()
+    await page.clock.pauseAt(new Date())
     const empties = page.getByRole('gridcell', { name: /empty/ })
     const index = await empties.first().getAttribute('data-cell')
     const target = page.locator(`[data-cell="${index}"]`)
@@ -164,6 +174,7 @@ test.describe('touch keypad', () => {
     await page.getByRole('button', { name: 'Undo', exact: true }).tap()
     await expect(target).toHaveAccessibleName(/notes 1/)
     await page.clock.install()
+    await page.clock.pauseAt(new Date())
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [touch] })
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: touch.x + 15, y: touch.y }] })
     await page.clock.runFor(1000)
