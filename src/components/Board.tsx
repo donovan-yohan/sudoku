@@ -80,6 +80,6 @@ export default function Board({ values, givens, notes, visibleNotes=notes, selec
         </button>
       })}
     </div>)}
-    {cages.length>0&&<CageOutlines cages={cages}/>}
+    {cages.length>0&&<CageOutlines cages={cages} selected={variant==='killer'?selected:undefined}/>}
   </div>
 }

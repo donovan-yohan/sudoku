@@ -1,6 +1,7 @@
 .diagonal-marks { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; fill:none; stroke:rgb(var(--ink) / .3); }
 .cell.diagonal .cell-value { position:relative; }
 .cage-outlines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3; fill:none; stroke:rgb(var(--ink) / .65); stroke-linejoin:miter; stroke-linecap:butt; }
+.cage-outlines .selected-cage { stroke:var(--fg); }
 .sudoku-board[role=grid]>.board-row:last-of-type>.cell { border-bottom-width:0; }
 .cage-total { position:absolute; top:4px; left:5px; font:9px/1.1 ui-sans-serif,system-ui,sans-serif; color:var(--fg); background:var(--bg); padding:0 1px; z-index:1; pointer-events:none; }
 .cell.caged .cell-value { padding-top:4px; }
